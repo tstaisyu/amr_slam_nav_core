@@ -32,10 +32,10 @@ def generate_launch_description():
     services_glob = LaunchConfiguration('services_glob', default='')
     params_glob = LaunchConfiguration('params_glob', default='')
 
-    config_dir = os.path.join(get_package_share_directory('cartographer_config'), 'config')
+    config_dir = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'config')
     configuration_basename = 'config.lua'
     nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
-    laser_filters_config_path = os.path.join(get_package_share_directory('cartographer_config'), 'launch', 'laser_filter_config.yaml')
+    laser_filters_config_path = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'config', 'laser_filter_config.yaml')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     resolution = LaunchConfiguration('resolution', default='0.05')
