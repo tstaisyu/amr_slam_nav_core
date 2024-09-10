@@ -18,12 +18,13 @@
 <package format="3">
   <name>amr_slam_nav_core</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="t_shiba117@yahoo.co.jp">taisyu</maintainer>
-  <license>TODO: License declaration</license>
+  <description>The package for amr</description>
+  <maintainer email="t_shiba117@yahoo.co.jp">Taisyu Shibata</maintainer>
+  <license>Apache2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
