@@ -18,6 +18,10 @@
 ## startup.launch.pyについて
 このlaunchファイルは、自律移動ロボットに必要なノードの起動を行います。
 * micro_ros_agent: 左右のハブホイールモータ制御用マイコンボード(M5Stack)2つと通信するためのノード
+* rosbridge_websocket: スマホやタブレットなど、リモートGUIとソケット通信するためのノード
+* rplidar_node: ロボットに搭載された2DLiDARのlaserscanデータをpublishするためのノード
+* laser_scan_filters: 生のlaserscanデータから、ロボット筐体部の干渉を受けている部分をフィルタリングするノード
+* cartographer: laserscanデータを元にSLAMするためのノード
 
 # How to setting
 
