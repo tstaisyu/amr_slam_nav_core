@@ -13,11 +13,13 @@
 # limitations under the License.
 
 import os
+import launch
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     # Declare arguments
@@ -29,6 +31,15 @@ def generate_launch_description():
     topics_glob = LaunchConfiguration('topics_glob', default='')
     services_glob = LaunchConfiguration('services_glob', default='')
     params_glob = LaunchConfiguration('params_glob', default='')
+
+    config_dir = os.path.join(get_package_share_directory('cartographer_config'), 'config')
+    configuration_basename = 'config.lua'
+    nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
+    laser_filters_config_path = os.path.join(get_package_share_directory('cartographer_config'), 'launch', 'laser_filter_config.yaml')
+
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    resolution = LaunchConfiguration('resolution', default='0.05')
+    publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
 
     # microROSAgent node
     micro_ros_agent_acm0 = Node(
@@ -91,6 +102,74 @@ def generate_launch_description():
         }]
     )
 
+    # Cartographer node
+    rplidar_node = Node(
+            package='rplidar_ros',
+            executable='rplidar_node',
+            name='rplidar_node',
+            parameters=[{
+                'serial_port': '/dev/ttyUSB0',
+                'serial_baudrate': 256000
+            }],
+            output='screen'
+        ),
+
+    laser_scan_filters = Node(
+            package='laser_filters',
+            executable='scan_to_scan_filter_chain',
+            name='laser_scan_filters',
+            output='screen',
+            parameters=[laser_filters_config_path],
+        ),
+
+    static_transform_publisher_map_to_odom = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_transform_publisher_map_to_odom',
+            arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'map', 'odom'],
+            output='screen'
+        ),
+
+    static_transform_publisher_odom_to_base_link = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_transform_publisher_odom_to_base_link',
+            arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'odom', 'base_link'],
+            output='screen'
+        ),
+
+    static_transform_publisher_base_link_to_laser_frame = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_transform_publisher_base_link_to_laser_frame',
+            arguments=['0.11', '0.08', '0.15', '0.0', '0.0', '-0.7071', '-0.7071', 'base_link', 'laser_frame'],
+            output='screen'
+        ),
+
+    cartographer_node = Node(
+            package='cartographer_ros',
+            executable='cartographer_node',
+            name='cartographer_node',
+            parameters=[{
+                'use_sim_time': use_sim_time
+            }],
+            arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
+            remappings=[('/rplidar/scan', '/scan_filtered')],
+            output='screen'
+        ),
+
+    occupancy_grid_node = Node(
+            package='cartographer_ros',
+            executable='cartographer_occupancy_grid_node',
+            name='occupancy_grid_node',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'resolution': resolution,
+                'publish_period_sec': publish_period_sec
+            }],
+            output='screen'
+        )
+
     # Launch description
     return LaunchDescription([
         DeclareLaunchArgument('port', default_value='9090'),
@@ -102,10 +181,21 @@ def generate_launch_description():
         DeclareLaunchArgument('services_glob', default_value=''),
         DeclareLaunchArgument('params_glob', default_value=''),
 
+        DeclareLaunchArgument('use_sim_time', default_value='false'),
+        DeclareLaunchArgument('resolution', default_value='0.05'),
+        DeclareLaunchArgument('publish_period_sec', default_value='1.0'),
+
         micro_ros_agent_acm0,
         micro_ros_agent_acm1,
         rosbridge_websocket_node,
         rosbridge_websocket_node_no_ssl,
-        rosapi_node
+        rosapi_node,
+        rplidar_node,
+        laser_scan_filters,
+        static_transform_publisher_map_to_odom,
+        static_transform_publisher_odom_to_base_link,
+        static_transform_publisher_base_link_to_laser_frame,
+        cartographer_node,
+        occupancy_grid_node
     ])
 
