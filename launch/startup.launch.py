@@ -19,14 +19,18 @@ from launch.actions import ExecuteProcess
 
 def generate_launch_description():
     return LaunchDescription([
-        # デバイス権限の設定とmicroROS Agentの起動 (デバイス0)
-        ExecuteProcess(
-            cmd=['bash', '-c', 'sudo chmod 666 /dev/ttyACM0 && ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM0 -v6'],
+        Node(
+            package='micro_ros_agent',
+            executable='micro_ros_agent',
+            name='micro_ros_agent_acm0',
+            arguments=['serial', '--dev', '/dev/ttyACM0', '-v6'],
             output='screen'
         ),
-        # デバイス権限の設定とmicroROS Agentの起動 (デバイス1)
-        ExecuteProcess(
-            cmd=['bash', '-c', 'sudo chmod 666 /dev/ttyACM1 && ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM1 -v6'],
+        Node(
+            package='micro_ros_agent',
+            executable='micro_ros_agent',
+            name='micro_ros_agent_acm1',
+            arguments=['serial', '--dev', '/dev/ttyACM1', '-v6'],
             output='screen'
         )
     ])
