@@ -107,6 +107,5 @@ def generate_launch_description():
         rosbridge_websocket_node,
         rosbridge_websocket_node_no_ssl,
         rosapi_node
-
     ])
 
