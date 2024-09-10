@@ -15,7 +15,9 @@
 
 # Package explanation
 
-
+## startup.launch.pyについて
+このlaunchファイルは、自律移動ロボットに必要なノードの起動を行います。
+* micro_ros_agent: 左右のハブホイールモータ制御用マイコンボード(M5Stack)2つと通信するためのノード
 
 # How to setting
 
