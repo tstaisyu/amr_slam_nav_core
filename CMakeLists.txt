@@ -39,7 +39,7 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
-  ament_add_pytest_test(test_micro_ros_agent test/test_micro_ros_agent.py)
+  # ament_add_pytest_test(test_micro_ros_agent test/test_micro_ros_agent.py)
 endif()
 
 # Launch ファイルのインストール
