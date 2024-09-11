@@ -22,6 +22,8 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -39,5 +41,17 @@ if(BUILD_TESTING)
 
   ament_add_pytest_test(test_micro_ros_agent test/test_micro_ros_agent.py)
 endif()
+
+# Launch ファイルのインストール
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Config ファイルのインストール
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()
