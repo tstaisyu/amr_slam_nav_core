@@ -112,7 +112,7 @@ def generate_launch_description():
                 'serial_baudrate': 256000
             }],
             output='screen'
-        ),
+        )
 
     laser_scan_filters = Node(
             package='laser_filters',
@@ -120,7 +120,7 @@ def generate_launch_description():
             name='laser_scan_filters',
             output='screen',
             parameters=[laser_filters_config_path],
-        ),
+        )
 
     static_transform_publisher_map_to_odom = Node(
             package='tf2_ros',
@@ -128,7 +128,7 @@ def generate_launch_description():
             name='static_transform_publisher_map_to_odom',
             arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'map', 'odom'],
             output='screen'
-        ),
+        )
 
     static_transform_publisher_odom_to_base_link = Node(
             package='tf2_ros',
@@ -136,7 +136,7 @@ def generate_launch_description():
             name='static_transform_publisher_odom_to_base_link',
             arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'odom', 'base_link'],
             output='screen'
-        ),
+        )
 
     static_transform_publisher_base_link_to_laser_frame = Node(
             package='tf2_ros',
@@ -144,7 +144,7 @@ def generate_launch_description():
             name='static_transform_publisher_base_link_to_laser_frame',
             arguments=['0.11', '0.08', '0.15', '0.0', '0.0', '-0.7071', '-0.7071', 'base_link', 'laser_frame'],
             output='screen'
-        ),
+        )
 
     cartographer_node = Node(
             package='cartographer_ros',
@@ -156,7 +156,7 @@ def generate_launch_description():
             arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
             remappings=[('/rplidar/scan', '/scan_filtered')],
             output='screen'
-        ),
+        )
 
     occupancy_grid_node = Node(
             package='cartographer_ros',
