@@ -4,23 +4,23 @@ laser_scan_filters:
       name: angle_bounds_filter_front_right
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: 0.966  # approximately 55.36 degrees in radians
-        upper_angle: 1.128  # approximately 64.66 degrees in radians
+        lower_angle: 0.48  # approximately 55.36 degrees in radians
+        upper_angle: 0.69  # approximately 64.66 degrees in radians
     filter2:
       name: angle_bounds_filter_rear_right
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: 2.571  # approximately 147.37 degrees in radians
-        upper_angle: 2.490  # approximately 142.76 degrees in radians
+        lower_angle: 1.76  # approximately 142.76 degrees in radians
+        upper_angle: 2.12  # approximately 147.37 degrees in radians
     filter3:
       name: angle_bounds_filter_rear_left
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: 3.611  # approximately 206.98 degrees in radians
-        upper_angle: 3.545  # approximately 203.21 degrees in radians
+        lower_angle: -1.98  # approximately 203.21 degrees in radians
+        upper_angle: -1.67  # approximately 206.98 degrees in radians
     filter4:
       name: angle_bounds_filter_front_left
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: 5.197  # approximately 297.73 degrees in radians
-        upper_angle: 5.275  # approximately 302.34 degrees in radians
+        lower_angle: -0.61  # approximately 297.73 degrees in radians
+        upper_angle: -0.41  # approximately 302.34 degrees in radians
