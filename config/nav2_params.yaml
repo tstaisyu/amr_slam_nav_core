@@ -37,7 +37,7 @@ amcl:
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
-    scan_topic: scan_filtered
+    scan_topic: scan
 
 bt_navigator:
   ros__parameters:
@@ -208,7 +208,7 @@ local_costmap:
         mark_threshold: 0
         observation_sources: scan
         scan:
-          topic: /scan_filtered
+          topic: /scan
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -239,7 +239,7 @@ global_costmap:
         enabled: True
         observation_sources: scan
         scan:
-          topic: /scan_filtered
+          topic: /scan
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -263,7 +263,6 @@ map_server:
     # Overridden in launch by the "map" launch configuration or provided default value.
     # To use in yaml, remove the default "map" value in the tb3_simulation_launch.py file & provide full path to map below.
     yaml_filename: ""
-    topic_name: "/map"
 
 map_saver:
   ros__parameters:
