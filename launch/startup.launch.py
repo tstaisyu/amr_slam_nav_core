@@ -35,7 +35,8 @@ def generate_launch_description():
     config_dir = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'config')
     configuration_basename = 'config.lua'
     nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
-    laser_filters_config_path = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'config', 'laser_filter_config.yaml')
+    laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
+    ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     resolution = LaunchConfiguration('resolution', default='0.05')
@@ -102,73 +103,90 @@ def generate_launch_description():
         }]
     )
 
-    # Cartographer node
+    # RPLiDAR node
     rplidar_node = Node(
-            package='rplidar_ros',
-            executable='rplidar_node',
-            name='rplidar_node',
-            parameters=[{
-                'serial_port': '/dev/ttyUSB0',
-                'serial_baudrate': 256000
-            }],
-            output='screen'
-        )
+        package='rplidar_ros',
+        executable='rplidar_node',
+        name='rplidar_node',
+        parameters=[{
+            'serial_port': '/dev/ttyUSB0',
+            'serial_baudrate': 256000
+        }],
+        output='screen'
+    )
 
+    # Laser scan filters
     laser_scan_filters = Node(
-            package='laser_filters',
-            executable='scan_to_scan_filter_chain',
-            name='laser_scan_filters',
-            output='screen',
-            parameters=[laser_filters_config_path],
-        )
+        package='laser_filters',
+        executable='scan_to_scan_filter_chain',
+        name='laser_scan_filters',
+        output='screen',
+        parameters=[laser_filters_config_path],
+    )
 
+    # EKF localization node
+    ekf_localization_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_localization_node',
+        output='screen',
+        parameters=[ekf_config],
+        remappings=[
+            ('/odometry/filtered', '/odom'),
+            ('/imu/data', '/imu/data_corrected')  # Remap as necessary
+        ]
+    )
+
+    # Static transform publishers
     static_transform_publisher_map_to_odom = Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_transform_publisher_map_to_odom',
-            arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'map', 'odom'],
-            output='screen'
-        )
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_transform_publisher_map_to_odom',
+        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'map', 'odom'],
+        output='screen'
+    )
 
     static_transform_publisher_odom_to_base_link = Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_transform_publisher_odom_to_base_link',
-            arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'odom', 'base_link'],
-            output='screen'
-        )
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_transform_publisher_odom_to_base_link',
+        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'odom', 'base_link'],
+        output='screen'
+    )
 
     static_transform_publisher_base_link_to_laser_frame = Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_transform_publisher_base_link_to_laser_frame',
-            arguments=['0.11', '0.08', '0.15', '0.0', '0.0', '-0.7071', '-0.7071', 'base_link', 'laser_frame'],
-            output='screen'
-        )
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_transform_publisher_base_link_to_laser_frame',
+        arguments=['0.11', '0.08', '0.15', '0.0', '0.0', '-0.7071', '-0.7071', 'base_link', 'laser_frame'],
+        output='screen'
+    )
 
+    # Cartographer node
     cartographer_node = Node(
-            package='cartographer_ros',
-            executable='cartographer_node',
-            name='cartographer_node',
-            parameters=[{
-                'use_sim_time': use_sim_time
-            }],
-            arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
-            remappings=[('/rplidar/scan', '/scan_filtered')],
-            output='screen'
-        )
+        package='cartographer_ros',
+        executable='cartographer_node',
+        name='cartographer_node',
+        parameters=[{
+            'use_sim_time': use_sim_time
+        }],
+        arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
+        remappings=[('/rplidar/scan', '/scan_filtered')],
+        output='screen'
+    )
 
+    # Occupancy grid node
     occupancy_grid_node = Node(
-            package='cartographer_ros',
-            executable='cartographer_occupancy_grid_node',
-            name='occupancy_grid_node',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'resolution': resolution,
-                'publish_period_sec': publish_period_sec
-            }],
-            output='screen'
-        )
+        package='cartographer_ros',
+        executable='cartographer_occupancy_grid_node',
+        name='occupancy_grid_node',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'resolution': resolution,
+            'publish_period_sec': publish_period_sec
+        }],
+        output='screen'
+    )
 
     # Launch description
     return LaunchDescription([
@@ -192,6 +210,7 @@ def generate_launch_description():
         rosapi_node,
         rplidar_node,
         laser_scan_filters,
+        ekf_localization_node,
         static_transform_publisher_map_to_odom,
         static_transform_publisher_odom_to_base_link,
         static_transform_publisher_base_link_to_laser_frame,
