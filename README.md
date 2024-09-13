@@ -24,7 +24,7 @@
 * cartographer: laserscanデータを元にSLAMするためのノード
 
 # How to setting
-
+<!--
 1. udevルールの設定
 udevルールを設定することで、Jetsonが起動時に自動的にM5Stackのデバイスパーミッションを適切に設定します。
 /etc/udev/rules.d/99-usb-serial.rulesというファイルを作成し、以下を記述します。（デバイスIDは実際の環境に合わせて適宜調整）
@@ -40,8 +40,30 @@ KERNEL=="ttyUSB0", MODE="0666"
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
+-->
 
+1. ROS2プログラム起動サービスの設定
+systemdサービスを設定することで、Jetsonが起動時に自動的にROS 2 launchファイルを実行します。
+/etc/systemd/system/ディレクトリ内にros2-launch.serviceという名前でファイルを作成し、以下を記述します。
 
+```bash
+[Unit]
+Description=Start ROS2 Launch
+After=network.target
 
+[Service]
+Type=simple
+User=<your-username>
+Environment="HOME=/home/<your-username>"
+Environment="ROS_DOMAIN_ID=0"
+ExecStart=/bin/bash -c "source /home/<your-username>/.bashrc && source /home/<your-username>/ros2_ws/install/setup.bash && source /home/<your-username>/neuratruck_ws/install/setup.bash && ros2 launch amr_slam_nav_core startup.launch.py"
 
+[Install]
+WantedBy=multi-user.target
+```
 
+サービスの有効化と起動
+```bash
+sudo systemctl enable ros2-launch.service
+sudo systemctl start ros2-launch.service
+```
