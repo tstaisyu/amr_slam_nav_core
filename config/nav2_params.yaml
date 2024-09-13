@@ -3,3 +3,8 @@ map_server:
     # yaml_filename: "path/to/your/map.yaml"  # この行を削除またはコメントアウト
     use_sim_time: False
     topic_name: "/map"  # Cartographerからのマップトピックを指定
+
+amcl:
+  ros__parameters:
+    use_sim_time: False
+    scan_topic: "/scan_filtered"  # トピック名を更新
