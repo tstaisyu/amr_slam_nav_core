@@ -31,7 +31,7 @@ udevルールを設定することで、Jetsonが起動時に自動的にM5Stack
 
 ```bash
 KERNEL=="ttyACM0", MODE="0666"
-KERNEL=="ttyACM1", MODE="0666"
+KERNEL=="ttyUSB0", MODE="0666"
 ```
 
 ルールを適用するためにudevをリロードします。
