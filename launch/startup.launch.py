@@ -171,7 +171,7 @@ def generate_launch_description():
             'use_sim_time': use_sim_time
         }],
         arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
-        remappings=[('/rplidar/scan', '/scan_filtered')],
+        remappings=[('/scan', '/scan_filtered')],
         output='screen'
     )
 
