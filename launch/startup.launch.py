@@ -150,7 +150,7 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='static_transform_publisher_odom_to_base_link',
-        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'odom', 'base_link'],
+        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '1.0', '0.0', 'odom', 'base_link'],
         output='screen'
     )
 
