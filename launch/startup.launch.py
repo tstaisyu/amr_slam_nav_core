@@ -222,6 +222,7 @@ def generate_launch_description():
         static_transform_publisher_map_to_odom,
         static_transform_publisher_odom_to_base_link,
         static_transform_publisher_base_link_to_laser_frame,
+        static_transform_publisher_laser_frame_to_base_footprint,
         cartographer_node,
         occupancy_grid_node
     ])
