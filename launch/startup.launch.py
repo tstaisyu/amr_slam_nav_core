@@ -162,6 +162,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    static_transform_publisher_laser_frame_to_base_footprint = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_transform_publisher_laser_frame_to_base_footprint',
+        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'laser_frame', 'base_footprint'],
+        output='screen'
+    )
+
     # Cartographer node
     cartographer_node = Node(
         package='cartographer_ros',
