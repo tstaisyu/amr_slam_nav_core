@@ -33,4 +33,9 @@ ekf_localization_node_params:
                    false, false, false]
     imu0_remove_gravitational_acceleration: true
 
-    # Covariances and other parameters can be set here
+    odom0: /odom_cartographer
+    odom0_config: [true, true, false,  # XYZ速度
+                  false, false, true,  # XYZ角速度
+                  false, false, false, # 加速度は不使用
+                  false, false, false,
+                  false, false, false]
