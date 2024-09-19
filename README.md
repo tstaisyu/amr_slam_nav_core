@@ -42,7 +42,12 @@ sudo udevadm trigger
 ```
 -->
 
-1. ROS2プログラム起動サービスの設定
+1. ROS2のlaunchファイルの起動スクリプトに実行権限を付与
+```bash
+chmod +x /path/to/startup.sh
+```
+
+2. ROS2プログラム起動サービスの設定
 systemdサービスを設定することで、Jetsonが起動時に自動的にROS 2 launchファイルを実行します。
 /etc/systemd/system/ディレクトリ内にros2-launch.serviceという名前でファイルを作成し、以下を記述します。
 
@@ -55,8 +60,9 @@ After=network.target
 Type=simple
 User=<your-username>
 Environment="HOME=/home/<your-username>"
-Environment="ROS_DOMAIN_ID=0"
-ExecStart=/bin/bash -c "source /home/<your-username>/.bashrc && source /home/<your-username>/ros2_ws/install/setup.bash && source /home/<your-username>/neuratruck_ws/install/setup.bash && ros2 launch amr_slam_nav_core startup.launch.py"
+# Environment="ROS_DOMAIN_ID=0" //as necessary
+ExecStart=/home/username/ros2_ws/src/amr_slam_nav_core/scripts/startup.sh
+
 
 [Install]
 WantedBy=multi-user.target
