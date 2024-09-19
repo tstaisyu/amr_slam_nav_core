@@ -132,7 +132,7 @@ def generate_launch_description():
         output='screen',
         parameters=[ekf_config],
         remappings=[
-            ('/odometry/filtered', '/odom'),
+            ('/odom', '/odom_cartographer'),
             ('/imu/data', '/imu/data_corrected')  # Remap as necessary
         ]
     )
