@@ -176,7 +176,9 @@ def generate_launch_description():
         executable='cartographer_node',
         name='cartographer_node',
         parameters=[{
-            'use_sim_time': use_sim_time
+            'use_sim_time': use_sim_time,
+            'provide_odom_frame': True,
+            'use_odometry': True,
         }],
         arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
         remappings=[('/scan', '/scan_filtered'),
