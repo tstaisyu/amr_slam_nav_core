@@ -24,23 +24,6 @@
 * cartographer: laserscanデータを元にSLAMするためのノード
 
 # How to setting
-<!--
-1. udevルールの設定
-udevルールを設定することで、Jetsonが起動時に自動的にM5Stackのデバイスパーミッションを適切に設定します。
-/etc/udev/rules.d/99-usb-serial.rulesというファイルを作成し、以下を記述します。（デバイスIDは実際の環境に合わせて適宜調整）
-
-```bash
-KERNEL=="ttyACM0", MODE="0666"
-KERNEL=="ttyUSB0", MODE="0666"
-```
-
-ルールを適用するためにudevをリロードします。
-
-```bash
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
--->
 
 1. ROS2のlaunchファイルの起動スクリプトに実行権限を付与
 ```bash
