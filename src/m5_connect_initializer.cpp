@@ -34,7 +34,7 @@ public:
 private:
     void publish_zero_velocity() {
         auto current_time = this->now();
-        if ((current_time - start_time_).seconds() < 15.0) {
+        if ((current_time - start_time_).seconds() < 90.0) {
             auto message = geometry_msgs::msg::Twist();
             message.linear.x = 0.0;
             message.angular.z = 0.0;
