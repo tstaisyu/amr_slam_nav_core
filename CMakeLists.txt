@@ -42,6 +42,14 @@ if(BUILD_TESTING)
   # ament_add_pytest_test(test_micro_ros_agent test/test_micro_ros_agent.py)
 endif()
 
+add_executable(m5_connect_initializer src/m5_connect_initializer.cpp)
+
+ament_target_dependencies(m5_connect_initializer rclcpp geometry_msgs)
+
+install(TARGETS
+  m5_connect_initializer
+  DESTINATION lib/${PROJECT_NAME})
+
 # Launch ファイルのインストール
 install(DIRECTORY
   launch
