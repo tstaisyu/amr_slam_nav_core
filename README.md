@@ -27,7 +27,7 @@
 
 1. ROS2のlaunchファイルの起動スクリプトに実行権限を付与
 ```bash
-chmod +x /path/to/startup.sh
+chmod +x /path/to/amr_slam_nav_core/scripts/startup.sh
 ```
 
 2. ROS2プログラム起動サービスの設定
@@ -42,10 +42,10 @@ After=network.target
 [Service]
 Type=simple
 User=<your-username>
-Environment="HOME=/home/<your-username>"
 # Environment="ROS_DOMAIN_ID=0" //as necessary
 ExecStart=/home/username/ros2_ws/src/amr_slam_nav_core/scripts/startup.sh
-
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
