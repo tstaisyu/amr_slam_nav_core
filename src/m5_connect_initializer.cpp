@@ -25,7 +25,7 @@ public:
     M5ConnectInitializer() : Node("m5_connect_initializer") {
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
         timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(50),
+            std::chrono::milliseconds(200),
             std::bind(&M5ConnectInitializer::publish_zero_velocity, this)
         );
         start_time_ = this->now();
