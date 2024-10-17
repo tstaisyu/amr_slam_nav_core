@@ -110,7 +110,7 @@ def generate_launch_description():
         name='m5_connect_initializer',
         output='screen'
     )
-    
+
     # RPLiDAR node
     rplidar_node = Node(
         package='rplidar_ros',
@@ -226,6 +226,7 @@ def generate_launch_description():
         rosbridge_websocket_node,
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
+        m5_connect_initializer,
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
