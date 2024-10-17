@@ -103,6 +103,14 @@ def generate_launch_description():
         }]
     )
 
+    # m5 connect initializer
+    m5_connect_initializer = Node(
+        package='amr_slam_nav_core',
+        executable='m5_connect_initializer',
+        name='m5_connect_initializer',
+        output='screen'
+    )
+    
     # RPLiDAR node
     rplidar_node = Node(
         package='rplidar_ros',
