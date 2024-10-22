@@ -25,7 +25,7 @@ ekf_localization_node_params:
                    false, false, false]
 
     # IMU data
-    imu0: /left_wheel_imu
+    imu0: /imu/data
     imu0_config: [false, false, false,
                    false, false, false,
                    true, true, true,
