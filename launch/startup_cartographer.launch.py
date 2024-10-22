@@ -138,10 +138,10 @@ def generate_launch_description():
         executable='ekf_node',
         name='ekf_localization_node',
         output='screen',
-        parameters=[{'/home/taisyu/neuratruck_ws/src/amr_slam_nav_core/config/ekf_config.yaml'}],
+        parameters=[ekf_config],
         remappings=[
            # ('/odom', '/odom_cartographer'),
-            ('/imu/data', '/left_wheel_imu')  # Remap as necessary
+            ('/imu', '/left_wheel_imu')  # Remap as necessary
         ]
     )
 
