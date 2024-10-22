@@ -1,4 +1,4 @@
-ekf_localization_node_params:
+ekf_localization_node:
   ros__parameters:
     use_sim_time: false
     publish_frequency: 30.0
