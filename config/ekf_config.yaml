@@ -25,7 +25,7 @@ ekf_localization_node:
                    false, false, false]
 
     # IMU data
-    imu0: true
+    imu0: /imu/data
     imu0_config: [false, false, false,
                    false, false, false,
                    false, false, false,
