@@ -37,7 +37,7 @@ def generate_launch_description():
     nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
-    print("Loading config from:", config_path)
+    print("Loading config from:", ekf_config)
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     resolution = LaunchConfiguration('resolution', default='0.05')
