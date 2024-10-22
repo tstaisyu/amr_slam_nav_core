@@ -11,7 +11,7 @@ ekf_localization_node_params:
     # Left wheel velocity
     odom0: /left_vel
     odom0_config: [false, false, false,
-                   true, false, false,
+                   false, false, false,
                    false, false, false,
                    false, false, false,
                    false, false, false]
@@ -19,7 +19,7 @@ ekf_localization_node_params:
     # Right wheel velocity
     odom1: /right_vel
     odom1_config: [false, false, false,
-                   true, false, false,
+                   false, false, false,
                    false, false, false,
                    false, false, false,
                    false, false, false]
