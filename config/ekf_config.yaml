@@ -25,12 +25,15 @@ ekf_localization_node_params:
                    false, false, false]
 
     # IMU data
-    imu0: /left_wheel_imu
+    imu0: /imu/data
     imu0_config: [false, false, false,
                    false, false, false,
                    false, false, false,
                    true, true, true,
                    true, true, true]
+    imu0_differential: false
+    imu0_relative: false
+    imu0_queue_size: 10
     imu0_remove_gravitational_acceleration: true
 
     odom0: /odom_cartographer
