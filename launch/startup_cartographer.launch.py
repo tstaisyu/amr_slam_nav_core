@@ -141,7 +141,7 @@ def generate_launch_description():
         parameters=[ekf_config],
         remappings=[
             ('/odom', '/odom_cartographer'),
-            ('/imu/data', '/imu/data_corrected')  # Remap as necessary
+            ('/left_wheel_imu/data', '/imu/data_corrected')  # Remap as necessary
         ]
     )
 
