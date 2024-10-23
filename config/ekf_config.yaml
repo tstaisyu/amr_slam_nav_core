@@ -8,11 +8,11 @@ ekf_localization_node:
     print_diagnostics: true
     debug: false
     publish_tf: true
-    map_frame: map
-    odom_frame: odom
-    base_link_frame: base_link
-    world_frame: odom
-    imu0: imu/data
+    map_frame: 'map'
+    odom_frame: 'odom'
+    base_link_frame: 'base_link'
+    world_frame: 'odom'
+    imu0: 'imu/data'
     imu0_config: [false, false, false,
                    true,  true,  true,
                    false, false, false,
