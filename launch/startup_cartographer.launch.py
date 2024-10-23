@@ -14,7 +14,6 @@
 
 import os
 import launch
-import yaml
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo
 from launch.conditions import IfCondition, UnlessCondition
@@ -139,11 +138,11 @@ def generate_launch_description():
         executable='ekf_node',
         name='ekf_localization_node',
         output='screen',
-        parameters=['/home/taisyu/neuratruck_ws/src/amr_slam_nav_core/config/ekf_config.yaml', {imu0: "/imu/data"}],
-        arguments=['--ros-args', '--log-level', 'debug'],        
+        parameters=[ekf_config],
+        arguments=['--ros-args', '--log-level', 'debug'],
         remappings=[
-            ('/odom', '/odom_cartographer'),
-            ('imu/data', 'imu/data')  # Remap as necessary
+           # ('/odom', '/odom_cartographer'),
+           ('/imu/data', '/imu/data')  # Remap as necessary
         ]
     )
 
