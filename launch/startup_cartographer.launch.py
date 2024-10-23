@@ -127,7 +127,7 @@ def generate_launch_description():
     
     controller_spawner = Node(
         package='controller_manager',
-        executable='spawner.py',
+        executable='spawner',
         arguments=['diff_drive_controller'],
         output='screen'
     )
