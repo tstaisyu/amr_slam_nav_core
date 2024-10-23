@@ -62,4 +62,10 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
+# URDF ファイルのインストール
+install(DIRECTORY
+  urdf
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_package()
