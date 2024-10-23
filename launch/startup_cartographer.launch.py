@@ -139,7 +139,7 @@ def generate_launch_description():
         name='ekf_localization_node',
         output='screen',
         parameters=[ekf_config],
-        arguments=['--ros-args', '--log-level', 'debug'],
+        # arguments=['--ros-args', '--log-level', 'debug'],
         remappings=[
            # ('/odom', '/odom_cartographer'),
            ('/imu/data', '/imu/data')  # Remap as necessary
