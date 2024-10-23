@@ -38,6 +38,12 @@ def generate_launch_description():
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
 
+    pkg_dir = get_package_share_directory('amr_slam_nav_core')
+    urdf_file = os.path.join(pkg_dir, 'urdf', 'n_v1.urdf')
+    with open(urdf_file, 'r') as file:
+        robot_description = file.read()
+    diff_drive_params = {'robot_description': robot_description}
+
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     resolution = LaunchConfiguration('resolution', default='0.05')
     publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
@@ -110,6 +116,21 @@ def generate_launch_description():
 #        name='m5_connect_initializer',
 #        output='screen'
 #    )
+
+    # diff_drive_controller_node
+    diff_drive_controller_node = Node(
+        package='controller_manager',
+        executable='ros2_control_node',
+        parameters=[diff_drive_params],
+        output='screen'
+    )
+    
+    controller_spawner = Node(
+        package='controller_manager',
+        executable='spawner.py',
+        arguments=['diff_drive_controller'],
+        output='screen'
+    )
 
     # RPLiDAR node
     rplidar_node = Node(
@@ -228,6 +249,8 @@ def generate_launch_description():
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
 #        m5_connect_initializer,
+        diff_drive_controller_node,
+        controller_spawner,
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
