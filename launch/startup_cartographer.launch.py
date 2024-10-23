@@ -38,8 +38,8 @@ def generate_launch_description():
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
 
-    pkg_dir = get_package_share_directory('amr_slam_nav_core')
-    urdf_file = os.path.join(pkg_dir, 'urdf', 'n_v1.urdf')
+    urdf_dir = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'urdf')
+    urdf_file = os.path.join(urdf_dir, 'n_v1.urdf')
     with open(urdf_file, 'r') as file:
         robot_description = file.read()
     diff_drive_params = {'robot_description': robot_description}
