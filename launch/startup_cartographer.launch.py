@@ -118,6 +118,13 @@ def generate_launch_description():
 #    )
 
     # diff_drive_controller_node
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        parameters=[diff_drive_params],
+        output='screen'
+    )
+
     diff_drive_controller_node = Node(
         package='controller_manager',
         executable='ros2_control_node',
