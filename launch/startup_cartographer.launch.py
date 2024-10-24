@@ -118,6 +118,14 @@ def generate_launch_description():
 #        output='screen'
 #    )
 
+    # odometry publisher
+    odometry_publisher = Node(
+        package='amr_slam_nav_core',
+        executable='odometry_publisher',
+        name='odometry_publisher',
+        output='screen'
+    )
+
     # RPLiDAR node
     rplidar_node = Node(
         package='rplidar_ros',
@@ -235,6 +243,7 @@ def generate_launch_description():
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
 #        m5_connect_initializer,
+        odometry_publisher,
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
