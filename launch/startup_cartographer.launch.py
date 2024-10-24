@@ -126,6 +126,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description}],
+    )
+
     # RPLiDAR node
     rplidar_node = Node(
         package='rplidar_ros',
@@ -244,6 +252,7 @@ def generate_launch_description():
         rosapi_node,
 #        m5_connect_initializer,
         odometry_publisher,
+        robot_state_publisher,
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
