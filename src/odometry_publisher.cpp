@@ -77,6 +77,9 @@ private:
         odom_msg->pose.pose.orientation.z = q.z();
         odom_msg->pose.pose.orientation.w = q.w();
 
+        odom_msg->twist.twist.linear.x = (left_velocity_ + right_velocity_) / 2;
+        odom_msg->twist.twist.angular.z = (right_velocity_ - left_velocity_) / wheel_base_;
+
         odom_publisher_->publish(*odom_msg);
         RCLCPP_DEBUG(this->get_logger(), "Published odometry message.");
     }
@@ -109,7 +112,7 @@ private:
     double right_velocity_{0.0};
     double x_, y_, theta_;
     double last_time_{0.0};
-    const double wheel_base_ = 0.5;  // Assume some wheel base
+    const double wheel_base_ = 0.202;  // Assume some wheel base
 };
 
 int main(int argc, char **argv) {
