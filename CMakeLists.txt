@@ -24,6 +24,10 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2 REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -42,11 +46,29 @@ if(BUILD_TESTING)
   # ament_add_pytest_test(test_micro_ros_agent test/test_micro_ros_agent.py)
 endif()
 
+# Include directories
+include_directories(include)
+
+# Declare a C++ executable
+add_executable(odometry_publisher src/odometry_publisher.cpp)
 add_executable(m5_connect_initializer src/m5_connect_initializer.cpp)
 
-ament_target_dependencies(m5_connect_initializer rclcpp geometry_msgs)
+# Specify libraries to link a library or executable target against
+ament_target_dependencies(odometry_publisher
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  tf2_ros
+  tf2
+)
+
+ament_target_dependencies(m5_connect_initializer
+  rclcpp
+  geometry_msgs
+)
 
 install(TARGETS
+  odometry_publisher
   m5_connect_initializer
   DESTINATION lib/${PROJECT_NAME})
 
@@ -67,5 +89,7 @@ install(DIRECTORY
   urdf
   DESTINATION share/${PROJECT_NAME}
 )
+
+ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()
