@@ -53,7 +53,7 @@ def generate_launch_description():
         package='micro_ros_agent',
         executable='micro_ros_agent',
         name='micro_ros_agent_acm0',
-        arguments=['serial', '--dev', '/dev/ttyACM0', '-v6', '--ros-args', '--log-level', 'info'],
+        arguments=['serial', '--dev', '/dev/ttyACM0', '-v4'],
         output='screen'
     )
 
@@ -61,7 +61,7 @@ def generate_launch_description():
         package='micro_ros_agent',
         executable='micro_ros_agent',
         name='micro_ros_agent_acm1',
-        arguments=['serial', '--dev', '/dev/ttyUSB1', '-v6', '--ros-args', '--log-level', 'info'],
+        arguments=['serial', '--dev', '/dev/ttyUSB1', '-v4'],
         parameters=[{'use_sim_time': False}],
         output='screen'
     )
