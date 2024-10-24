@@ -256,6 +256,7 @@ def generate_launch_description():
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
 #        m5_connect_initializer,
+        robot_state_publisher,
         diff_drive_controller_node,
         controller_spawner,
         rplidar_node,
