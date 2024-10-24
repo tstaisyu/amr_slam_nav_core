@@ -15,6 +15,8 @@ public:
         odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
         tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
+        RCLCPP_INFO(this->get_logger(), "Odometry publisher has started.");
+
         // Initialize position and orientation
         x_ = 0.0;
         y_ = 0.0;
@@ -24,16 +26,20 @@ public:
 private:
     void left_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
         left_velocity_ = msg->twist.linear.x;
+        RCLCPP_DEBUG(this->get_logger(), "Received left wheel velocity: %f", left_velocity_);
     }
 
     void right_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
         right_velocity_ = msg->twist.linear.x;
+        RCLCPP_DEBUG(this->get_logger(), "Received right wheel velocity: %f", right_velocity_);
         update_odometry();
     }
 
     void update_odometry() {
         double dt = this->get_clock()->now().seconds() - last_time_;
         last_time_ = this->get_clock()->now().seconds();
+
+        RCLCPP_DEBUG(this->get_logger(), "Time delta: %f", dt);
 
         // Compute odometry here based on left_velocity_ and right_velocity_
         double linear_velocity = (left_velocity_ + right_velocity_) / 2;
@@ -46,6 +52,13 @@ private:
         x_ += delta_x;
         y_ += delta_y;
 
+        RCLCPP_DEBUG(this->get_logger(), "Updated odometry: x=%f, y=%f, theta=%f", x_, y_, theta_);
+
+        publish_odometry();
+        send_transform();
+    }
+
+    void publish_odometry() {
         // Publish odometry message
         auto odom_msg = std::make_shared<nav_msgs::msg::Odometry>();
         odom_msg->header.stamp = this->get_clock()->now();
@@ -62,7 +75,10 @@ private:
         odom_msg->pose.pose.orientation.w = q.w();
 
         odom_publisher_->publish(*odom_msg);
+        RCLCPP_DEBUG(this->get_logger(), "Published odometry message.");
+    }
 
+    void send_transform() {
         // Send transform
         geometry_msgs::msg::TransformStamped transform;
         transform.header.stamp = this->get_clock()->now();
@@ -70,13 +86,17 @@ private:
         transform.child_frame_id = "base_link";
         transform.transform.translation.x = x_;
         transform.transform.translation.y = y_;
+        tf2::Quaternion q;
+        q.setRPY(0, 0, theta_);
         transform.transform.rotation.x = q.x();
         transform.transform.rotation.y = q.y();
         transform.transform.rotation.z = q.z();
         transform.transform.rotation.w = q.w();
-        tf_broadcaster_->sendTransform(transform);
-    }
 
+        tf_broadcaster_->sendTransform(transform);
+        RCLCPP_DEBUG(this->get_logger(), "Broadcasted transform.");
+    }
+    
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr left_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr right_subscriber_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
