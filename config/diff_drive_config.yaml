@@ -5,4 +5,4 @@ diff_drive_controller:
     right_wheel_names: ['right_wheel_joint']
     wheel_separation: 0.5
     wheel_radius: 0.15
-    publish_rate: 50.0
+    update_rate: 50.0
