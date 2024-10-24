@@ -42,7 +42,7 @@
     <axis xyz="0 1 0"/>
   </joint>
 
-  <!-- ros2_control configuration -->
+  <!-- ros2_control configuration 
   <ros2_control name="DiffDriveSystem" type="system">
     <hardware>
       <plugin>ros2_control_demo_hardware/RRBotSystemPositionOnlyHardware</plugin>
@@ -56,4 +56,5 @@
       <interface name="position"/>
     </joint>
   </ros2_control>
+  -->
 </robot>
