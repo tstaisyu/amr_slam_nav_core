@@ -117,28 +117,6 @@ def generate_launch_description():
 #        output='screen'
 #    )
 
-    # diff_drive_controller_node
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        parameters=[{'robot_description': Command(['xacro ', urdf_file])}],
-        output='screen'
-    )
-
-    diff_drive_controller_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[diff_drive_params],
-        output='screen'
-    )
-    
-    controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['diff_drive_controller'],
-        output='screen'
-    )
-
     # RPLiDAR node
     rplidar_node = Node(
         package='rplidar_ros',
