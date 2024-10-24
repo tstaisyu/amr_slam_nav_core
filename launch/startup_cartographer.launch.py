@@ -105,7 +105,7 @@ def generate_launch_description():
         executable='rosapi_node',
         parameters=[{
             'topics_glob': topics_glob,
-            'services_glob': services_glob,
+            'services_gl    parameters=[{'use_sim_time': False}],ob': services_glob,
             'params_glob': params_glob,
         }]
     )
@@ -235,9 +235,6 @@ def generate_launch_description():
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
 #        m5_connect_initializer,
-        robot_state_publisher,
-        diff_drive_controller_node,
-        controller_spawner,
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
