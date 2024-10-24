@@ -62,6 +62,7 @@ def generate_launch_description():
         executable='micro_ros_agent',
         name='micro_ros_agent_acm1',
         arguments=['serial', '--dev', '/dev/ttyUSB1', '-v6'],
+        parameters=[{'use_sim_time': False}],
         output='screen'
     )
 
