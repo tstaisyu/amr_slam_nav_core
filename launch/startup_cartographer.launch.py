@@ -105,7 +105,7 @@ def generate_launch_description():
         executable='rosapi_node',
         parameters=[{
             'topics_glob': topics_glob,
-            'services_gl    parameters=[{'use_sim_time': False}],ob': services_glob,
+            'services_glob': services_glob,
             'params_glob': params_glob,
         }]
     )
