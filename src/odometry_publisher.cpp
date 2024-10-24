@@ -8,10 +8,13 @@
 class OdometryPublisher : public rclcpp::Node {
 public:
     OdometryPublisher() : Node("odometry_publisher") {
+        rclcpp::QoS custom_qos_profile(10);
+        custom_qos_profile.best_effort();
+
         left_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-            "left_vel", 10, std::bind(&OdometryPublisher::left_wheel_callback, this, std::placeholders::_1));
+            "left_vel", custom_qos_profile, std::bind(&OdometryPublisher::left_wheel_callback, this, std::placeholders::_1));
         right_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-            "right_vel", 10, std::bind(&OdometryPublisher::right_wheel_callback, this, std::placeholders::_1));
+            "right_vel", custom_qos_profile, std::bind(&OdometryPublisher::right_wheel_callback, this, std::placeholders::_1));
         odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
         tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
