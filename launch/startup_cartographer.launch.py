@@ -118,6 +118,14 @@ def generate_launch_description():
 #        output='screen'
 #    )
 
+    # raw_imu_subscriber
+    raw_imu_subscriber = Node(
+        package='amr_slam_nav_core',
+        executable='raw_imu_subscriber',
+        name='raw_imu_subscriber',
+        output='screen'
+    )
+
     # odometry publisher
     odometry_publisher = Node(
         package='amr_slam_nav_core',
@@ -259,6 +267,7 @@ def generate_launch_description():
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
 #        m5_connect_initializer,
+        raw_imu_subscriber,
         odometry_publisher,
         robot_state_publisher,
         rplidar_node,
