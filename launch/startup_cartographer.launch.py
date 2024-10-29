@@ -186,6 +186,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    static_transform_publisher_base_link_to_imu = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_transform_publisher_base_link_to_imu',
+        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'base_link', 'imu'],
+        output='screen'
+    )
+
     static_transform_publisher_base_link_to_laser_frame = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -258,6 +266,7 @@ def generate_launch_description():
         ekf_localization_node,
         static_transform_publisher_map_to_odom,
         static_transform_publisher_odom_to_base_link,
+        static_transform_publisher_base_link_to_imu,
         static_transform_publisher_base_link_to_laser_frame,
         static_transform_publisher_laser_frame_to_base_footprint,
         cartographer_node,
