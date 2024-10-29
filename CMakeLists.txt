@@ -50,10 +50,16 @@ endif()
 include_directories(include)
 
 # Declare a C++ executable
+add_executable(raw_imu_subscriber src/raw_imu_subscriber.cpp)
 add_executable(odometry_publisher src/odometry_publisher.cpp)
 add_executable(m5_connect_initializer src/m5_connect_initializer.cpp)
 
 # Specify libraries to link a library or executable target against
+ament_target_dependencies(raw_imu_subscriber
+  rclcpp
+  sensor_msgs
+)
+
 ament_target_dependencies(odometry_publisher
   rclcpp
   geometry_msgs
@@ -68,6 +74,7 @@ ament_target_dependencies(m5_connect_initializer
 )
 
 install(TARGETS
+  raw_imu_subscriber
   odometry_publisher
   m5_connect_initializer
   DESTINATION lib/${PROJECT_NAME})
