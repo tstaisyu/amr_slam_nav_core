@@ -176,39 +176,6 @@ def generate_launch_description():
         ]
     )
 
-    # Static transform publishers
-    static_transform_publisher_map_to_odom = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_transform_publisher_map_to_odom',
-        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'map', 'odom'],
-        output='screen'
-    )
-
-    static_transform_publisher_odom_to_base_link = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_transform_publisher_odom_to_base_link',
-        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'odom', 'base_link'],
-        output='screen'
-    )
-
-#    static_transform_publisher_base_link_to_laser_frame = Node(
-#        package='tf2_ros',
-#        executable='static_transform_publisher',
-#        name='static_transform_publisher_base_link_to_laser_frame',
-#        arguments=['0.11', '0.08', '0.15', '0.0', '0.0', '1.0', '0.0', 'base_link', 'laser_frame'],
-#        output='screen'
-#    )
-
-    static_transform_publisher_laser_frame_to_base_footprint = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_transform_publisher_laser_frame_to_base_footprint',
-        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'laser_frame', 'base_footprint'],
-        output='screen'
-    )
-
     # Cartographer node
     cartographer_node = Node(
         package='cartographer_ros',
@@ -264,10 +231,6 @@ def generate_launch_description():
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
-        static_transform_publisher_map_to_odom,
-        static_transform_publisher_odom_to_base_link,
-#        static_transform_publisher_base_link_to_laser_frame,
-        static_transform_publisher_laser_frame_to_base_footprint,
         cartographer_node,
         occupancy_grid_node
     ])
