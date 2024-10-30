@@ -41,10 +41,6 @@ def generate_launch_description():
     urdf_file = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'urdf', 'n_v1.urdf')
     with open(urdf_file, 'r') as file:
         robot_description = file.read()
-    diff_drive_params = {'robot_description': robot_description}
-
-    print("Robot Description Loaded:")
-    print(robot_description)
     
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     resolution = LaunchConfiguration('resolution', default='0.05')
