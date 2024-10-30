@@ -52,7 +52,4 @@ TRAJECTORY_BUILDER_2D.submaps.num_range_data = 120
 TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.1
 TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.2)
 
-TRAJECTORY_BUILDER_2D.use_odometry = true
-TRAJECTORY_BUILDER_2D.odometry_topic = "odometry/filtered"
-
 return options
