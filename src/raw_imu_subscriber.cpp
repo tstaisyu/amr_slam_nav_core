@@ -5,7 +5,7 @@ class RawIMUSubscriber : public rclcpp::Node
 {
 public:
     RawIMUSubscriber(): Node("raw_imu_subscriber") {
-        
+
         // QoSをBEST_EFFORTに設定
         auto subscriber_qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data));
         subscriber_qos.best_effort();
@@ -30,6 +30,10 @@ private:
     void imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
     {
         auto filtered_msg = filter_data(msg);
+
+        // フレームIDを変更
+        filtered_msg->header.frame_id = "imu_link";    
+
         publisher_->publish(*filtered_msg);
     }
 
