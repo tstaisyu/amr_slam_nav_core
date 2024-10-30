@@ -43,6 +43,9 @@ def generate_launch_description():
         robot_description = file.read()
     diff_drive_params = {'robot_description': robot_description}
 
+    print("Robot Description Loaded:")
+    print(robot_description)
+    
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     resolution = LaunchConfiguration('resolution', default='0.05')
     publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
