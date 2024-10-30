@@ -42,6 +42,18 @@
     <axis xyz="0 1 0"/>
   </joint>
 
+  <!-- IMUリンクの定義 -->
+  <link name="imu_link">
+    <!-- IMUの物理的な特性（質量、慣性など）をここに記述 -->
+  </link>
+
+  <!-- base_linkとimu_linkを固定ジョイントで接続 -->
+  <joint name="base_to_imu" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
   <!-- ros2_control configuration 
   <ros2_control name="DiffDriveSystem" type="system">
     <hardware>
