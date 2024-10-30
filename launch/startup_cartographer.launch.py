@@ -38,8 +38,7 @@ def generate_launch_description():
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
 
-    urdf_dir = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'urdf')
-    urdf_file = os.path.join(urdf_dir, 'n_v1.urdf')
+    urdf_file = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'urdf', 'n_v1.urdf')
     with open(urdf_file, 'r') as file:
         robot_description = file.read()
     diff_drive_params = {'robot_description': robot_description}
@@ -194,14 +193,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    static_transform_publisher_base_link_to_imu = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_transform_publisher_base_link_to_imu',
-        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '1.0', 'base_link', 'imu'],
-        output='screen'
-    )
-
     static_transform_publisher_base_link_to_laser_frame = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -275,7 +266,6 @@ def generate_launch_description():
         ekf_localization_node,
         static_transform_publisher_map_to_odom,
         static_transform_publisher_odom_to_base_link,
-        static_transform_publisher_base_link_to_imu,
         static_transform_publisher_base_link_to_laser_frame,
         static_transform_publisher_laser_frame_to_base_footprint,
         cartographer_node,
