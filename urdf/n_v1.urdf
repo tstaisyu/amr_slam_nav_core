@@ -68,6 +68,24 @@
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
 
+  <!-- LiDARのリンク定義 -->
+  <link name="laser_link">
+    <visual>
+      <origin xyz="0 0 -0.0105" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.038" length="0.07"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+  </link>
+
+  <!-- LiDARをbase_linkに固定するジョイント定義 -->
+  <joint name="base_to_laser" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_link"/>
+    <origin xyz="0.092 0 0.151" rpy="0 0 0"/>
+  </joint>
+
   <!-- ros2_control configuration 
   <ros2_control name="DiffDriveSystem" type="system">
     <hardware>
