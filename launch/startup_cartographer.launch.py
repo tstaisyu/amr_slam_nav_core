@@ -172,7 +172,7 @@ def generate_launch_description():
         # arguments=['--ros-args', '--log-level', 'debug'],
         remappings=[
            # ('/odom', '/odom_cartographer'),
-           ('/imu/data', '/imu/data')  # Remap as necessary
+#           ('/imu/data', '/imu/data')  # Remap as necessary
         ]
     )
 
@@ -186,7 +186,7 @@ def generate_launch_description():
         }],
         arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
         remappings=[('/scan', '/scan_filtered'),
-                    ('/odom', '/odom_cartographer') 
+#                    ('/odom', '/odom_cartographer') 
         ],
         output='screen'
     )
