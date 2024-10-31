@@ -109,14 +109,6 @@ def generate_launch_description():
         }]
     )
 
-    # m5 connect initializer
-#    m5_connect_initializer = Node(
-#        package='amr_slam_nav_core',
-#        executable='m5_connect_initializer',
-#        name='m5_connect_initializer',
-#        output='screen'
-#    )
-
     # raw_imu_subscriber
     raw_imu_subscriber = Node(
         package='amr_slam_nav_core',
@@ -270,7 +262,6 @@ def generate_launch_description():
         rosbridge_websocket_node,
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
-#        m5_connect_initializer,
         raw_imu_subscriber,
 #        imu_filter_madgwick,
         odometry_publisher,
