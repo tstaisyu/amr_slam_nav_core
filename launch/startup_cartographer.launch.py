@@ -23,17 +23,31 @@ from ament_index_python.packages import get_package_share_directory
 from launch.event_handlers import OnShutdown
 from threading import Thread
 
-def publish_reboot():
+def publish_reboot(context, *args, **kwargs):
     import rclpy
     from std_msgs.msg import Int32
+    import time
 
-    rclpy.init()
+    # ROS 2の初期化
+    rclpy.init(args=None)
     node = rclpy.create_node('shutdown_reboot_publisher')
     publisher = node.create_publisher(Int32, '/reboot', 10)
+
+    # メッセージの作成とパブリッシュ
     msg = Int32()
     msg.data = 1
     publisher.publish(msg)
     node.get_logger().info('Reboot message published')
+
+    # メッセージが送信されるのを待機
+    end_time = time.time() + 2.0  # 2秒待機（必要に応じて調整）
+    while rclpy.ok() and time.time() < end_time:
+        rclpy.spin_once(node, timeout_sec=0.1)
+
+    # 追加の待機時間（必要に応じて）
+    time.sleep(1.0)
+
+    # ROS 2のシャットダウン
     rclpy.shutdown()
 
 def generate_launch_description():
@@ -232,7 +246,7 @@ def generate_launch_description():
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
             on_shutdown=[
-                OpaqueFunction(function=lambda context: Thread(target=publish_reboot).start())
+                OpaqueFunction(function=publish_reboot)
             ]
         )
     )
