@@ -14,7 +14,7 @@ ekf_localization_node:
     print_diagnostics: true
 
     # odom data
-    odom0: /odom
+    odom0: /odom_encoder
     odom0_config: [true, true, false,
                    false, false, false,
                    false, false, false,
