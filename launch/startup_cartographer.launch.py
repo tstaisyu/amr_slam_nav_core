@@ -15,12 +15,26 @@
 import os
 import launch
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo, ExecuteProcess, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo, ExecuteProcess, RegisterEventHandler, OpaqueFunction
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from launch.event_handlers import OnShutdown
+from threading import Thread
+
+def publish_reboot():
+    import rclpy
+    from std_msgs.msg import Int32
+
+    rclpy.init()
+    node = rclpy.create_node('shutdown_reboot_publisher')
+    publisher = node.create_publisher(Int32, '/reboot', 10)
+    msg = Int32()
+    msg.data = 1
+    publisher.publish(msg)
+    node.get_logger().info('Reboot message published')
+    rclpy.shutdown()
 
 def generate_launch_description():
     # Declare arguments
@@ -218,11 +232,7 @@ def generate_launch_description():
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
             on_shutdown=[
-                ExecuteProcess(
-                    cmd='source /opt/ros/humble/setup.bash && ros2 topic pub /reboot std_msgs/Int32 "data: 1" -1',
-                    shell=True,
-                    output='screen'
-                )
+                OpaqueFunction(function=lambda context: Thread(target=publish_reboot).start())
             ]
         )
     )
