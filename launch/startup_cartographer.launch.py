@@ -125,24 +125,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    # madgwick_filter
-#    imu_filter_madgwick = Node(
-#        package='imu_filter_madgwick',
-#        executable='imu_filter_madgwick_node',
-#        name='imu_filter_madgwick',
-#        parameters=[{
-#            'use_mag': False,
-#            'publish_tf': False,
-#            'world_frame': 'enu',
-#            'publish_debug_topics': False
-#        }],
-#        remappings=[
-#            ('/imu/data_raw', '/imu/data_raw'),
-#            ('/imu/mag', '/imu/mag'),
-#            ('/imu/data', '/imu/data_filtered')
-#        ]
-#    )
-
     # odometry publisher
     odometry_publisher = Node(
         package='amr_slam_nav_core',
@@ -272,7 +254,6 @@ def generate_launch_description():
         rosapi_node,
 #        m5_connect_initializer,
         raw_imu_subscriber,
-#        imu_filter_madgwick,
         odometry_publisher,
         robot_state_publisher,
         rplidar_node,
