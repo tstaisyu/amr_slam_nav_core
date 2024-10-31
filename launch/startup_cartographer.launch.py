@@ -187,22 +187,6 @@ def generate_launch_description():
         ]
     )
 
-#    static_transform_publisher_map_to_odom = Node(
-#        package='tf2_ros',
-#        executable='static_transform_publisher',
-#        name='static_transform_publisher_map_to_odom',
-#        arguments=['0', '0', '0', '0', '0', '0', '1', 'map', 'odom'],
-#        output='screen'
-#    )
-
-#    static_transform_publisher_odom_to_base_link = Node(
-#        package='tf2_ros',
-#        executable='static_transform_publisher',
-#        name='static_transform_publisher_odom_to_base_link',
-#        arguments=['0', '0', '0', '0', '0', '0', '1', 'odom', 'base_link'],
-#        output='screen'
-#    )
-
     # Cartographer node
     cartographer_node = Node(
         package='cartographer_ros',
@@ -270,8 +254,6 @@ def generate_launch_description():
         rplidar_node,
         laser_scan_filters,
         ekf_localization_node,
-#        static_transform_publisher_map_to_odom,
-#        static_transform_publisher_odom_to_base_link,
         cartographer_node,
         occupancy_grid_node,
         shutdown_handler
