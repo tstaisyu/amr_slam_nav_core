@@ -100,6 +100,7 @@ TRAJECTORY_BUILDER_2D = {
     },
     max_num_final_iterations = 200,
   }
+}
 
 TRAJECTORY_BUILDER_2D.use_odometry = true
 TRAJECTORY_BUILDER_2D.odometry_topic = "odometry/filtered"
