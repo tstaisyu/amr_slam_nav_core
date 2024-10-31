@@ -219,7 +219,7 @@ def generate_launch_description():
         OnShutdown(
             on_shutdown=[
                 ExecuteProcess(
-                    cmd='ros2 topic pub /reboot std_msgs/Int32 "data: 1" -1',
+                    cmd='source /opt/ros/humble/setup.bash && ros2 topic pub /reboot std_msgs/Int32 "data: 1" -1',
                     shell=True,
                     output='screen'
                 )
