@@ -50,8 +50,6 @@ def main():
 
     finally:
         # すべてのプロセスを終了させる
-    finally:
-        # すべてのプロセスを終了させる
         if agent_proc.poll() is None:
             agent_proc.terminate()
         if main_proc.poll() is None:
