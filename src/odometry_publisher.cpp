@@ -19,10 +19,16 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <deque>
 
 class OdometryPublisher : public rclcpp::Node {
 public:
     OdometryPublisher() : Node("odometry_publisher") {
+        last_time_ = this->get_clock()->now();    
+        timer_ = this->create_wall_timer(
+            std::chrono::duration<double>(1.0 / update_rate_),
+            std::bind(&OdometryPublisher::update_odometry, this));
+
         rclcpp::QoS custom_qos_profile(10);
         custom_qos_profile.best_effort();
 
@@ -42,22 +48,52 @@ public:
     }
 
 private:
+    // クラスメンバとして過去の速度データを保持するためのキューを定義
+    std::deque<double> left_velocity_history_;
+    std::deque<double> right_velocity_history_;
+    const size_t filter_size_ = 5;  // 移動平均のウィンドウサイズ
+
+    rclcpp::Time last_time_;
+
+    rclcpp::TimerBase::SharedPtr timer_;
+    const double update_rate_ = 50.0;  // 50Hzで更新
+
     void left_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
-        left_velocity_ = msg->twist.linear.x;
+        // 新しいデータを追加
+        left_velocity_history_.push_back(msg->twist.linear.x);
+        // 古いデータを削除
+        if (left_velocity_history_.size() > filter_size_) {
+            left_velocity_history_.pop_front();
+        }
+        left_velocity_ = std::accumulate(left_velocity_history_.begin(), left_velocity_history_.end(), 0.0) / left_velocity_history_.size();
         RCLCPP_DEBUG(this->get_logger(), "Received left wheel velocity: %f", left_velocity_);
     }
 
     void right_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
-        right_velocity_ = msg->twist.linear.x;
+        right_velocity_history_.push_back(msg->twist.linear.x);
+        if (right_velocity_history_.size() > filter_size_) {
+            right_velocity_history_.pop_front();
+        }
+        right_velocity_ = std::accumulate(right_velocity_history_.begin(), right_velocity_history_.end(), 0.0) / right_velocity_history_.size();
         RCLCPP_DEBUG(this->get_logger(), "Received right wheel velocity: %f", right_velocity_);
-        update_odometry();
+        // 左右の速度データが揃ったらオドメトリを更新
+        if (left_velocity_history_.size() == filter_size_) {
+            update_odometry();
+        }
     }
 
     void update_odometry() {
-        double dt = this->get_clock()->now().seconds() - last_time_;
-        last_time_ = this->get_clock()->now().seconds();
+        auto current_time = this->get_clock()->now();
+        double dt = (current_time - last_time_).seconds();
+        last_time_ = current_time;
 
         RCLCPP_DEBUG(this->get_logger(), "Time delta: %f", dt);
+
+        // dtが異常に大きい場合の対策
+        if (dt <= 0.0 || dt > 1.0) {
+            RCLCPP_WARN(this->get_logger(), "Invalid time delta: %f", dt);
+            return;
+        }
 
         // Compute odometry here based on left_velocity_ and right_velocity_
         double linear_velocity = (left_velocity_ + right_velocity_) / 2;
