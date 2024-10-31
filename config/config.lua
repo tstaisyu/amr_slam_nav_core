@@ -8,7 +8,7 @@ options = {
   tracking_frame = "base_link",
   published_frame = "base_link",
   odom_frame = "odom",
-  provide_odom_frame = true,
+  provide_odom_frame = false,
   publish_frame_projected_to_2d = true,
   use_odometry = true,
   use_nav_sat = false,
@@ -30,27 +30,76 @@ options = {
 
 MAP_BUILDER.use_trajectory_builder_2d = true
 
-TRAJECTORY_BUILDER_2D.min_range = 0.
-TRAJECTORY_BUILDER_2D.max_range = 10.
-TRAJECTORY_BUILDER_2D.missing_data_ray_length = 5.
-TRAJECTORY_BUILDER_2D.use_imu_data = true
-TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = false
+TRAJECTORY_BUILDER_2D = {
+  use_imu_data = true,
+  min_range = 0.0,
+  max_range = 10.0,
+  missing_data_ray_length = 1.0,
+  num_accumulated_range_data = 1,
+  voxel_filter_size = 0.025,
+  use_online_correlative_scan_matcher = {
+    linear_search_window = 0.1,
+    angular_search_window = math.rad(20.0),
+    translation_delta_cost_weight = 1e-1,
+    rotation_delta_cost_weight = 1e-1,
+  },
+  ceres_scan_matcher = {
+    occupied_space_weight = 1,
+    translation_weight = 10,
+    rotation_weight = 40,
+    ceres_solver_options = {
+      use_nonmonotonic_steps = false,
+      max_num_iterations = 20,
+      num_threads = 1,
+    },
+  },
+  motion_filter = {
+    max_time_seconds = 0.1,
+    max_distance_meters = 0.1,
+    max_angle_radians = math.rad(0.1),
+  },
+  submaps = {
+    num_range_data = 90,
+    grid_options_2d = {
+      grid_type = "PROBABILITY_GRID",
+      resolution = 0.05,
+    },
+    range_data_inserter = {
+      insert_free_space = true,
+      hit_probability = 0.55,
+      miss_probability = 0.49,
+    },
+  },
 
-POSE_GRAPH.constraint_builder.min_score = 0.65
-POSE_GRAPH.constraint_builder.global_localization_min_score = 0.7
-
-POSE_GRAPH.optimization_problem.local_slam_pose_translation_weight = 1e5
-POSE_GRAPH.optimization_problem.local_slam_pose_rotation_weight = 1e5
-POSE_GRAPH.optimization_problem.odometry_translation_weight = 1e5
-POSE_GRAPH.optimization_problem.odometry_rotation_weight = 1e5
-POSE_GRAPH.optimization_problem.huber_scale = 1e3
-
-TRAJECTORY_BUILDER_2D.ceres_scan_matcher.occupied_space_weight = 10
-TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 40
-
-TRAJECTORY_BUILDER_2D.submaps.num_range_data = 120
-TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.1
-TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.2)
+  POSE_GRAPH = {
+    optimize_every_n_nodes = 90,
+    constraint_builder = {
+      min_score = 0.65,
+      global_localization_min_score = 0.7,
+      sampling_ratio = 0.3,
+      max_constraint_distance = 15.0,
+      adaptive_voxel_filter = {
+        max_length = 0.5,
+        min_num_points = 100,
+        max_range = 50.0,
+      },
+      ceres_scan_matcher = {
+        occupied_space_weight = 1.0,
+        translation_weight = 10.0,
+        rotation_weight = 1.0,
+      },
+    },
+    optimization_problem = {
+      huber_scale = 1e1,
+      acceleration_weight = 1e-1,
+      rotation_weight = 1e-1,
+      local_slam_pose_translation_weight = 1e5,
+      local_slam_pose_rotation_weight = 1e5,
+      odometry_translation_weight = 1e5,
+      odometry_rotation_weight = 1e5,
+    },
+    max_num_final_iterations = 200,
+  }
 
 TRAJECTORY_BUILDER_2D.use_odometry = true
 TRAJECTORY_BUILDER_2D.odometry_topic = "odometry/filtered"
