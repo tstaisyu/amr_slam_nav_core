@@ -11,8 +11,11 @@ def main():
     agent_launch = 'ros2 launch amr_slam_nav_core micro_ros_agent.launch.py'
 
     # Launchファイルをバックグラウンドで実行
+    print("Starting micro_ros_agent_launch.py...")
     agent_proc = subprocess.Popen(agent_launch, shell=True, preexec_fn=os.setsid)
-    time.sleep(2)
+    time.sleep(2)  # micro_ros_agentが起動するまで待機（必要に応じて調整）
+
+    print("Starting main_launch.py...")
     main_proc = subprocess.Popen(main_launch, shell=True, preexec_fn=os.setsid)
 
     try:
@@ -31,22 +34,27 @@ def main():
 
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Shutting down launch files...")
+        print("\nShutting down launch files...")
 
         # メインLaunchファイルを終了させる
         try:
+            print("Sending SIGINT to main_launch.py...")
             os.killpg(os.getpgid(main_proc.pid), signal.SIGINT)
             main_proc.wait(timeout=10)
+            print("main_launch.py terminated.")
         except subprocess.TimeoutExpired:
-            os.killpg(os.getpgid(main_proc.pid), signal.SIGTERM)
+            print("main_launch.py did not terminate gracefully, killing...")
+            os.killpg(os.getpgid(main_proc.pid), signal.SIGKILL)
 
         # エージェントLaunchファイルを終了させる
         try:
+            print("Sending SIGINT to micro_ros_agent_launch.py...")
             os.killpg(os.getpgid(agent_proc.pid), signal.SIGINT)
             agent_proc.wait(timeout=10)
+            print("micro_ros_agent_launch.py terminated.")
         except subprocess.TimeoutExpired:
-            print("micro_ros_agent launch file did not shut down gracefully, terminating.")
-            os.killpg(os.getpgid(agent_proc.pid), signal.SIGTERM)
+            print("micro_ros_agent_launch.py did not terminate gracefully, killing...")
+            os.killpg(os.getpgid(agent_proc.pid), signal.SIGKILL)
 
     finally:
         # すべてのプロセスを終了させる
