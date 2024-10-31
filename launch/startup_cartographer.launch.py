@@ -15,11 +15,12 @@
 import os
 import launch
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo
+from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo, ExecuteProcess, RegisterEventHandler
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+from launch.event_handlers import OnShutdown
 
 def generate_launch_description():
     # Declare arguments
@@ -204,6 +205,17 @@ def generate_launch_description():
         output='screen'
     )
 
+    shutdown_handler = RegisterEventHandler(
+        OnShutdown(
+            on_shutdown=[
+                ExecuteProcess(
+                    cmd=['ros2', 'topic', 'pub', '/reboot', 'std_msgs/String', '"reboot"'],
+                    shell=True,
+                )
+            ]
+        )
+    )
+
     # Launch description
     return LaunchDescription([
         DeclareLaunchArgument('port', default_value='9090'),
@@ -232,6 +244,7 @@ def generate_launch_description():
         laser_scan_filters,
         ekf_localization_node,
         cartographer_node,
-        occupancy_grid_node
+        occupancy_grid_node,
+        shutdown_handler
     ])
 
