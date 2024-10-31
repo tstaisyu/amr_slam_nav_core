@@ -24,11 +24,6 @@
 class OdometryPublisher : public rclcpp::Node {
 public:
     OdometryPublisher() : Node("odometry_publisher") {
-        last_time_ = this->get_clock()->now();    
-        timer_ = this->create_wall_timer(
-            std::chrono::duration<double>(1.0 / update_rate_),
-            std::bind(&OdometryPublisher::update_odometry, this));
-
         rclcpp::QoS custom_qos_profile(10);
         custom_qos_profile.best_effort();
 
@@ -37,27 +32,24 @@ public:
         right_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
             "right_vel", custom_qos_profile, std::bind(&OdometryPublisher::right_wheel_callback, this, std::placeholders::_1));
         odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
-        tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-
-        RCLCPP_INFO(this->get_logger(), "Odometry publisher has started.");
 
         // Initialize position and orientation
         x_ = 0.0;
         y_ = 0.0;
         theta_ = 0.0;
+        
+        // Initialize time
+        last_time_ = this->get_clock()->now();    
+
+        // Timer for periodic odometry update
+        timer_ = this->create_wall_timer(
+            std::chrono::duration<double>(1.0 / update_rate_),
+            std::bind(&OdometryPublisher::update_odometry, this));    
+
+        RCLCPP_INFO(this->get_logger(), "Odometry publisher has started.");
     }
 
 private:
-    // クラスメンバとして過去の速度データを保持するためのキューを定義
-    std::deque<double> left_velocity_history_;
-    std::deque<double> right_velocity_history_;
-    const size_t filter_size_ = 5;  // 移動平均のウィンドウサイズ
-
-    rclcpp::Time last_time_;
-
-    rclcpp::TimerBase::SharedPtr timer_;
-    const double update_rate_ = 50.0;  // 50Hzで更新
-
     void left_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
         // 新しいデータを追加
         left_velocity_history_.push_back(msg->twist.linear.x);
@@ -76,10 +68,6 @@ private:
         }
         right_velocity_ = std::accumulate(right_velocity_history_.begin(), right_velocity_history_.end(), 0.0) / right_velocity_history_.size();
         RCLCPP_DEBUG(this->get_logger(), "Received right wheel velocity: %f", right_velocity_);
-        // 左右の速度データが揃ったらオドメトリを更新
-        if (left_velocity_history_.size() == filter_size_) {
-            update_odometry();
-        }
     }
 
     void update_odometry() {
@@ -109,18 +97,18 @@ private:
         RCLCPP_DEBUG(this->get_logger(), "Updated odometry: x=%f, y=%f, theta=%f", x_, y_, theta_);
 
         publish_odometry();
-        send_transform();
     }
 
     void publish_odometry() {
         // Publish odometry message
         auto odom_msg = std::make_shared<nav_msgs::msg::Odometry>();
         odom_msg->header.stamp = this->get_clock()->now();
-        odom_msg->header.frame_id = "odom";
+        odom_msg->header.frame_id = "odom_encorder";
         odom_msg->child_frame_id = "base_link";
 
         odom_msg->pose.pose.position.x = x_;
         odom_msg->pose.pose.position.y = y_;
+        odom_msg->pose.pose.position.z = 0.0;
         tf2::Quaternion q;
         q.setRPY(0, 0, theta_);
         odom_msg->pose.pose.orientation.x = q.x();
@@ -131,38 +119,41 @@ private:
         odom_msg->twist.twist.linear.x = (left_velocity_ + right_velocity_) / 2;
         odom_msg->twist.twist.angular.z = (right_velocity_ - left_velocity_) / wheel_base_;
 
+        // Set covariance matrices
+        for (int i = 0; i < 36; ++i) {
+            odom_msg->pose.covariance[i] = 0.0;
+            odom_msg->twist.covariance[i] = 0.0;
+        }
+        odom_msg->pose.covariance[0] = 0.001;   // x
+        odom_msg->pose.covariance[7] = 0.001;   // y
+        odom_msg->pose.covariance[35] = 0.01;   // yaw
+        odom_msg->twist.covariance[0] = 0.001;  // x
+        odom_msg->twist.covariance[35] = 0.01;  // yaw
+
         odom_publisher_->publish(*odom_msg);
         RCLCPP_DEBUG(this->get_logger(), "Published odometry message.");
     }
 
-    void send_transform() {
-        // Send transform
-        geometry_msgs::msg::TransformStamped transform;
-        transform.header.stamp = this->get_clock()->now();
-        transform.header.frame_id = "odom";
-        transform.child_frame_id = "base_link";
-        transform.transform.translation.x = x_;
-        transform.transform.translation.y = y_;
-        tf2::Quaternion q;
-        q.setRPY(0, 0, theta_);
-        transform.transform.rotation.x = q.x();
-        transform.transform.rotation.y = q.y();
-        transform.transform.rotation.z = q.z();
-        transform.transform.rotation.w = q.w();
-
-        tf_broadcaster_->sendTransform(transform);
-        RCLCPP_DEBUG(this->get_logger(), "Broadcasted transform.");
-    }
-    
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr left_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr right_subscriber_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
-    std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    rclcpp::TimerBase::SharedPtr timer_;
 
+    // wheel velocity
     double left_velocity_{0.0};
     double right_velocity_{0.0};
-    double x_, y_, theta_;
-    double last_time_{0.0};
+    // クラスメンバとして過去の速度データを保持するためのキューを定義
+    std::deque<double> left_velocity_history_;
+    std::deque<double> right_velocity_history_;
+    const size_t filter_size_ = 5;  // 移動平均のウィンドウサイズ
+
+    // Robot pose
+    double x_{0.0}, y_{0.0}, theta_{0.0};
+
+    // Timeing
+    rclcpp::Time last_time_;
+    const double update_rate_ = 50.0;  // 50Hzで更新
+
     const double wheel_base_ = 0.202;  // Assume some wheel base
 };
 
