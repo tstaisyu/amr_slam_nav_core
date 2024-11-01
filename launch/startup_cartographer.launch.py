@@ -141,26 +141,31 @@ def generate_launch_description():
         package='amr_slam_nav_core',
         executable='raw_imu_subscriber',
         name='raw_imu_subscriber',
-        output='screen'
+        output='screen',
+        remappings=[
+            ('/imu/data_raw', '/imu/data_raw'),
+            ('/imu/data_converted', '/imu/data_converted')
+        ]
     )
 
     # madgwick_filter
-#    imu_filter_madgwick = Node(
-#        package='imu_filter_madgwick',
-#        executable='imu_filter_madgwick_node',
-#        name='imu_filter_madgwick',
-#        parameters=[{
-#            'use_mag': False,
-#            'publish_tf': False,
-#            'world_frame': 'enu',
-#            'publish_debug_topics': False
-#        }],
-#        remappings=[
-#            ('/imu/data_raw', '/imu/data_raw'),
-#            ('/imu/mag', '/imu/mag'),
-#            ('/imu/data', '/imu/data_filtered')
-#        ]
-#    )
+    imu_filter_madgwick = Node(
+        package='imu_filter_madgwick',
+        executable='imu_filter_madgwick_node',
+        name='imu_filter_madgwick',
+        parameters=[{
+            'use_mag': False,
+            'publish_tf': False,
+            'world_frame': 'enu',
+            'publish_debug_topics': False,
+            'gain': 0.1,
+        }],
+        remappings=[
+            ('/imu/data_raw', '/imu/data_qos'),
+            ('/imu/data', '/imu/data_filtered')
+        ],
+        output='screen'
+    )
 
     # odometry publisher
     odometry_publisher = Node(
@@ -209,8 +214,8 @@ def generate_launch_description():
         parameters=[ekf_config],
         # arguments=['--ros-args', '--log-level', 'debug'],
         remappings=[
-           # ('/odom', '/odom_cartographer'),
-#           ('/imu/data', '/imu/data')  # Remap as necessary
+            ('/odom', '/odom_encoder'),
+            ('/imu/data', '/imu/data_filtered')  # Remap as necessary
         ]
     )
 
@@ -271,7 +276,7 @@ def generate_launch_description():
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
         raw_imu_subscriber,
-#        imu_filter_madgwick,
+        imu_filter_madgwick,
         odometry_publisher,
         robot_state_publisher,
         rplidar_node,
