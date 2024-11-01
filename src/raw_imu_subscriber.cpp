@@ -36,7 +36,7 @@ public:
         );
 
         publisher_ = this->create_publisher<sensor_msgs::msg::Imu>(
-            "imu/data_filtered",
+            "imu/data_qos",
             publisher_qos
         );
     }
