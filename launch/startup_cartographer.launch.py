@@ -232,7 +232,7 @@ def generate_launch_description():
         }],
         arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
         remappings=[('/scan', '/scan_filtered'),
-#                    ('/odom', '/odom_cartographer') 
+                    ('/odom', '/odom_cartographer') 
         ],
         output='screen'
     )
