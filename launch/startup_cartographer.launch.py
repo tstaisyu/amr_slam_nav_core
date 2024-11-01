@@ -144,7 +144,7 @@ def generate_launch_description():
         output='screen',
         remappings=[
             ('/imu/data_raw', '/imu/data_raw'),
-            ('/imu/data_converted', '/imu/data_converted')
+            ('/imu/data_qos', '/imu/data_qos')
         ]
     )
 
@@ -172,7 +172,10 @@ def generate_launch_description():
         package='amr_slam_nav_core',
         executable='odometry_publisher',
         name='odometry_publisher',
-        output='screen'
+        output='screen',
+        remappings=[
+            ('/odom', '/odom_encoder')                       # オドメトリのリマッピング
+        ]
     )
 
     robot_state_publisher = Node(
