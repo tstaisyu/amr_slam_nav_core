@@ -8,7 +8,7 @@ options = {
   tracking_frame = "base_link",
   published_frame = "base_link",
   odom_frame = "odom",
-  provide_odom_frame = false,
+  provide_odom_frame = true,
   publish_frame_projected_to_2d = true,
   use_odometry = true,
   use_nav_sat = false,
@@ -32,17 +32,12 @@ MAP_BUILDER.use_trajectory_builder_2d = true
 
 TRAJECTORY_BUILDER_2D = {
   use_imu_data = true,
-  min_range = 0.0,
+  min_range = 0.1,
   max_range = 10.0,
   missing_data_ray_length = 1.0,
   num_accumulated_range_data = 1,
   voxel_filter_size = 0.025,
-  use_online_correlative_scan_matcher = {
-    linear_search_window = 0.1,
-    angular_search_window = math.rad(20.0),
-    translation_delta_cost_weight = 1e-1,
-    rotation_delta_cost_weight = 1e-1,
-  },
+  use_online_correlative_scan_matcher = false,
   ceres_scan_matcher = {
     occupied_space_weight = 1,
     translation_weight = 10,
@@ -103,6 +98,6 @@ TRAJECTORY_BUILDER_2D = {
 }
 
 TRAJECTORY_BUILDER_2D.use_odometry = true
-TRAJECTORY_BUILDER_2D.odometry_topic = "odometry/filtered"
+TRAJECTORY_BUILDER_2D.odometry_topic = "/odometry/filtered"
 
 return options
