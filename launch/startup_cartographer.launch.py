@@ -75,22 +75,22 @@ def generate_launch_description():
     publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
 
     # microROSAgent node
-#    micro_ros_agent_acm0 = Node(
-#        package='micro_ros_agent',
-#        executable='micro_ros_agent',
-#        name='micro_ros_agent_acm0',
-#        arguments=['serial', '--dev', '/dev/ttyACM0', '-v4'],
-#        output='screen'
-#    )
+    micro_ros_agent_acm0 = Node(
+        package='micro_ros_agent',
+        executable='micro_ros_agent',
+        name='micro_ros_agent_acm0',
+        arguments=['serial', '--dev', '/dev/ttyACM0', '-v4'],
+        output='screen'
+    )
 
-#    micro_ros_agent_acm1 = Node(
-#        package='micro_ros_agent',
-#        executable='micro_ros_agent',
-#        name='micro_ros_agent_acm1',
-#        arguments=['serial', '--dev', '/dev/ttyUSB1', '-v4'],
-#        parameters=[{'use_sim_time': False}],
-#        output='screen'
-#    )
+    micro_ros_agent_acm1 = Node(
+        package='micro_ros_agent',
+        executable='micro_ros_agent',
+        name='micro_ros_agent_acm1',
+        arguments=['serial', '--dev', '/dev/ttyUSB1', '-v4'],
+        parameters=[{'use_sim_time': False}],
+        output='screen'
+    )
 
     # Rosbridge WebSocket node
     rosbridge_websocket_node = Node(
@@ -273,8 +273,8 @@ def generate_launch_description():
         DeclareLaunchArgument('resolution', default_value='0.05'),
         DeclareLaunchArgument('publish_period_sec', default_value='1.0'),
 
-#        micro_ros_agent_acm0,
-#        micro_ros_agent_acm1,
+        micro_ros_agent_acm0,
+        micro_ros_agent_acm1,
         rosbridge_websocket_node,
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
