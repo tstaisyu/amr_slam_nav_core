@@ -56,3 +56,48 @@ WantedBy=multi-user.target
 sudo systemctl enable ros2-launch.service
 sudo systemctl start ros2-launch.service
 ```
+
+## How to test with pseudo data
+
+1. Terminal1
+```bash
+ros2 launch amr_slam_nav_core startup_cartographer.launch.py
+```
+
+2. Terminal1
+```bash
+# 左ホイール (left_vel)
+while true; do
+    ros2 topic pub /left_vel geometry_msgs/msg/TwistStamped "{header: {stamp: now, frame_id: 'left_wheel'}, twist: {linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}}" -r 20
+    sleep 0.05
+done
+```
+
+3. Terminal1
+```bash
+# 右ホイール (right_vel)
+while true; do
+    ros2 topic pub /right_vel geometry_msgs/msg/TwistStamped "{header: {stamp: now, frame_id: 'right_wheel'}, twist: {linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}}" -r 20
+    sleep 0.05
+done
+```
+
+4. Terminal1
+```bash
+# IMUの加速度データに地球の重力を模擬
+while true; do
+    ros2 topic pub /imu/data_raw sensor_msgs/msg/Imu "{
+        header: {stamp: now, frame_id: 'imu_link'},
+        orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0},
+        angular_velocity: {x: 0.0, y: 0.0, z: 0.0},
+        linear_acceleration: {x: 0.0, y: 0.0, z: 9.81}
+    }" -r 20
+    sleep 0.05
+done
+```
+
+5. Terminal1
+```bash
+sudo chmod +x ${this package}/scripts/laserscan_sample.sh
+./scripts/laserscan_sample.sh
+```
