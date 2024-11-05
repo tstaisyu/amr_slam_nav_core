@@ -100,19 +100,4 @@
     <origin xyz="0.092 0 0.151" rpy="0 0 0"/>
   </joint>
 
-  <!-- ros2_control configuration 
-  <ros2_control name="DiffDriveSystem" type="system">
-    <hardware>
-      <plugin>ros2_control_demo_hardware/RRBotSystemPositionOnlyHardware</plugin>
-    </hardware>
-    <joint name="left_wheel_joint">
-      <interface name="velocity"/>
-      <interface name="position"/>
-    </joint>
-    <joint name="right_wheel_joint">
-      <interface name="velocity"/>
-      <interface name="position"/>
-    </joint>
-  </ros2_control>
-  -->
 </robot>
