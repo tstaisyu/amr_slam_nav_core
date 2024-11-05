@@ -174,7 +174,7 @@ def generate_launch_description():
         name='odometry_publisher',
         output='screen',
         remappings=[
-            ('/odom', '/odom_encoder')                       # オドメトリのリマッピング
+            ('/odom', '/odometry/odom_encorder')                       # オドメトリのリマッピング
         ]
     )
 
@@ -217,7 +217,7 @@ def generate_launch_description():
         parameters=[ekf_config],
         # arguments=['--ros-args', '--log-level', 'debug'],
         remappings=[
-            ('/odom', '/odom_encoder'),
+            ('/odom', '/odometry/odom_encorder'),
             ('/imu/data', '/imu/data_filtered')  # Remap as necessary
         ]
     )
@@ -232,7 +232,7 @@ def generate_launch_description():
         }],
         arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
         remappings=[('/scan', '/scan_filtered'),
-                    ('/odom', '/odom_cartographer') 
+                    ('/odom', '/odometry/filtered') 
         ],
         output='screen'
     )
