@@ -19,26 +19,28 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <deque>
 
 class OdometryPublisher : public rclcpp::Node {
 public:
-    OdometryPublisher() : Node("odometry_publisher") {
+    OdometryPublisher() : Node("odometry_publisher"), update_rate_(50.0), wheel_base_(0.202) {
         rclcpp::QoS custom_qos_profile(10);
         custom_qos_profile.best_effort();
 
+        // Subscribing to left and right wheel velocity topics
         left_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-            "left_wheel/velocity", custom_qos_profile, std::bind(&OdometryPublisher::left_wheel_callback, this, std::placeholders::_1));
+            "left_wheel/velocity", custom_qos_profile, 
+            std::bind(&OdometryPublisher::left_wheel_callback, this, std::placeholders::_1));
         right_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-            "right_wheel/velocity", custom_qos_profile, std::bind(&OdometryPublisher::right_wheel_callback, this, std::placeholders::_1));
+            "right_wheel/velocity", custom_qos_profile, 
+            std::bind(&OdometryPublisher::right_wheel_callback, this, std::placeholders::_1));
+
+        // Publisher for odometry data
         odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odometry/odom_encoder", 10);
 
-        // Initialize position and orientation
-        x_ = 0.0;
-        y_ = 0.0;
-        theta_ = 0.0;
-        
-        // Initialize time
+        // Initialize robot state
+        x_ = 0.0; y_ = 0.0; theta_ = 0.0;
         last_time_ = this->get_clock()->now();    
 
         // Timer for periodic odometry update
@@ -50,85 +52,93 @@ public:
     }
 
 private:
+    // Handle left wheel velocity messages
     void left_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
-        // 新しいデータを追加
-        left_velocity_history_.push_back(msg->twist.linear.x);
-        // 古いデータを削除
-        if (left_velocity_history_.size() > filter_size_) {
-            left_velocity_history_.pop_front();
-        }
-        left_velocity_ = std::accumulate(left_velocity_history_.begin(), left_velocity_history_.end(), 0.0) / left_velocity_history_.size();
-        RCLCPP_DEBUG(this->get_logger(), "Received left wheel velocity: %f", left_velocity_);
+        // Process and filter the incoming velocity data for left wheel
+        process_velocity_data(msg->twist.linear.x, left_velocity_history_, left_velocity_);
     }
 
+    // Handle right wheel velocity messages
     void right_wheel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
-        right_velocity_history_.push_back(msg->twist.linear.x);
-        if (right_velocity_history_.size() > filter_size_) {
-            right_velocity_history_.pop_front();
+        // Process and filter the incoming velocity data for right wheel
+        process_velocity_data(msg->twist.linear.x, right_velocity_history_, right_velocity_);
+    }
+
+    // General method to process and filter velocity data
+    void process_velocity_data(double velocity, std::deque<double>& history, double& filtered_velocity) {
+        history.push_back(velocity);
+        if (history.size() > filter_size_) {
+            history.pop_front();
         }
-        right_velocity_ = std::accumulate(right_velocity_history_.begin(), right_velocity_history_.end(), 0.0) / right_velocity_history_.size();
-        RCLCPP_DEBUG(this->get_logger(), "Received right wheel velocity: %f", right_velocity_);
+        filtered_velocity = std::accumulate(history.begin(), history.end(), 0.0) / history.size();
     }
 
     void update_odometry() {
+        // Get the current time for this update cycle
         auto current_time = this->get_clock()->now();
+        // Calculate the time elapsed since the last update
         double dt = (current_time - last_time_).seconds();
+        // Update the last_time_ to current time for the next cycle
         last_time_ = current_time;
 
         RCLCPP_DEBUG(this->get_logger(), "Time delta: %f", dt);
 
-        // dtが異常に大きい場合の対策
-        if (dt <= 0.0 || dt > 1.0) {
+        // Check for valid time delta: It should be positive and not unreasonably large
+        if (dt <= 0.0 || dt > 0.1) {
             RCLCPP_WARN(this->get_logger(), "Invalid time delta: %f", dt);
-            return;
+            return; // Skip this update if the time delta is invalid
         }
 
-        // Compute odometry here based on left_velocity_ and right_velocity_
-        double linear_velocity = (left_velocity_ + right_velocity_) / 2;
-        double angular_velocity = (right_velocity_ - left_velocity_) / wheel_base_;
+        // Compute linear and angular velocities from the wheel velocities
+        double linear_velocity = (left_velocity_ + right_velocity_) / 2; // Average of both wheel velocities
+        double angular_velocity = (right_velocity_ - left_velocity_) / wheel_base_; // Difference divided by the wheel base
 
-        // Update robot position and orientation
-        double delta_x = linear_velocity * cos(theta_) * dt;
-        double delta_y = linear_velocity * sin(theta_) * dt;
-        theta_ += angular_velocity * dt;
-        x_ += delta_x;
-        y_ += delta_y;
+        // Calculate the change in position and orientation
+        double delta_x = linear_velocity * cos(theta_) * dt; // Change in x based on current orientation and speed
+        double delta_y = linear_velocity * sin(theta_) * dt; // Change in y based on current orientation and speed
+        theta_ += angular_velocity * dt; // Update the orientation based on angular velocity
+
+        x_ += delta_x; // Update the x position
+        y_ += delta_y; // Update the y position
 
         RCLCPP_DEBUG(this->get_logger(), "Updated odometry: x=%f, y=%f, theta=%f", x_, y_, theta_);
 
+        // Finally, publish the updated odometry to the rest of the system
         publish_odometry();
     }
 
+    // Publish the computed odometry
     void publish_odometry() {
-        // Publish odometry message
+        // Create and publish odometry message
         auto odom_msg = std::make_shared<nav_msgs::msg::Odometry>();
         odom_msg->header.stamp = this->get_clock()->now();
         odom_msg->header.frame_id = "odom";
         odom_msg->child_frame_id = "base_link";
+        populate_odometry_message(odom_msg);
+    }
 
+    // Fill the odometry message with current state
+    void populate_odometry_message(std::shared_ptr<nav_msgs::msg::Odometry>& odom_msg) {
+        // Set position and orientation in odometry message
         odom_msg->pose.pose.position.x = x_;
         odom_msg->pose.pose.position.y = y_;
         odom_msg->pose.pose.position.z = 0.0;
         tf2::Quaternion q;
         q.setRPY(0, 0, theta_);
-        odom_msg->pose.pose.orientation.x = q.x();
-        odom_msg->pose.pose.orientation.y = q.y();
-        odom_msg->pose.pose.orientation.z = q.z();
-        odom_msg->pose.pose.orientation.w = q.w();
+        odom_msg->pose.pose.orientation = tf2::toMsg(q);
 
+        // Set linear and angular velocities in odometry message
         odom_msg->twist.twist.linear.x = (left_velocity_ + right_velocity_) / 2;
         odom_msg->twist.twist.angular.z = (right_velocity_ - left_velocity_) / wheel_base_;
 
-        // Set covariance matrices
-        for (int i = 0; i < 36; ++i) {
-            odom_msg->pose.covariance[i] = 0.0;
-            odom_msg->twist.covariance[i] = 0.0;
-        }
-        odom_msg->pose.covariance[0] = 0.001;   // x
-        odom_msg->pose.covariance[7] = 0.001;   // y
-        odom_msg->pose.covariance[35] = 0.01;   // yaw
-        odom_msg->twist.covariance[0] = 0.001;  // x
-        odom_msg->twist.covariance[35] = 0.01;  // yaw
+        // Set covariance matrices, assuming some standard values
+        std::fill(std::begin(odom_msg->pose.covariance), std::end(odom_msg->pose.covariance), 0.0);
+        std::fill(std::begin(odom_msg->twist.covariance), std::end(odom_msg->twist.covariance), 0.0);
+        odom_msg->pose.covariance[0] = 0.001;  // Position x
+        odom_msg->pose.covariance[7] = 0.001;  // Position y
+        odom_msg->pose.covariance[35] = 0.01;  // Orientation yaw
+        odom_msg->twist.covariance[0] = 0.001; // Velocity x
+        odom_msg->twist.covariance[35] = 0.01; // Angular velocity z
 
         odom_publisher_->publish(*odom_msg);
         RCLCPP_DEBUG(this->get_logger(), "Published odometry message.");
@@ -139,22 +149,14 @@ private:
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    // wheel velocity
-    double left_velocity_{0.0};
-    double right_velocity_{0.0};
-    // クラスメンバとして過去の速度データを保持するためのキューを定義
-    std::deque<double> left_velocity_history_;
-    std::deque<double> right_velocity_history_;
-    const size_t filter_size_ = 5;  // 移動平均のウィンドウサイズ
+    double left_velocity_{0.0}, right_velocity_{0.0};
+    std::deque<double> left_velocity_history_, right_velocity_history_;
+    const size_t filter_size_ = 5;  // Window size for moving average
 
-    // Robot pose
-    double x_{0.0}, y_{0.0}, theta_{0.0};
-
-    // Timeing
+    double x_{0.0}, y_{0.0}, theta_{0.0};  // Robot's position and orientation
     rclcpp::Time last_time_;
-    const double update_rate_ = 50.0;  // 50Hzで更新
-
-    const double wheel_base_ = 0.202;  // Assume some wheel base
+    const double update_rate_;  // Update rate in Hz
+    const double wheel_base_;  // Distance between the wheels
 };
 
 int main(int argc, char **argv) {
