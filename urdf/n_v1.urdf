@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot name="n1_diff_drive">
-  <!-- Base Link -->
+
+  <!-- Base link definition -->
   <link name="base_link">
     <visual>
       <geometry>
@@ -9,6 +10,7 @@
     </visual>
   </link>
 
+  <!-- Base footprint link -->
   <link name="base_footprint">
     <visual>
       <geometry>
@@ -17,13 +19,14 @@
     </visual>
   </link>
 
+  <!-- Fixed joint between base_link and base_footprint -->
   <joint name="base_footprint_to_base_link" type="fixed">
     <parent link="base_link"/>
     <child link="base_footprint"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
-  <!-- Left Wheel -->
+  <!-- Left Wheel link -->
   <link name="left_wheel">
     <visual>
       <geometry>
@@ -32,7 +35,7 @@
     </visual>
   </link>
 
-  <!-- Right Wheel -->
+  <!-- Right Wheel link -->
   <link name="right_wheel">
     <visual>
       <geometry>
@@ -41,7 +44,7 @@
     </visual>
   </link>
 
-  <!-- Joints -->
+  <!-- Continuous joint for left wheel -->
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
@@ -49,6 +52,7 @@
     <axis xyz="0 1 0"/>
   </joint>
 
+  <!-- Continuous joint for right wheel -->
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
@@ -56,18 +60,18 @@
     <axis xyz="0 1 0"/>
   </joint>
 
-  <!-- IMUリンクの定義 -->
+  <!-- IMU link definition -->
   <link name="imu_link">
     <visual>
       <geometry>
-        <box size="0.054 0.054 0.0189"/> <!-- サイズは適宜調整 -->
+        <box size="0.054 0.054 0.0189"/> <!-- Adjust size as needed -->
       </geometry>
       <material name="grey">
         <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
     </visual>
     <inertial>
-      <mass value="0.0492"/> <!-- 質量は適宜調整 -->
+      <mass value="0.0492"/> <!-- Adjust mass as needed -->
       <inertia 
         ixx="0.001" ixy="0.0" ixz="0.0"
         iyy="0.001" iyz="0.0"
@@ -75,14 +79,14 @@
     </inertial>
   </link>
 
-  <!-- base_linkとimu_linkを固定ジョイントで接続 -->
+  <!-- Fixed joint between base_link and imu_link -->
   <joint name="base_to_imu" type="fixed">
     <parent link="base_link"/>
     <child link="imu_link"/>
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
 
-  <!-- LiDARのリンク定義 -->
+  <!-- LiDAR link definition -->
   <link name="laser_link">
     <visual>
       <origin xyz="0 0 -0.0105" rpy="0 0 0"/>
@@ -93,7 +97,7 @@
     </visual>
   </link>
 
-  <!-- LiDARをbase_linkに固定するジョイント定義 -->
+  <!-- Fixed joint between base_link and laser_link -->
   <joint name="base_to_laser" type="fixed">
     <parent link="base_link"/>
     <child link="laser_link"/>
