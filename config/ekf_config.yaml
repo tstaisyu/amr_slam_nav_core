@@ -1,51 +1,44 @@
 ekf_localization_node:
   ros__parameters:
-    use_sim_time: false
-    frequency: 30.0
-    two_d_mode: true
-    publish_tf: true
-    map_frame: map
-    odom_frame: odom
-    base_link_frame: base_link
-    world_frame: odom
-    sensor_timeout: 0.1
-    transform_time_offset: 0.0
-    transform_timeout: 0.0
-    print_diagnostics: true
+    use_sim_time: false  # Whether to use simulation time
+    frequency: 30.0  # Frequency at which to run the filter
+    two_d_mode: true  # Limit EKF to 2D motion
+    publish_tf: true  # Publish transformation frames
+    map_frame: map  # Frame that represents the map
+    odom_frame: odom  # Frame that represents odometry
+    base_link_frame: base_link  # Frame that represents the robot base
+    world_frame: odom  # World frame for localization data
+    sensor_timeout: 0.1  # Timeout for sensor data receipt
+    transform_time_offset: 0.0  # Time offset for the transformation
+    transform_timeout: 0.0  # Timeout for transformation publication
+    print_diagnostics: true  # Print diagnostics information
 
-    # odom data
-    odom0: /odometry/odom_encoder
-    odom0_config: [true, true, false,
-                   false, false, false,
-                   false, false, false,
-                   false, false, true,
-                   false, false, false]
-    odom0_differential: false
-    odom0_relative: false
-    odom0_queue_size: 10
-    odom0_nodelay: false
+    # Odometry data configuration
+    odom0: /odometry/odom_encoder  # Odometry topic
+    odom0_config: [true, true, false,  # Configure XYZ position
+                   false, false, false,  # Configure XYZ velocity
+                   false, false, false,  # Configure XYZ acceleration
+                   false, false, true,  # Configure Yaw angle
+                   false, false, false]  # Not used
+    odom0_differential: false  # Use differential odometry
+    odom0_relative: false  # Use relative odometry
+    odom0_queue_size: 10  # Queue size for odometry messages
+    odom0_nodelay: false  # No delay in odometry processing
 
-    # IMU data
-    imu0: /imu/data_filtered
-    imu0_config: [false, false, false,
-                   false, false, false,
-                   false, false, false,
-                   true, true, true,
-                   true, true, true]
-    imu0_differential: false
-    imu0_relative: false
-    imu0_queue_size: 10
-    imu0_remove_gravitational_acceleration: true
-    imu0_nodelay: false
+    # IMU data configuration
+    imu0: /imu/data_filtered  # IMU topic
+    imu0_config: [false, false, false,  # No position
+                   false, false, false,  # No velocity
+                   false, false, false,  # No acceleration
+                   true, true, true,  # Orientation (Roll, Pitch, Yaw)
+                   true, true, true]  # Angular velocities (Roll, Pitch, Yaw)
+    imu0_differential: false  # Use differential IMU data
+    imu0_relative: false  # Use relative IMU data
+    imu0_queue_size: 10  # Queue size for IMU messages
+    imu0_remove_gravitational_acceleration: true  # Remove gravitational acceleration from IMU data
+    imu0_nodelay: false  # No delay in IMU data processing
 
-#    odom0: /odom_cartographer
-#    odom0_config: [false, false, false,  # XYZ速度
-#                  false, false, false,  # XYZ角速度
-#                  false, false, false, # 加速度は不使用
-#                  false, false, false,
-#                  false, false, false]
-
-# 初期共分散行列
+# Initial estimate covariance matrix
 #initial_estimate_covariance: [1e-1, 0, 0, 0, 0, 0,
 #                              0, 1e-1, 0, 0, 0, 0,
 #                              0, 0, 1e-1, 0, 0, 0,
@@ -53,7 +46,7 @@ ekf_localization_node:
 #                              0, 0, 0, 0, 1e-1, 0,
 #                              0, 0, 0, 0, 0, 1e-1]
 
-# プロセスノイズの共分散行列
+# Process noise covariance matrix
 #process_noise_covariance: [ 1e-5, 0, 0, 0, 0, 0,
 #                            0, 1e-5, 0, 0, 0, 0,
 #                            0, 0, 1e-5, 0, 0, 0,
