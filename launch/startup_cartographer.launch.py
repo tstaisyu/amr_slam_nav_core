@@ -63,14 +63,14 @@ def generate_launch_description():
         Node(
             package='micro_ros_agent',
             executable='micro_ros_agent',
-            name='micro_ros_agent_acm0',
+            name='right_wheel_micro_ros_agent',
             arguments=['serial', '--dev', '/dev/ttyACM0', '-v4'],
             output='screen'
         ),
         Node(
             package='micro_ros_agent',
             executable='micro_ros_agent',
-            name='micro_ros_agent_acm1',
+            name='left_wheel_micro_ros_agent',
             arguments=['serial', '--dev', '/dev/ttyUSB1', '-v4'],
             parameters=[{'use_sim_time': use_sim_time}],
             output='screen'
