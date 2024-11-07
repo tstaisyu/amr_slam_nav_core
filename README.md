@@ -14,8 +14,9 @@
 -->
 
 # amr_slam_nav_core
+
 ## パッケージの説明
-amr_slam_nav_core は、自律移動ロボット（AMR）のナビゲーションとSLAM（Simultaneous Localization and Mapping）機能のコアコンポーネントを提供するROS 2パッケージです。このパッケージは、ロボットのセンサーからのデータを統合し、環境のマッピングとロボットの自己位置推定を行います。
+`amr_slam_nav_core` は、自律移動ロボット（AMR）のナビゲーションとSLAM（Simultaneous Localization and Mapping）機能のコアコンポーネントを提供するROS 2パッケージです。このパッケージは、ロボットのセンサーからのデータを統合し、環境のマッピングとロボットの自己位置推定を行います。
 
 ## 主な機能
 * IMUデータの購読とフィルタリング
@@ -24,26 +25,28 @@ amr_slam_nav_core は、自律移動ロボット（AMR）のナビゲーショ�
 * SLAM機能の実装（Cartographer）
 * 通信インターフェースの提供（rosbridge_websocket）
 * LiDARデータの処理とフィルタリング
+* ホイールモータのリブートサービス
 
 ## startup.launch.pyについて
 このlaunchファイルは、自律移動ロボットに必要なノードの起動を行います。以下のノードが含まれています：
-* micro_ros_agent: 左右のハブホイールモータ制御用マイコンボード（M5Stack）2つと通信するためのノード
-* rosbridge_websocket: スマホやタブレットなど、リモートGUIとソケット通信するためのノード
-* rplidar_node: ロボットに搭載された2D LiDARのlaserscanデータをpublishするためのノード
-* laser_scan_filters: 生のlaserscanデータから、ロボット筐体部の干渉を受けている部分をフィルタリングするノード
-* cartographer: laserscanデータを元にSLAMを行うためのノード
-* odometry_publisher: ホイールの速度データを基にオドメトリデータを計算し、publishするノード
-* connection_checker: ホイールモータの接続状態を定期的にチェックするノード
-* raw_imu_subscriber: IMUの生データを購読し、フィルタリングしてpublishするノード
+* **micro_ros_agent**: 左右のハブホイールモータ制御用マイコンボード（M5Stack）2つと通信するためのノード
+* **rosbridge_websocket**: スマホやタブレットなど、リモートGUIとソケット通信するためのノード
+* **rplidar_node**: ロボットに搭載された2D LiDARのlaserscanデータをpublishするためのノード
+* **laser_scan_filters**: 生のlaserscanデータから、ロボット筐体部の干渉を受けている部分をフィルタリングするノード
+* **cartographer**: laserscanデータを元にSLAMを行うためのノード
+* **odometry_publisher**: ホイールの速度データを基にオドメトリデータを計算し、publishするノード
+* **connection_checker**: ホイールモータの接続状態を定期的にチェックするノード
+* **raw_imu_subscriber**: IMUの生データを購読し、フィルタリングしてpublishするノード
+* **reboot_service_client**: システムシグナル（例: Ctrl+C）を受け取った際に、左右のホイールモータをリブートするサービスを呼び出すノード
 
-# セットアップ方法
+## セットアップ方法
 
-1. ROS2のlaunchファイルの起動スクリプトに実行権限を付与
+### 1. ROS 2のlaunchファイルの起動スクリプトに実行権限を付与
 ```bash
 chmod +x /path/to/amr_slam_nav_core/scripts/startup.sh
 ```
 
-2. ROS2プログラム起動サービスの設定
+### 2. ROS2プログラム起動サービスの設定
 systemdサービスを設定することで、Jetsonが起動時に自動的にROS 2 launchファイルを実行します。
 /etc/systemd/system/ディレクトリ内にros2-launch.serviceという名前でファイルを作成し、以下を記述します。
 
@@ -72,12 +75,12 @@ sudo systemctl start ros2-launch.service
 
 ## テスト方法（疑似データを使用）
 
-1. Terminal1: Cartographerを起動
+### 1. Terminal1: Cartographerを起動
 ```bash
 ros2 launch amr_slam_nav_core startup_cartographer.launch.py
 ```
 
-2. Terminal2: 左ホイールの速度データをパブリッシュ
+### 2. Terminal2: 左ホイールの速度データをパブリッシュ
 ```bash
 # 左ホイール (left_vel)
 while true; do
@@ -86,7 +89,7 @@ while true; do
 done
 ```
 
-3. Terminal3: 右ホイールの速度データをパブリッシュ
+### 3. Terminal3: 右ホイールの速度データをパブリッシュ
 ```bash
 # 右ホイール (right_vel)
 while true; do
@@ -95,7 +98,7 @@ while true; do
 done
 ```
 
-4. Terminal4: IMUの加速度データをパブリッシュ
+### 4. Terminal4: IMUの加速度データをパブリッシュ
 ```bash
 # IMUの加速度データに地球の重力を模擬
 while true; do
@@ -109,7 +112,7 @@ while true; do
 done
 ```
 
-5. Terminal: laserscanの疑似データをパブリッシュ
+### 5. Terminal: laserscanの疑似データをパブリッシュ
 ```bash
 sudo chmod +x ${this package}/scripts/laserscan_sample.sh
 ./scripts/laserscan_sample.sh
@@ -117,7 +120,6 @@ sudo chmod +x ${this package}/scripts/laserscan_sample.sh
 
 ## パッケージのビルド
 パッケージをビルドするには、ROS 2ワークスペースのルートディレクトリで以下のコマンドを実行します：
-
 ```bash
 colcon build --packages-select amr_slam_nav_core
 ```
@@ -128,22 +130,81 @@ source install/setup.bash
 ```
 
 ## 使用方法
+
 ### ノードの説明
-* raw_imu_subscriber: IMUの生データを購読し、フィルタリングして/imu/data_qosにパブリッシュします。
-* odometry_publisher: 左右のホイールの速度データを基にオドメトリデータを計算し、/odometry/odom_encoderにパブリッシュします。
-* connection_checker: 左右のホイールモータの接続状態を定期的にチェックし、接続状況をログに記録します。
-* reboot_service_client: システムシグナル（例: Ctrl+C）を受け取った際に、左右のホイールモータをリブートするサービスを呼び出します。
+`amr_slam_nav_core` パッケージには、以下の主要なノードが含まれています。それぞれのノードの役割と動作について詳しく説明します。
+
+#### 1. `raw_imu_subscriber`
+* **役割**: IMU（慣性測定装置）の生データを購読し、フィルタリングして`/imu/data_qos`にパブリッシュします。
+* **動作**:
+  - `/imu/data_raw` トピックからIMUデータを受信。
+  - 受信データに移動平均フィルタを適用してノイズを低減。
+  - フィルタリング後のデータを `/imu/data_qos` トピックにパブリッシュ。
+
+#### 2. `odometry_publisher`
+* **役割**: 左右のホイールの速度データを基にオドメトリデータを計算し、`/odometry/odom_encoder`にパブリッシュします。
+* **動作**:
+  - `/left_wheel/velocity` と `/right_wheel/velocity` トピックから車輪の速度データを受信。
+  - 受信した速度データからロボットの位置（x, y）と姿勢（theta）を計算。
+  - 計算したオドメトリデータを `/odometry/odom_encoder` トピックにパブリッシュ。
+
+#### 3. `connection_checker`
+* **役割**: 左右のホイールモータの接続状態を定期的にチェックし、接続状況をログに記録します。
+* **動作**:
+  - 定期的に `/connection_check_request` トピックに接続確認メッセージをパブリッシュ。
+  - `/left_wheel/connection_response` と `/right_wheel/connection_response` トピックから接続状態のレスポンスを受信。
+  - レスポンスに基づき、接続が確立されているかどうかをログに記録。
+
+#### 4. `reboot_service_client`
+* **役割**: システムシグナル（例: Ctrl+C）を受け取った際に、左右のホイールモータをリブートするサービスを呼び出します。
+* **動作**:
+  - シグナルを受信すると、`/left_wheel/reboot_service` と `/right_wheel/reboot_service` サービスを非同期に呼び出します。
+  - サービスのレスポンスを受け取り、リブートの成功・失敗をログに記録。
+  - 両サービスの呼び出しが完了した後、ROS 2 を安全にシャットダウンします。
 
 ### サービスの利用
+
 リブートサービスを手動で呼び出す場合は、以下のコマンドを使用します：
+
 ```bash
 ros2 service call /left_wheel/reboot_service std_srvs/srv/Trigger
 ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 ```
 
+## ディレクトリ構成
+以下は、`amr_slam_nav_core`パッケージのディレクトリ構成です：
+
+amr_slam_nav_core/
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── config
+│   ├── config.lua
+│   ├── ekf_config.yaml
+│   ├── laser_filter_config.yaml
+│   └── nav2_params.yaml
+├── include
+│   └── amr_slam_nav_core
+├── launch
+│   └── startup_cartographer.launch.py
+├── package.xml
+├── scripts
+│   ├── laserscan_sample.sh
+│   ├── startup.py
+│   └── startup.sh
+├── src
+│   ├── connection_checker.cpp
+│   ├── odometry_publisher.cpp
+│   ├── raw_imu_subscriber.cpp
+│   └── reboot_service_client.cpp
+└── urdf
+    └── n_v1.urdf
+
 ## 開発者向け
+
 ### 依存関係
 このパッケージは以下の依存関係を持ちます：
+
 * rclcpp
 * sensor_msgs
 * geometry_msgs
@@ -157,12 +218,22 @@ ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 バグ報告や機能追加の提案は、GitHubリポジトリのIssuesセクションで受け付けています。プルリクエストも歓迎します。
 
 ### ライセンス
-このプロジェクトはApache License 2.0の下でライセンスされています。詳細については、LICENSEファイルを参照してください。
+このプロジェクトはApache License 2.0の下でライセンスされています。詳細については、`LICENSE`ファイルを参照してください。
 
 ## トラブルシューティング
+
 ### ノードが起動しない:
 * 必要な依存パッケージがインストールされているか確認してください。
 * ワークスペースが正しくビルドされているか確認してください。
+
 ### センサーからデータが取得できない:
 * センサーが正しく接続されているか、トピックが正しいか確認してください。
-* ros2 topic listコマンドでデータがpublishされているか確認してください。
+* `ros2 topic list`コマンドでデータがpublishされているか確認してください。
+
+### サービスが動作しない:
+* `reboot_service_client`ノードが正しく起動しているか確認してください。
+* サービスが適切に登録されているか、`ros2 service list`で確認してください。
+
+### その他:
+* ログメッセージを確認し、エラーや警告を基に問題を特定してください。
+* 必要に応じて、各ノードのデバッグモードを有効にして詳細なログを取得してください。
