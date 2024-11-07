@@ -31,7 +31,7 @@ public:
             "left_wheel/velocity", custom_qos_profile, std::bind(&OdometryPublisher::left_wheel_callback, this, std::placeholders::_1));
         right_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
             "right_wheel/velocity", custom_qos_profile, std::bind(&OdometryPublisher::right_wheel_callback, this, std::placeholders::_1));
-        odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odometry/odom_encorder", 10);
+        odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odometry/odom_encoder", 10);
 
         // Initialize position and orientation
         x_ = 0.0;

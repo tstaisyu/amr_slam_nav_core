@@ -146,7 +146,7 @@ def generate_launch_description():
             name='odometry_publisher',
             output='screen',
             remappings=[
-                ('/odom', '/odometry/odom_encorder')                       # オドメトリのリマッピング
+                ('/odom', '/odometry/odom_encoder')
             ]
         ),
         # Node for robot state publisher
@@ -165,7 +165,7 @@ def generate_launch_description():
             output='screen',
             parameters=[ekf_config],
             remappings=[
-                ('/odom', '/odometry/odom_encorder'),
+                ('/odom', '/odometry/odom_encoder'),
                 ('/imu/data', '/imu/data_filtered')
             ]
         ),
