@@ -92,6 +92,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Connection checker node
+    connection_checker = Node(
+        package='amr_slam_nav_core',
+        executable='connection_checker',
+        name='connection_checker',
+        output='screen'
+    )
+
     # Rosbridge WebSocket node
     rosbridge_websocket_node = Node(
         package='rosbridge_server',
@@ -275,6 +283,7 @@ def generate_launch_description():
 
         micro_ros_agent_acm0,
         micro_ros_agent_acm1,
+        connection_checker,
         rosbridge_websocket_node,
         rosbridge_websocket_node_no_ssl,
         rosapi_node,
