@@ -15,15 +15,15 @@
 import os
 import launch
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, LogInfo, ExecuteProcess, RegisterEventHandler, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, GroupAction
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-from launch.event_handlers import OnShutdown
 
 def generate_launch_description():
-    # Declare arguments
+    # ======== Declaration of launch arguments ========
+    # Arguments for communication settings
     port = LaunchConfiguration('port', default='9090')
     address = LaunchConfiguration('address', default='')
     ssl = LaunchConfiguration('ssl', default='false')
@@ -33,214 +33,230 @@ def generate_launch_description():
     services_glob = LaunchConfiguration('services_glob', default='')
     params_glob = LaunchConfiguration('params_glob', default='')
 
-    config_dir = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'config')
-    configuration_basename = 'config.lua'
-    nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
-    laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
-    ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
-
-    urdf_file = os.path.join(get_package_share_directory('amr_slam_nav_core'), 'urdf', 'n_v1.urdf')
-    with open(urdf_file, 'r') as file:
-        robot_description = file.read()
-    
+    # Arguments for simulation time settings
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+
+    # Arguments for Cartographer settings
     resolution = LaunchConfiguration('resolution', default='0.05')
     publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
 
-    # microROSAgent node
-    micro_ros_agent_acm0 = Node(
-        package='micro_ros_agent',
-        executable='micro_ros_agent',
-        name='micro_ros_agent_acm0',
-        arguments=['serial', '--dev', '/dev/ttyACM0', '-v4'],
-        output='screen'
-    )
+    # ======== Source the path and configuration file ========
+    package_dir = get_package_share_directory('amr_slam_nav_core')
+    config_dir = os.path.join(package_dir, 'config')
+    urdf_file = os.path.join(package_dir, 'urdf', 'n_v1.urdf')
 
-    micro_ros_agent_acm1 = Node(
-        package='micro_ros_agent',
-        executable='micro_ros_agent',
-        name='micro_ros_agent_acm1',
-        arguments=['serial', '--dev', '/dev/ttyUSB1', '-v4'],
-        parameters=[{'use_sim_time': False}],
-        output='screen'
-    )
+    # Paths of configuration files
+    nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
+    laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
+    ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
+    cartographer_config = os.path.join(config_dir, 'config.lua')
+    urdf_file = os.path.join(urdf_dir, 'n_v1.urdf')
 
-    # Connection checker node
-    connection_checker = Node(
-        package='amr_slam_nav_core',
-        executable='connection_checker',
-        name='connection_checker',
-        output='screen'
-    )
+    # Load the robot's URDF file
+    with open(urdf_file, 'r') as file:
+        robot_description = file.read()
+    
+    # ======== Node definitions ========
 
-    # Rosbridge WebSocket node
-    rosbridge_websocket_node = Node(
-        package='rosbridge_server',
-        executable='rosbridge_websocket',
-        name='rosbridge_websocket',
-        output='screen',
-        parameters=[{
-            'certfile': certfile,
-            'keyfile': keyfile,
-            'port': port,
-            'address': address,
-            'topics_glob': topics_glob,
-            'services_glob': services_glob,
-            'params_glob': params_glob,
-        }],
-        condition=IfCondition(ssl)
-    )
+    # Group of Micro-ROS-Agent nodes
+    micro_ros_agents = GroupAction([
+        Node(
+            package='micro_ros_agent',
+            executable='micro_ros_agent',
+            name='micro_ros_agent_acm0',
+            arguments=['serial', '--dev', '/dev/ttyACM0', '-v4'],
+            output='screen'
+        ),
+        Node(
+            package='micro_ros_agent',
+            executable='micro_ros_agent',
+            name='micro_ros_agent_acm1',
+            arguments=['serial', '--dev', '/dev/ttyUSB1', '-v4'],
+            parameters=[{'use_sim_time': use_sim_time}],
+            output='screen'
+        )
+    ])
 
-    rosbridge_websocket_node_no_ssl = Node(
-        package='rosbridge_server',
-        executable='rosbridge_websocket',
-        name='rosbridge_websocket',
-        output='screen',
-        parameters=[{
-            'port': port,
-            'address': address,
-            'topics_glob': topics_glob,
-            'services_glob': services_glob,
-            'params_glob': params_glob,
-        }],
-        condition=UnlessCondition(ssl)
-    )
+    # Group of Sensor-related nodes
+    sensor_nodes = GroupAction([
+        # Node for connection check
+        Node(
+            package='amr_slam_nav_core',
+            executable='connection_checker',
+            name='connection_checker',
+            output='screen'
+        ),
+        # Node for subscription of raw imu data
+        raw_imu_subscriber = Node(
+            package='amr_slam_nav_core',
+            executable='raw_imu_subscriber',
+            name='raw_imu_subscriber',
+            output='screen',
+            remappings=[
+                ('/imu/data_raw', '/imu/data_raw'),
+                ('/imu/data_qos', '/imu/data_qos')
+            ]
+        ),
+        # Node for madgwick filter
+        Node(
+            package='imu_filter_madgwick',
+            executable='imu_filter_madgwick_node',
+            name='imu_filter_madgwick',
+            parameters=[{
+                'use_mag': False,
+                'publish_tf': False,
+                'world_frame': 'enu',
+                'publish_debug_topics': False,
+                'gain': 0.1,
+            }],
+            remappings=[
+                ('/imu/data_raw', '/imu/data_qos'),
+                ('/imu/data', '/imu/data_filtered')
+            ],
+            output='screen'
+        ),
+        # Node for RPLiDAR
+        Node(
+            package='rplidar_ros',
+            executable='rplidar_node',
+            name='rplidar_node',
+            parameters=[{
+                'serial_port': '/dev/ttyUSB0',
+                'serial_baudrate': 256000,
+                'frame_id': 'laser_link'
+            }],
+            output='screen'
+        ),
+        # Node for laser scan filters
+        Node(
+            package='laser_filters',
+            executable='scan_to_scan_filter_chain',
+            name='laser_scan_filters',
+            output='screen',
+            parameters=[laser_filters_config_path],
+        ),
+    ])
 
-    # Rosapi node
-    rosapi_node = Node(
-        package='rosapi',
-        executable='rosapi_node',
-        parameters=[{
-            'topics_glob': topics_glob,
-            'services_glob': services_glob,
-            'params_glob': params_glob,
-        }]
-    )
+    # Group of navigation related nodes
+    navigation_nodes = GroupAction([
+    # Node for odometry publisher
+        Node(
+            package='amr_slam_nav_core',
+            executable='odometry_publisher',
+            name='odometry_publisher',
+            output='screen',
+            remappings=[
+                ('/odom', '/odometry/odom_encorder')                       # オドメトリのリマッピング
+            ]
+        ),
+        # Node for robot state publisher
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[{'robot_description': robot_description}],
+        ),
+        # Node for EKF localization
+        Node(
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_localization_node',
+            output='screen',
+            parameters=[ekf_config],
+            remappings=[
+                ('/odom', '/odometry/odom_encorder'),
+                ('/imu/data', '/imu/data_filtered')
+            ]
+        ),
+        # Node for Cartographer
+        Node(
+            package='cartographer_ros',
+            executable='cartographer_node',
+            name='cartographer_node',
+            parameters=[{
+                'use_sim_time': use_sim_time
+            }],
+            arguments=['-configuration_directory', config_dir, '-configuration_basename', 'config.lua'],
+            remappings=[('/scan', '/scan_filtered'),
+                        ('/odom', '/odometry/filtered') 
+            ],
+            output='screen'
+        ),
+        # Node for occupancy grid
+        Node(
+            package='cartographer_ros',
+            executable='cartographer_occupancy_grid_node',
+            name='occupancy_grid_node',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'resolution': resolution,
+                'publish_period_sec': publish_period_sec
+            }],
+            output='screen'
+        ),
+    ])
 
-    # raw_imu_subscriber
-    raw_imu_subscriber = Node(
-        package='amr_slam_nav_core',
-        executable='raw_imu_subscriber',
-        name='raw_imu_subscriber',
-        output='screen',
-        remappings=[
-            ('/imu/data_raw', '/imu/data_raw'),
-            ('/imu/data_qos', '/imu/data_qos')
-        ]
-    )
+    # Group of communication related nodes
+    communication_nodes = GroupAction([
+        # Node for rosbridge websocket (SSL)
+        Node(
+            package='rosbridge_server',
+            executable='rosbridge_websocket',
+            name='rosbridge_websocket',
+            output='screen',
+            parameters=[{
+                'certfile': certfile,
+                'keyfile': keyfile,
+                'port': port,
+                'address': address,
+                'topics_glob': topics_glob,
+                'services_glob': services_glob,
+                'params_glob': params_glob,
+            }],
+            condition=IfCondition(ssl)
+        ),
+        # Node for rosbridge websocket (non-SSL)
+        Node(
+            package='rosbridge_server',
+            executable='rosbridge_websocket',
+            name='rosbridge_websocket',
+            output='screen',
+            parameters=[{
+                'port': port,
+                'address': address,
+                'topics_glob': topics_glob,
+                'services_glob': services_glob,
+                'params_glob': params_glob,
+            }],
+            condition=UnlessCondition(ssl)
+        ),
+        # Node for rosapi
+        Node(
+            package='rosapi',
+            executable='rosapi_node',
+            parameters=[{
+                'topics_glob': topics_glob,
+                'services_glob': services_glob,
+                'params_glob': params_glob,
+            }]
+        ),
+    ])
 
-    # madgwick_filter
-    imu_filter_madgwick = Node(
-        package='imu_filter_madgwick',
-        executable='imu_filter_madgwick_node',
-        name='imu_filter_madgwick',
-        parameters=[{
-            'use_mag': False,
-            'publish_tf': False,
-            'world_frame': 'enu',
-            'publish_debug_topics': False,
-            'gain': 0.1,
-        }],
-        remappings=[
-            ('/imu/data_raw', '/imu/data_qos'),
-            ('/imu/data', '/imu/data_filtered')
-        ],
-        output='screen'
-    )
+    # Group of utility nodes
+    utility_nodes = GroupAction([
+        # Node for reboot service client
+        Node(
+            package='amr_slam_nav_core',
+            executable='reboot_service_client',
+            name='reboot_service_client',
+            output='screen'
+        ),
+    ])
 
-    # odometry publisher
-    odometry_publisher = Node(
-        package='amr_slam_nav_core',
-        executable='odometry_publisher',
-        name='odometry_publisher',
-        output='screen',
-        remappings=[
-            ('/odom', '/odometry/odom_encorder')                       # オドメトリのリマッピング
-        ]
-    )
-
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='screen',
-        parameters=[{'robot_description': robot_description}],
-    )
-
-    # RPLiDAR node
-    rplidar_node = Node(
-        package='rplidar_ros',
-        executable='rplidar_node',
-        name='rplidar_node',
-        parameters=[{
-            'serial_port': '/dev/ttyUSB0',
-            'serial_baudrate': 256000,
-            'frame_id': 'laser_link'
-        }],
-        output='screen'
-    )
-
-    # Laser scan filters
-    laser_scan_filters = Node(
-        package='laser_filters',
-        executable='scan_to_scan_filter_chain',
-        name='laser_scan_filters',
-        output='screen',
-        parameters=[laser_filters_config_path],
-    )
-
-    # EKF localization node
-    ekf_localization_node = Node(
-        package='robot_localization',
-        executable='ekf_node',
-        name='ekf_localization_node',
-        output='screen',
-        parameters=[ekf_config],
-        # arguments=['--ros-args', '--log-level', 'debug'],
-        remappings=[
-            ('/odom', '/odometry/odom_encorder'),
-            ('/imu/data', '/imu/data_filtered')  # Remap as necessary
-        ]
-    )
-
-    # Cartographer node
-    cartographer_node = Node(
-        package='cartographer_ros',
-        executable='cartographer_node',
-        name='cartographer_node',
-        parameters=[{
-            'use_sim_time': use_sim_time
-        }],
-        arguments=['-configuration_directory', config_dir, '-configuration_basename', configuration_basename],
-        remappings=[('/scan', '/scan_filtered'),
-                    ('/odom', '/odometry/filtered') 
-        ],
-        output='screen'
-    )
-
-    # Occupancy grid node
-    occupancy_grid_node = Node(
-        package='cartographer_ros',
-        executable='cartographer_occupancy_grid_node',
-        name='occupancy_grid_node',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'resolution': resolution,
-            'publish_period_sec': publish_period_sec
-        }],
-        output='screen'
-    )
-
-    # reboot_service_client
-    reboot_service_client = Node(
-        package='amr_slam_nav_core',
-        executable='reboot_service_client',
-        name='reboot_service_client',
-        output='screen'
-    )
-
-    # Launch description
+    # ======== Building a launch description ========
     return LaunchDescription([
+        # Declare launch arguments
         DeclareLaunchArgument('port', default_value='9090'),
         DeclareLaunchArgument('address', default_value=''),
         DeclareLaunchArgument('ssl', default_value='false'),
@@ -249,26 +265,15 @@ def generate_launch_description():
         DeclareLaunchArgument('topics_glob', default_value=''),
         DeclareLaunchArgument('services_glob', default_value=''),
         DeclareLaunchArgument('params_glob', default_value=''),
-
         DeclareLaunchArgument('use_sim_time', default_value='false'),
         DeclareLaunchArgument('resolution', default_value='0.05'),
         DeclareLaunchArgument('publish_period_sec', default_value='1.0'),
 
-        micro_ros_agent_acm0,
-        micro_ros_agent_acm1,
-        connection_checker,
-        rosbridge_websocket_node,
-        rosbridge_websocket_node_no_ssl,
-        rosapi_node,
-        raw_imu_subscriber,
-        imu_filter_madgwick,
-        odometry_publisher,
-        robot_state_publisher,
-        rplidar_node,
-        laser_scan_filters,
-        ekf_localization_node,
-        cartographer_node,
-        occupancy_grid_node,
-        reboot_service_client
+        # Node groups
+        micro_ros_agents,
+        sensor_nodes,
+        navigation_nodes,
+        communication_nodes,
+        utility_nodes,
     ])
 
