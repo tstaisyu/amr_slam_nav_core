@@ -1,26 +1,30 @@
 laser_scan_filters:
   ros__parameters:
+    # Front Right Angle Bounds Filter: Filters laser scans to only include angles in the front right quadrant.
     filter1:
       name: angle_bounds_filter_front_right
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: 0.48  # approximately 55.36 degrees in radians
-        upper_angle: 0.69  # approximately 64.66 degrees in radians
+        lower_angle: 0.48  # ~55.36 degrees, covering front right area
+        upper_angle: 0.69  # ~64.66 degrees, covering front right area
+    # Rear Right Angle Bounds Filter: Filters laser scans to only include angles in the rear right quadrant.
     filter2:
       name: angle_bounds_filter_rear_right
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: 1.76  # approximately 142.76 degrees in radians
-        upper_angle: 2.12  # approximately 147.37 degrees in radians
+        lower_angle: 1.76  # ~142.76 degrees, covering rear right area
+        upper_angle: 2.12  # ~147.37 degrees, covering rear right area
+    # Rear Left Angle Bounds Filter: Filters laser scans to only include angles in the rear left quadrant.
     filter3:
       name: angle_bounds_filter_rear_left
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: -1.98  # approximately 203.21 degrees in radians
-        upper_angle: -1.67  # approximately 206.98 degrees in radians
+        lower_angle: -1.98  # ~203.21 degrees, covering rear left area
+        upper_angle: -1.67  # ~206.98 degrees, covering rear left area
+    # Front Left Angle Bounds Filter: Filters laser scans to only include angles in the front left quadrant.
     filter4:
       name: angle_bounds_filter_front_left
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-        lower_angle: -0.61  # approximately 297.73 degrees in radians
-        upper_angle: -0.41  # approximately 302.34 degrees in radians
+        lower_angle: -0.61  # ~297.73 degrees, covering front left area
+        upper_angle: -0.41  # ~302.34 degrees, covering front left area
