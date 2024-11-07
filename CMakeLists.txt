@@ -15,6 +15,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(amr_slam_nav_core)
 
+# Compiler options for GNU and Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
@@ -28,22 +29,16 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
+
+# Optional dependency section
 # find_package(<dependency> REQUIRED)
 
+# Test configurations
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
+  # Enable copyright linter once copyright and license information is present
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-
-  # ament_add_pytest_test(test_micro_ros_agent test/test_micro_ros_agent.py)
 endif()
 
 # Include directories
@@ -54,46 +49,17 @@ add_executable(raw_imu_subscriber src/raw_imu_subscriber.cpp)
 add_executable(odometry_publisher src/odometry_publisher.cpp)
 add_executable(connection_checker src/connection_checker.cpp)
 
-# Specify libraries to link a library or executable target against
-ament_target_dependencies(raw_imu_subscriber
-  rclcpp
-  sensor_msgs
-)
-
-ament_target_dependencies(odometry_publisher
-  rclcpp
-  geometry_msgs
-  nav_msgs
-  tf2_ros
-  tf2
-)
-
+# Specifying libraries for linking
+ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs)
+ament_target_dependencies(odometry_publisher rclcpp geometry_msgs nav_msgs tf2_ros tf2)
 ament_target_dependencies(connection_checker rclcpp std_msgs)
 
-install(TARGETS
-  raw_imu_subscriber
-  odometry_publisher
-  connection_checker
+# Installation of targets and resources
+install(TARGETS raw_imu_subscriber odometry_publisher connection_checker
   DESTINATION lib/${PROJECT_NAME})
 
-# Launch ファイルのインストール
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}
-)
-
-# Config ファイルのインストール
-install(DIRECTORY
-  config
-  DESTINATION share/${PROJECT_NAME}
-)
-
-# URDF ファイルのインストール
-install(DIRECTORY
-  urdf
-  DESTINATION share/${PROJECT_NAME}
-)
+install(DIRECTORY launch config urdf
+  DESTINATION share/${PROJECT_NAME})
 
 ament_export_dependencies(rosidl_default_runtime)
-
 ament_package()
