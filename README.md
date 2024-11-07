@@ -174,7 +174,7 @@ ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 ## ディレクトリ構成
 以下は、`amr_slam_nav_core`パッケージのディレクトリ構成です：
 
-amr_slam_nav_core/
+```plaintext
 ├── CMakeLists.txt
 ├── LICENSE
 ├── README.md
@@ -199,6 +199,7 @@ amr_slam_nav_core/
 │   └── reboot_service_client.cpp
 └── urdf
     └── n_v1.urdf
+```
 
 ## 開発者向け
 
