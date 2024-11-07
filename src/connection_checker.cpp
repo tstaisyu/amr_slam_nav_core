@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int32.hpp"
 
@@ -22,20 +23,41 @@ public:
   ConnectionChecker()
   : Node("connection_checker")
   {
-    publisher_ = this->create_publisher<std_msgs::msg::Int32>("connection_check_request", 10);
-    left_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-      "/left_wheel/connection_response", 10, [this](std_msgs::msg::Int32::SharedPtr msg) {
-        if (msg->data == 1) {
-          RCLCPP_INFO(this->get_logger(), "left_wheel connected.");
-        }
-      });
-    right_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-      "/right_wheel/connection_response", 10, [this](std_msgs::msg::Int32::SharedPtr msg) {
-        if (msg->data == 1) {
-          RCLCPP_INFO(this->get_logger(), "right_wheel connected.");
-        }
-      });
+    init_publisher(); // Initialize the publisher for connection checks
+    init_subscriptions(); // Setup subscriptions to check connections for each wheel
+    init_timer(); // Start a timer to periodically check connections
+  }
 
+private:
+  // Initialize the publisher with the appropriate topic and QoS settings
+  void init_publisher()
+  {
+    publisher_ = this->create_publisher<std_msgs::msg::Int32>("connection_check_request", 10);
+  }
+
+  // Helper function to log connection status based on received messages
+  void check_connection(const std_msgs::msg::Int32::SharedPtr msg, const std::string &wheel_name)
+  {
+    if (msg->data == 1) {
+      RCLCPP_INFO(this->get_logger(), "%s connected.", wheel_name.c_str());
+    }
+  }
+
+  // Set up subscriptions to wheel connection response topics
+  void init_subscriptions()
+  {
+    left_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
+      "/left_wheel/connection_response", 10, 
+      std::bind(&ConnectionChecker::check_connection, this, std::placeholders::_1, "left_wheel"));
+    
+    right_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
+      "/right_wheel/connection_response", 10,
+      std::bind(&ConnectionChecker::check_connection, this, std::placeholders::_1, "right_wheel"));
+  }
+
+  // Initialize a timer to publish connection check requests
+  void init_timer()
+  {
     timer_ = this->create_wall_timer(
       std::chrono::seconds(1), [this]() {
         std_msgs::msg::Int32 msg;
@@ -44,7 +66,6 @@ public:
       });
   }
 
-private:
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr left_wheel_subscription_;
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr right_wheel_subscription_;
