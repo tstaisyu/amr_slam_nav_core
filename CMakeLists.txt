@@ -52,6 +52,7 @@ include_directories(include)
 # Declare a C++ executable
 add_executable(raw_imu_subscriber src/raw_imu_subscriber.cpp)
 add_executable(odometry_publisher src/odometry_publisher.cpp)
+add_executable(connection_checker src/connection_checker.cpp)
 
 # Specify libraries to link a library or executable target against
 ament_target_dependencies(raw_imu_subscriber
@@ -67,9 +68,12 @@ ament_target_dependencies(odometry_publisher
   tf2
 )
 
+ament_target_dependencies(connection_checker rclcpp std_msgs)
+
 install(TARGETS
   raw_imu_subscriber
   odometry_publisher
+  connection_checker
   DESTINATION lib/${PROJECT_NAME})
 
 # Launch ファイルのインストール
