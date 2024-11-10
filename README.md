@@ -119,15 +119,46 @@ sudo chmod +x ${this package}/scripts/laserscan_sample.sh
 ```
 
 ## パッケージのビルド
-パッケージをビルドするには、ROS 2ワークスペースのルートディレクトリで以下のコマンドを実行します：
+以下の手順に従って、amr_slam_nav_core パッケージをビルドします。
+
+### 前提条件
+- ROS 2 がインストールされていること。
+- Git がインストールされていること。
+- 必要な依存パッケージがインストールされていること。
+
+1. ROS 2ワークスペースの作成
+もしまだROS 2ワークスペースを作成していない場合は、以下のコマンドで作成します。既にワークスペースが存在する場合は、このステップをスキップしてください。
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+```
+
+2. パッケージのクローン
+amr_slam_nav_core パッケージをROS 2ワークスペースの src ディレクトリにクローンします。
+```bash
+git clone https://github.com/tstaisyu/amr_slam_nav_core.git
+```
+
+3. 依存関係の解決
+ワークスペースのルートディレクトリに戻り、rosdep を使用して依存関係をインストールします。
+```bash
+cd ~/ros2_ws
+rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+```
+
+4. パッケージのビルド
+colcon を使用してパッケージをビルドします。
 ```bash
 colcon build --packages-select amr_slam_nav_core
 ```
 
-ビルド後、ワークスペースをソースします：
+5. ワークスペースのソース
+ビルドが完了したら、ワークスペースをソースします。
 ```bash
 source install/setup.bash
 ```
+これで、amr_slam_nav_core パッケージがビルドされ、利用可能になります。
 
 ## 使用方法
 
