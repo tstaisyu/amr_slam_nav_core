@@ -14,26 +14,48 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch.event_handlers import OnProcessExit
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    # ======== Declaration of launch arguments ========
-    # Arguments for simulation time settings
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-
-    # Arguments for Cartographer settings    
-    resolution = LaunchConfiguration('resolution', default='0.05')
-    publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
-
     # ======== Source the path and configuration file ========
     package_name = 'amr_slam_nav_core'
     package_dir = get_package_share_directory(package_name)
     config_dir = os.path.join(package_dir, 'config')
     cartographer_config_dir = config_dir
     cartographer_config_basename = 'config.lua'
+
+    # ======== Declaration of launch arguments ========
+    # Arguments for simulation time settings
+    use_sim_time = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='false',
+        description='Use simulation (Gazebo) clock if true'
+    )
+
+    # Arguments for Cartographer settings    
+    resolution = DeclareLaunchArgument(
+        'resolution',
+        default_value='0.05',
+        description='Resolution of the occupancy grid'
+    )
+    publish_period_sec = DeclareLaunchArgument(
+        'publish_period_sec',
+        default_value='1.0',
+        description='Publish period for occupancy grid'
+    )
+
+    # Arguments for map saving
+    map_name_arg = DeclareLaunchArgument(
+        'map_name',
+        default_value='map',
+        description='Name of the map to save'
+    )
+    
+    map_name = LaunchConfiguration('map_name')
 
     # ======== Node definitions ========
     # Node for Cartographer
@@ -68,6 +90,22 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Including a Launch file for saving maps
+    save_map_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(package_dir, 'launch', 'save_map.launch.py')
+        ),
+        launch_arguments={'map_name': map_name}.items()
+    )
+    
+    # An event handler that triggers saving the map when a Cartographer node is closed
+    save_map_on_exit = RegisterEventHandler(
+        OnProcessExit(
+            target_action=cartographer_node,
+            on_exit=[save_map_launch]
+        )
+    )
+
     # ======== Building a launch description ========
     ld = LaunchDescription()
 
@@ -75,9 +113,11 @@ def generate_launch_description():
     ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false'))
     ld.add_action(DeclareLaunchArgument('resolution', default_value='0.05'))
     ld.add_action(DeclareLaunchArgument('publish_period_sec', default_value='1.0'))
+    ld.add_action(DeclareLaunchArgument('map_name_arg', default_value='map'))
 
     # Add nodes to the launch description
     ld.add_action(cartographer_node)
     ld.add_action(occupancy_grid_node)
+    ld.add_action(save_map_on_exit)
 
     return ld
