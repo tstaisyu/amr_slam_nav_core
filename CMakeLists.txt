@@ -52,9 +52,9 @@ add_executable(odometry_publisher src/odometry_publisher.cpp)
 add_executable(connection_checker src/connection_checker.cpp)
 
 # Specifying libraries for linking
-ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs)
-ament_target_dependencies(odometry_publisher rclcpp geometry_msgs nav_msgs tf2_ros tf2)
-ament_target_dependencies(connection_checker rclcpp std_msgs)
+ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs tf2_geometry_msgs)
+ament_target_dependencies(odometry_publisher rclcpp geometry_msgs nav_msgs tf2_ros tf2 tf2_geometry_msgs)
+ament_target_dependencies(connection_checker rclcpp std_msgs tf2_geometry_msgs)
 
 # Installation of targets and resources
 install(TARGETS raw_imu_subscriber odometry_publisher connection_checker
