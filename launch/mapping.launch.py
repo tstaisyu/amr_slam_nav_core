@@ -33,26 +33,26 @@ def generate_launch_description():
     # Arguments for simulation time settings
     use_sim_time = LaunchConfiguration(
         'use_sim_time',
-        default_value='false',
+        default='false',
         description='Use simulation (Gazebo) clock if true'
     )
 
     # Arguments for Cartographer settings    
     resolution = LaunchConfiguration(
         'resolution',
-        default_value='0.05',
+        default='0.05',
         description='Resolution of the occupancy grid'
     )
     publish_period_sec = LaunchConfiguration(
         'publish_period_sec',
-        default_value='1.0',
+        default='1.0',
         description='Publish period for occupancy grid'
     )
 
     # Arguments for map saving
     map_name_arg = LaunchConfiguration(
         'map_name',
-        default_value='map',
+        default='map',
         description='Name of the map to save'
     )
     
