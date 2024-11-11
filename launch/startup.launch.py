@@ -224,23 +224,24 @@ def generate_launch_description():
     ])
 
     # ======== Building a launch description ========
-    return LaunchDescription([
-        # Declare launch arguments
-        DeclareLaunchArgument('port', default_value='9090'),
-        DeclareLaunchArgument('address', default_value=''),
-        DeclareLaunchArgument('ssl', default_value='false'),
-        DeclareLaunchArgument('certfile', default_value=''),
-        DeclareLaunchArgument('keyfile', default_value=''),
-        DeclareLaunchArgument('topics_glob', default_value=''),
-        DeclareLaunchArgument('services_glob', default_value=''),
-        DeclareLaunchArgument('params_glob', default_value=''),
-        DeclareLaunchArgument('use_sim_time', default_value='false'),
+    ld = LaunchDescription()
 
-        # Node groups
-        micro_ros_agents,
-        sensor_nodes,
-        navigation_nodes,
-        communication_nodes,
-        utility_nodes,
-    ])
+    # Declare launch arguments
+    ld.add_action(DeclareLaunchArgument('port', default_value='9090', description='Port for rosbridge websocket'))
+    ld.add_action(DeclareLaunchArgument('address', default_value='', description='Address for rosbridge websocket'))
+    ld.add_action(DeclareLaunchArgument('ssl', default_value='false', description='Enable SSL for rosbridge websocket'))
+    ld.add_action(DeclareLaunchArgument('certfile', default_value='', description='SSL certificate file for rosbridge websocket'))
+    ld.add_action(DeclareLaunchArgument('keyfile', default_value='', description='SSL key file for rosbridge websocket'))
+    ld.add_action(DeclareLaunchArgument('topics_glob', default_value='', description='Topic patterns to include in rosbridge'))
+    ld.add_action(DeclareLaunchArgument('services_glob', default_value='', description='Service patterns to include in rosbridge'))
+    ld.add_action(DeclareLaunchArgument('params_glob', default_value='', description='Parameter patterns to include in rosbridge'))
+    ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation time'))
 
+    # Add node groups
+    ld.add_action(micro_ros_agents)
+    ld.add_action(sensor_nodes)
+    ld.add_action(navigation_nodes)
+    ld.add_action(communication_nodes)
+    ld.add_action(utility_nodes)
+
+    return ld
