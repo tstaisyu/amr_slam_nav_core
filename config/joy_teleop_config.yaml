@@ -1,20 +1,40 @@
 joy_node:
   ros__parameters:
+    # Name of the joystick device as recognized by the system
     device_name: "Logitech Gamepad F710"
+    
+    # Deadzone threshold to ignore minor joystick movements
     deadzone: 0.1
+    
+    # Rate (in Hz) at which joystick inputs are automatically repeated
     autorepeat_rate: 20.0
 
 teleop_twist_joy:
   ros__parameters:
+    # Use simulation time (false for real robots)
     use_sim_time: false
-    axis_linear.x: 4  # 右スティックの垂直軸（jstestで確認した軸4）
-    scale_linear.x: 0.5  # 軸4の上がマイナス値なので反転して正方向に
-    axis_angular.yaw: 3  # 右スティックの水平軸（jstestで確認した軸3）
-    scale_angular.yaw: -0.5  # 角速度のスケーリングファクタ
-    enable_button: 4  # 左肩ボタンでteleopを有効化
-    twist_timeout: 0.5  # 指令タイムアウト時間
-    deadzone: 0.1  # ジョイスティックの死ゾーン（小さな入力を無視）
-    autorepeat_rate: 20.0  # 自動リピート率（Hz）
-    enable_turbo_button: 5  # 右肩ボタンでスケーリングファクタを変更
-    turbo_scale: 2.0  # スケーリングファクタの変更値
+    
+    # Mapping for linear velocity control
+    axis_linear.x: 4  # Vertical axis of the right joystick (confirmed via jstest)
+    scale_linear.x: 0.5  # Scaling factor for linear velocity (positive value)
+    
+    # Mapping for angular velocity control
+    axis_angular.yaw: 3  # Horizontal axis of the right joystick (confirmed via jstest)
+    scale_angular.yaw: -0.5  # Scaling factor for angular velocity (negative to invert direction)
+    
+    # Button configuration
+    enable_button: 4  # Left shoulder button to enable teleoperation
+    enable_turbo_button: 5  # Right shoulder button to toggle turbo mode
+    
+    # Turbo mode scaling factor
+    turbo_scale: 2.0  # Scaling factor multiplier when turbo mode is active
+    
+    # Timeout for sending Twist messages (in seconds)
+    twist_timeout: 0.5  # If no input is received within this duration, velocities reset to zero
+    
+    # Deadzone threshold to ignore minor joystick movements
+    deadzone: 0.1  # Ensures small, unintended joystick movements are ignored
+    
+    # Rate (in Hz) at which Twist messages are automatically repeated
+    autorepeat_rate: 20.0  # Provides smooth and continuous command updates
     
