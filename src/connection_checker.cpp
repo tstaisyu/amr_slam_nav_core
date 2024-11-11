@@ -36,10 +36,12 @@ private:
   }
 
   // Helper function to log connection status based on received messages
-  void check_connection(const std_msgs::msg::Int32::SharedPtr msg, const std::string &wheel_name)
+  void check_connection(const std::shared_ptr<const std_msgs::msg::Int32> msg, const std::string &wheel_name)
   {
     if (msg->data == 1) {
       RCLCPP_INFO(this->get_logger(), "%s connected.", wheel_name.c_str());
+    } else {
+      RCLCPP_WARN(this->get_logger(), "%s not connected.", wheel_name.c_str());
     }
   }
 
@@ -48,11 +50,15 @@ private:
   {
     left_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
       "/left_wheel/connection_response", 10, 
-      std::bind(&ConnectionChecker::check_connection, this, std::placeholders::_1, "left_wheel"));
-    
+      [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
+        this->check_connection(msg, "left_wheel");
+      });
+          
     right_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
       "/right_wheel/connection_response", 10,
-      std::bind(&ConnectionChecker::check_connection, this, std::placeholders::_1, "right_wheel"));
+      [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
+        this->check_connection(msg, "right_wheel");
+      });
   }
 
   // Initialize a timer to publish connection check requests
@@ -63,6 +69,7 @@ private:
         std_msgs::msg::Int32 msg;
         msg.data = 1;
         publisher_->publish(msg);
+        RCLCPP_DEBUG(this->get_logger(), "Published connection check request.");
       });
   }
 
