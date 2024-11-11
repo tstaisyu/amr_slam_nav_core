@@ -60,7 +60,7 @@ ament_target_dependencies(connection_checker rclcpp std_msgs tf2_geometry_msgs)
 ament_target_dependencies(reboot_service_client rclcpp std_srvs tf2_geometry_msgs)
 
 # Installation of targets and resources
-install(TARGETS raw_imu_subscriber odometry_publisher connection_checker
+install(TARGETS raw_imu_subscriber odometry_publisher connection_checker reboot_service_client
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch config urdf
