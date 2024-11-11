@@ -51,7 +51,7 @@ include_directories(include)
 add_executable(raw_imu_subscriber src/raw_imu_subscriber.cpp)
 add_executable(odometry_publisher src/odometry_publisher.cpp)
 add_executable(connection_checker src/connection_checker.cpp)
-add_executable(reboot_service_client src/reboot_service_client.cpp) 
+# add_executable(reboot_service_client src/reboot_service_client.cpp) 
 
 # Specifying libraries for linking
 ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs tf2_geometry_msgs)
