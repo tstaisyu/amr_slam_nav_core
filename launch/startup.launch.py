@@ -235,8 +235,6 @@ def generate_launch_description():
         DeclareLaunchArgument('services_glob', default_value=''),
         DeclareLaunchArgument('params_glob', default_value=''),
         DeclareLaunchArgument('use_sim_time', default_value='false'),
-        DeclareLaunchArgument('resolution', default_value='0.05'),
-        DeclareLaunchArgument('publish_period_sec', default_value='1.0'),
 
         # Node groups
         micro_ros_agents,
