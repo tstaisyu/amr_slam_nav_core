@@ -22,6 +22,16 @@ def generate_launch_description():
     package_dir = get_package_share_directory(package_name)
     config_file = os.path.join(package_dir, 'config', 'joy_teleop_config.yaml')
 
+    # Node for Joy Node
+    joy_node = Node(
+        package='joy',
+        executable='joy_node',
+        name='joy_node',
+        parameters=[config_file],
+        output='screen'
+    )
+
+    # Node for Teleop Twist Joy
     teleop_twist_joy_node = Node(
         package='teleop_twist_joy',
         executable='teleop_node',
@@ -34,5 +44,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        joy_node,
         teleop_twist_joy_node
     ])
