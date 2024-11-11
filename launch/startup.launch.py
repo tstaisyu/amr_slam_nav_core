@@ -82,7 +82,7 @@ def generate_launch_description():
             output='screen'
         ),
         # Node for subscription of raw imu data
-        raw_imu_subscriber = Node(
+        Node(
             package='amr_slam_nav_core',
             executable='raw_imu_subscriber',
             name='raw_imu_subscriber',
