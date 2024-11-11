@@ -15,6 +15,7 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.event_handlers import OnProcessExit
@@ -30,26 +31,26 @@ def generate_launch_description():
 
     # ======== Declaration of launch arguments ========
     # Arguments for simulation time settings
-    use_sim_time = DeclareLaunchArgument(
+    use_sim_time = LaunchConfiguration(
         'use_sim_time',
         default_value='false',
         description='Use simulation (Gazebo) clock if true'
     )
 
     # Arguments for Cartographer settings    
-    resolution = DeclareLaunchArgument(
+    resolution = LaunchConfiguration(
         'resolution',
         default_value='0.05',
         description='Resolution of the occupancy grid'
     )
-    publish_period_sec = DeclareLaunchArgument(
+    publish_period_sec = LaunchConfiguration(
         'publish_period_sec',
         default_value='1.0',
         description='Publish period for occupancy grid'
     )
 
     # Arguments for map saving
-    map_name_arg = DeclareLaunchArgument(
+    map_name_arg = LaunchConfiguration(
         'map_name',
         default_value='map',
         description='Name of the map to save'
@@ -110,10 +111,10 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     # Launch arguments declaration
-    ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false'))
-    ld.add_action(DeclareLaunchArgument('resolution', default_value='0.05'))
-    ld.add_action(DeclareLaunchArgument('publish_period_sec', default_value='1.0'))
-    ld.add_action(DeclareLaunchArgument('map_name_arg', default_value='map'))
+    ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'))
+    ld.add_action(DeclareLaunchArgument('resolution', default_value='0.05', description='Resolution of the occupancy grid'))
+    ld.add_action(DeclareLaunchArgument('publish_period_sec', default_value='1.0', description='Publish period for occupancy grid'))
+    ld.add_action(DeclareLaunchArgument('map_name_arg', default_value='map', description='Name of the map to save'))
 
     # Add nodes to the launch description
     ld.add_action(cartographer_node)
