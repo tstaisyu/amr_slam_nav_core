@@ -38,7 +38,7 @@ private:
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
   static inline rclcpp::Node::SharedPtr global_node_handle = nullptr;
 
-  static void handle_signal(int signal)
+  static void handle_signal(int /*signal*/)
   {
     if (global_node_handle) {
       auto node = std::dynamic_pointer_cast<RebootServiceClient>(global_node_handle->shared_from_this());
