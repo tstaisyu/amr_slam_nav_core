@@ -57,7 +57,7 @@ add_executable(connection_checker src/connection_checker.cpp)
 ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs tf2_geometry_msgs)
 ament_target_dependencies(odometry_publisher rclcpp geometry_msgs nav_msgs tf2_ros tf2 tf2_geometry_msgs)
 ament_target_dependencies(connection_checker rclcpp std_msgs tf2_geometry_msgs)
-ament_target_dependencies(reboot_service_client rclcpp std_srvs tf2_geometry_msgs)
+# ament_target_dependencies(reboot_service_client rclcpp std_srvs tf2_geometry_msgs)
 
 # Installation of targets and resources
 install(TARGETS raw_imu_subscriber odometry_publisher connection_checker
