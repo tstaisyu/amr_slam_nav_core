@@ -1,16 +1,16 @@
 joy_node:
   ros__parameters:
-    device_name: "Logitech F710"
+    device_name: "Logitech Gamepad F710"
     deadzone: 0.1
     autorepeat_rate: 20.0
 
 teleop_twist_joy:
   ros__parameters:
     use_sim_time: false
-    axis_linear: 4  # 右スティックの垂直軸（jstestで確認した軸4）
-    scale_linear: -0.5  # 軸4の上がマイナス値なので反転して正方向に
-    axis_angular: 3  # 右スティックの水平軸（jstestで確認した軸3）
-    scale_angular: 0.5  # 角速度のスケーリングファクタ
+    axis_linear.x: 4  # 右スティックの垂直軸（jstestで確認した軸4）
+    scale_linear.x: 0.5  # 軸4の上がマイナス値なので反転して正方向に
+    axis_angular.yaw: 3  # 右スティックの水平軸（jstestで確認した軸3）
+    scale_angular.yaw: -0.5  # 角速度のスケーリングファクタ
     enable_button: 4  # 左肩ボタンでteleopを有効化
     twist_timeout: 0.5  # 指令タイムアウト時間
     deadzone: 0.1  # ジョイスティックの死ゾーン（小さな入力を無視）
