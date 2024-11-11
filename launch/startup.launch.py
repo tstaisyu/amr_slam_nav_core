@@ -39,7 +39,7 @@ def generate_launch_description():
     # ======== Source the path and configuration file ========
     package_dir = get_package_share_directory('amr_slam_nav_core')
     config_dir = os.path.join(package_dir, 'config')
-    urdf_file = os.path.join(package_dir, 'urdf', 'n_v1.urdf')
+    urdf_dir = os.path.join(package_dir, 'urdf')
 
     # Paths of configuration files
     nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
