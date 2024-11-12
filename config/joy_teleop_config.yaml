@@ -16,11 +16,11 @@ teleop_twist_joy:
     
     # Mapping for linear velocity control
     axis_linear.x: 4  # Vertical axis of the right joystick (confirmed via jstest)
-    scale_linear.x: 0.5  # Scaling factor for linear velocity (positive value)
+    scale_linear.x: 0.1  # Scaling factor for linear velocity (positive value)
     
     # Mapping for angular velocity control
     axis_angular.yaw: 3  # Horizontal axis of the right joystick (confirmed via jstest)
-    scale_angular.yaw: -0.5  # Scaling factor for angular velocity (negative to invert direction)
+    scale_angular.yaw: -0.1  # Scaling factor for angular velocity (negative to invert direction)
     
     # Button configuration
     enable_button: 4  # Left shoulder button to enable teleoperation
