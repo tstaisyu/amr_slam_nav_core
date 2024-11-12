@@ -14,8 +14,8 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
-from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler, ExecuteProcess
+from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.event_handlers import OnProcessExit
@@ -98,19 +98,21 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Including a Launch file for saving maps
-    save_map_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(package_dir, 'launch', 'save_map.launch.py')
-        ),
-        launch_arguments={'map_name': map_name}.items()
+    # Command to save the map using nav2_map_server map_saver_cli
+    save_map_command = ExecuteProcess(
+        cmd=[
+            'ros2', 'run', 'nav2_map_server', 'map_saver_cli',
+            '-f', PathJoinSubstitution([os.path.expanduser('~'), 'maps', map_name])
+        ],
+        name='save_map',
+        output='screen'
     )
-    
-    # An event handler that triggers saving the map when a Cartographer node is closed
+
+    # Event handler to trigger map saving when the Cartographer node exits
     save_map_on_exit = RegisterEventHandler(
         OnProcessExit(
             target_action=cartographer_node,
-            on_exit=[save_map_launch]
+            on_exit=[save_map_command]
         )
     )
 
