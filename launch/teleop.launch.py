@@ -49,6 +49,17 @@ def generate_launch_description():
         arguments=['--ros-args', '--log-level', 'INFO']  # Set log level to INFO
     )
 
+    joy_cmd_vel_relay = Node(
+        package='amr_slam_nav_core',
+        executable='joy_cmd_vel_relay',
+        name='joy_cmd_vel_relay',
+        remappings=[
+            ('input_cmd_vel', 'joy_cmd_vel'),
+            ('output_cmd_vel', 'cmd_vel')
+        ],
+        output='screen'
+    )
+
     # Create and return the LaunchDescription with both nodes
     return LaunchDescription([
         joy_node,
