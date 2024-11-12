@@ -69,7 +69,8 @@ def generate_launch_description():
         ],
         remappings=[
             ('/scan', '/scan_filtered'),
-            ('/odom', '/odometry/filtered')
+            ('/odom', '/odometry/filtered'),
+            ('/imu', '/imu/data_filtered') 
         ],
         output='screen'
     )
