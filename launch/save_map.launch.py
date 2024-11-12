@@ -78,4 +78,7 @@ def generate_launch_description():
     ld.add_action(call_write_state)
     ld.add_action(save_map_event_handler)
 
+    # デバッグ用ログの追加
+    ld.add_action(LogInfo(msg=["save_map.launch.py has been launched with map_name: ", map_name]))
+
     return ld
