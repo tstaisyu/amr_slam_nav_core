@@ -14,68 +14,66 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
-from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, LogInfo, OpaqueFunction
+from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 
-def generate_launch_description():
-    # マップ名を指定する引数の宣言
-    map_name_arg = DeclareLaunchArgument(
-        'map_name',
-        default_value='map',
-        description='Name of the map to save'
-    )
-    
-    map_name = LaunchConfiguration('map_name')
-    
-    # ホームディレクトリのパスを取得
+def save_map(context, *args, **kwargs):
+    map_name = context.perform_substitution(LaunchConfiguration('map_name'))
     home_dir = os.path.expanduser('~')
     map_dir = os.path.join(home_dir, 'maps')
-    
-    # マップ保存ディレクトリを作成（存在しない場合）
-    create_map_dir = ExecuteProcess(
-        cmd=['mkdir', '-p', map_dir],
-        output='screen'
-    )
+
+    # マップディレクトリの作成
+    os.makedirs(map_dir, exist_ok=True)
 
     # pbstreamファイルのパス
     pbstream_file = os.path.join(map_dir, f'{map_name}.pbstream')
 
     # ROSマップファイルのパス
     ros_map_stem = os.path.join(map_dir, map_name)
-    
-    # 保存コマンドの定義
-    save_map_command = [
+
+    # `/write_state` サービスの呼び出し
+    call_write_state = [
         'ros2', 'service', 'call', '/write_state', 'cartographer_ros_msgs/srv/WriteState',
         f'{{"filename": "{pbstream_file}", "include_unfinished_submaps": true}}'
     ]
-    
-    save_map_process = ExecuteProcess(
-        cmd=save_map_command,
-        output='screen',
-        shell=True
-    )
-    
-    # マップ変換コマンドの定義
-    convert_map_command = [
+
+    # pbstreamからROSマップへの変換
+    convert_pbstream = [
         'ros2', 'run', 'cartographer_ros', 'cartographer_pbstream_to_ros_map',
         f'-map_filestem={ros_map_stem}',
         f'-pbstream_filename={pbstream_file}',
         '-resolution=0.05'
     ]
-    
-    convert_map_process = ExecuteProcess(
-        cmd=convert_map_command,
-        output='screen'
-    )
 
-    # ログ出力の追加
-    log_info = LogInfo(msg=[f'Map saved as {ros_map_stem}.yaml and {ros_map_stem}.pgm in {map_dir}'])
-    
-    return LaunchDescription([
-        map_name_arg,
-        create_map_dir,
-        save_map_process,
-        convert_map_process,
-        log_info
-    ])
+    # マップ保存の実行
+    return [
+        ExecuteProcess(
+            cmd=call_write_state,
+            output='screen'
+        ),
+        ExecuteProcess(
+            cmd=convert_pbstream,
+            output='screen'
+        ),
+        LogInfo(
+            msg=[f'Map saved as {ros_map_stem}.yaml and {ros_map_stem}.pgm in {map_dir}']
+        )
+    ]
+
+def generate_launch_description():
+    ld = LaunchDescription()
+
+    # Launch引数の宣言
+    map_name_arg = DeclareLaunchArgument(
+        'map_name',
+        default_value='map',
+        description='Name of the map to save'
+    )
+    ld.add_action(map_name_arg)
+
+    # OpaqueFunctionを使用してマップ保存処理を実行
+    save_map_action = OpaqueFunction(function=save_map)
+    ld.add_action(save_map_action)
+
+    return ld
