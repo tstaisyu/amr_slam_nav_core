@@ -25,27 +25,13 @@ def generate_launch_description():
     package_dir = get_package_share_directory(package_name)
 
     # Declare launch arguments
-    map_name_arg = DeclareLaunchArgument(
-        'map_name',
-        default_value='map_20230427_1500',
-        description='Name of the map to save'
-    )
     rviz_config_file = DeclareLaunchArgument(
         'rviz_config_file',
         default_value=os.path.join(package_dir, 'rviz', 'mapping.rviz'),
         description='Path to the RViz2 config file'
     )
 
-    map_name = LaunchConfiguration('map_name')
     rviz_config = LaunchConfiguration('rviz_config_file')
-
-    # Include the existing mapping.launch.py
-    mapping_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(package_dir, 'launch', 'mapping.launch.py')
-        ),
-        launch_arguments={'map_name': map_name}.items()
-    )
 
     # Rviz2 node
     rviz_node = Node(
@@ -57,8 +43,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        map_name_arg,
         rviz_config_file,
-        mapping_launch,
         rviz_node
     ])
