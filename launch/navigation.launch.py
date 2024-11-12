@@ -47,7 +47,7 @@ def generate_launch_description():
     # マップ読み込みパスの定義
     home_dir = os.path.expanduser('~')
     map_dir = os.path.join(home_dir, 'maps')
-    map_yaml = PathJoinSubstitution([map_dir, map_name, TextSubstitution(text='.yaml')])
+    map_yaml = os.path.join(map_dir, map_name, TextSubstitution(text='.yaml'))
     
     # map_serverノードの定義
     map_server_node = Node(
@@ -86,10 +86,14 @@ def generate_launch_description():
         }.items()
     )
 
-    return LaunchDescription([
-        use_sim_time,
-        map_name_arg,
-        map_server_node,
-        lifecycle_manager_node,
-        bringup_launch
-    ])
+    # ======== Building a launch description ========
+    ld = LaunchDescription()
+
+    # Add the actions to the launch description
+    ld.add_action(use_sim_time)
+    ld.add_action(map_name_arg)
+    ld.add_action(map_server_node)
+    ld.add_action(lifecycle_manager_node)
+    ld.add_action(bringup_launch)
+
+    return ld
