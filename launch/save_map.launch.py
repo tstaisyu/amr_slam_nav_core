@@ -38,12 +38,24 @@ def save_map(context, *args, **kwargs):
         ros_map_stem = os.path.join(map_dir, map_name)
         print(f"ROS map stem: {ros_map_stem}")
 
+        # サービスの待機
+        print("Waiting for /write_state service to become available...")
+        wait_cmd = 'ros2 service wait /write_state --timeout 10'
+        wait_result = subprocess.run(wait_cmd, shell=True, capture_output=True, text=True)
+
+        if wait_result.returncode != 0:
+            print(f"Service /write_state not available: {wait_result.stderr}")
+            return [LogInfo(msg=f"Service /write_state not available: {wait_result.stderr}")]
+        else:
+            print("Service /write_state is available.")
+
         # `/write_state` サービスの呼び出しコマンド
-        call_write_state_cmd = [
+        # JSONを正しくエスケープ
+        call_write_state_cmd = (
             f'ros2 service call /write_state '
             f'cartographer_ros_msgs/srv/WriteState '
             f'"{{\\"filename\\": \\"{pbstream_file}\\", \\"include_unfinished_submaps\\": true}}"'
-        ]
+        )
 
         # サービス呼び出しの実行
         print(f"Calling service to save pbstream: {pbstream_file}")
@@ -65,16 +77,16 @@ def save_map(context, *args, **kwargs):
             return [LogInfo(msg=f"pbstream file is empty: {pbstream_file}")]
 
         # pbstreamからROSマップへの変換コマンド
-        convert_pbstream_cmd = [
+        convert_pbstream_cmd = (
             f'ros2 run cartographer_ros cartographer_pbstream_to_ros_map '
             f'-map_filestem={ros_map_stem} '
             f'-pbstream_filename={pbstream_file} '
             f'-resolution=0.05'
-        ]
+        )
 
         # 変換プロセスの実行
         print(f"Converting pbstream to ROS map: {ros_map_stem}.yaml and {ros_map_stem}.pgm")
-        result = subprocess.run(convert_pbstream_cmd, capture_output=True, text=True)
+        result = subprocess.run(convert_pbstream_cmd, shell=True, capture_output=True, text=True)
 
         if result.returncode != 0:
             print(f"Conversion failed with return code {result.returncode}")
