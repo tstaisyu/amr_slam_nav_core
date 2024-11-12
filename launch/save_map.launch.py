@@ -47,7 +47,7 @@ def generate_launch_description():
     # 保存コマンドの定義
     save_map_command = [
         'ros2', 'service', 'call', '/write_state', 'cartographer_ros_msgs/srv/WriteState',
-        f"{{'filename': '{pbstream_file}', 'include_unfinished_submaps': true}}"
+        f'{{"filename": "{pbstream_file}", "include_unfinished_submaps": true}}'
     ]
     
     save_map_process = ExecuteProcess(
@@ -68,10 +68,14 @@ def generate_launch_description():
         cmd=convert_map_command,
         output='screen'
     )
+
+    # ログ出力の追加
+    log_info = LogInfo(msg=[f'Map saved as {ros_map_stem}.yaml and {ros_map_stem}.pgm in {map_dir}'])
     
     return LaunchDescription([
         map_name_arg,
         create_map_dir,
         save_map_process,
-        convert_map_process
+        convert_map_process,
+        log_info
     ])
