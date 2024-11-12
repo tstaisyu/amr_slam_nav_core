@@ -20,7 +20,8 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     # Get the directory of the package
-    package_dir = get_package_share_directory('amr_slam_nav_core')
+    package_name = 'amr_slam_nav_core'
+    package_dir = get_package_share_directory(package_name)
 
     # Declare and get the map name
     map_name_arg = DeclareLaunchArgument(
