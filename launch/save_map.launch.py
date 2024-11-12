@@ -19,7 +19,10 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    # マップ名の宣言と取得
+    # Get the directory of the package
+    package_dir = get_package_share_directory('amr_slam_nav_core')
+
+    # Declare and get the map name
     map_name_arg = DeclareLaunchArgument(
         'map_name',
         default_value='map',
@@ -27,7 +30,7 @@ def generate_launch_description():
     )
     map_name = LaunchConfiguration('map_name')
 
-    # マップ保存コマンドの設定
+    # Define the command to save the map
     save_map_command = ExecuteProcess(
         cmd=[
             'ros2', 'run', 'nav2_map_server', 'map_saver_cli',
@@ -37,7 +40,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Launch descriptionの作成
+    # Create and return the launch description
     ld = LaunchDescription([
         map_name_arg,
         save_map_command
