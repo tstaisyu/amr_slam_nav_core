@@ -21,19 +21,21 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
+    # Get the directory of the package    
     package_name = 'amr_slam_nav_core'
     package_dir = get_package_share_directory(package_name)
 
     # Declare launch arguments
     rviz_config_file = DeclareLaunchArgument(
         'rviz_config_file',
-        default_value=os.path.join(package_dir, 'rviz', 'mapping.rviz'),
+        default_value=os.path.joinPathJoinSubstitution([package_dir, 'rviz', 'mapping.rviz']),
         description='Path to the RViz2 config file'
     )
 
+    # Define the launch configuration for RViz
     rviz_config = LaunchConfiguration('rviz_config_file')
 
-    # Rviz2 node
+    # Define the RViz node with configuration
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -42,6 +44,7 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Build and return the launch description
     return LaunchDescription([
         rviz_config_file,
         rviz_node
