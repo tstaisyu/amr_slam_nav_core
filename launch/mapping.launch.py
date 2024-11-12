@@ -83,7 +83,9 @@ def generate_launch_description():
         parameters=[{
             'use_sim_time': use_sim_time,
             'resolution': resolution,
-            'publish_period_sec': publish_period_sec
+            'publish_period_sec': publish_period_sec,
+            'map_frame': 'map',
+            'odom_frame': 'odom'        
         }],
         output='screen'
     )
