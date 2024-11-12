@@ -15,7 +15,7 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command, TextSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -47,11 +47,7 @@ def generate_launch_description():
     # マップ読み込みパスの定義
     home_dir = os.path.expanduser('~')
     map_dir = os.path.join(home_dir, 'maps')
-    map_yaml = PathJoinSubstitution([
-        TextSubstitution(text=map_dir + '/'),
-        map_name,
-        TextSubstitution(text='.yaml')
-    ])
+    map_yaml = PathJoinSubstitution([map_dir, map_name, TextSubstitution(text='.yaml')])
     
     # map_serverノードの定義
     map_server_node = Node(
@@ -84,9 +80,9 @@ def generate_launch_description():
             os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
         ),
         launch_arguments={
-            'map': map_yaml,
-            'use_sim_time': use_sim_time,
-            'params_file': os.path.join(nav2_params_dir, 'nav2_params.yaml')
+            'map': Command(['echo', map_yaml]),
+            'use_sim_time': Command(['echo', use_sim_time_lc]),
+            'params_file': Command(['echo', os.path.join(nav2_params_dir, 'nav2_params.yaml')])
         }.items()
     )
 
