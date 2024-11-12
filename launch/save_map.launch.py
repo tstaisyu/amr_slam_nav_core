@@ -23,7 +23,7 @@ def generate_launch_description():
     map_name_arg = DeclareLaunchArgument(
         'map_name',
         default_value='map',
-        description='保存するマップの名前'
+        description='Name of the map to save'
     )
     
     map_name = LaunchConfiguration('map_name')
@@ -37,11 +37,17 @@ def generate_launch_description():
         cmd=['mkdir', '-p', map_dir],
         output='screen'
     )
+
+    # pbstreamファイルのパス
+    pbstream_file = os.path.join(map_dir, f'{map_name}.pbstream')
+
+    # ROSマップファイルのパス
+    ros_map_stem = os.path.join(map_dir, map_name)
     
     # 保存コマンドの定義
     save_map_command = [
         'ros2', 'service', 'call', '/write_state', 'cartographer_ros_msgs/srv/WriteState',
-        "{'filename': '" + map_dir + "/' + '" + map_name.perform(None) + "' + '.pbstream', 'include_unfinished_submaps': true}"
+        f"{{'filename': '{pbstream_file}', 'include_unfinished_submaps': true}}"
     ]
     
     save_map_process = ExecuteProcess(
@@ -53,15 +59,14 @@ def generate_launch_description():
     # マップ変換コマンドの定義
     convert_map_command = [
         'ros2', 'run', 'cartographer_ros', 'cartographer_pbstream_to_ros_map',
-        '-map_filestem=' + map_dir + '/${map_name}',
-        '-pbstream_filename=' + map_dir + '/${map_name}.pbstream',
+        f'-map_filestem={ros_map_stem}',
+        f'-pbstream_filename={pbstream_file}',
         '-resolution=0.05'
     ]
     
     convert_map_process = ExecuteProcess(
         cmd=convert_map_command,
-        output='screen',
-        shell=True
+        output='screen'
     )
     
     return LaunchDescription([
