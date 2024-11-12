@@ -47,7 +47,7 @@ def save_map(context, *args, **kwargs):
 
         # サービス呼び出しの実行
         print(f"Calling service to save pbstream: {pbstream_file}")
-        result = subprocess.run(call_write_state_cmd, capture_output=True, text=True)
+        result = subprocess.run(call_write_state_cmd, shell=True, capture_output=True, text=True)
 
         if result.returncode != 0:
             print(f"Service call failed with return code {result.returncode}")
