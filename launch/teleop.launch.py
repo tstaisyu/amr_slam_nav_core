@@ -16,7 +16,6 @@ import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-from rclpy.qos import qos_profile_sensor_data
 
 def generate_launch_description():
     # Define the package name and retrieve its share directory
@@ -47,8 +46,7 @@ def generate_launch_description():
             ('cmd_vel', 'cmd_vel')  # Remap topics if necessary (currently redundant)
         ],
         output='screen',  # Output logs to the screen
-        arguments=['--ros-args', '--log-level', 'INFO'],  # Set log level to INFO
-        qos_profile=qos_profile_sensor_data
+        arguments=['--ros-args', '--log-level', 'INFO']  # Set log level to INFO
     )
 
     # Create and return the LaunchDescription with both nodes
