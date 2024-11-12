@@ -40,9 +40,9 @@ def save_map(context, *args, **kwargs):
 
         # `/write_state` サービスの呼び出しコマンド
         call_write_state_cmd = [
-            'ros2', 'service', 'call', '/write_state',
-            'cartographer_ros_msgs/srv/WriteState',
-            f'{{"filename": "{pbstream_file}", "include_unfinished_submaps": true}}'
+            f'ros2 service call /write_state '
+            f'cartographer_ros_msgs/srv/WriteState '
+            f'"{{\\"filename\\": \\"{pbstream_file}\\", \\"include_unfinished_submaps\\": true}}"'
         ]
 
         # サービス呼び出しの実行
@@ -66,10 +66,10 @@ def save_map(context, *args, **kwargs):
 
         # pbstreamからROSマップへの変換コマンド
         convert_pbstream_cmd = [
-            'ros2', 'run', 'cartographer_ros', 'cartographer_pbstream_to_ros_map',
-            f'-map_filestem={ros_map_stem}',
-            f'-pbstream_filename={pbstream_file}',
-            '-resolution=0.05'
+            f'ros2 run cartographer_ros cartographer_pbstream_to_ros_map '
+            f'-map_filestem={ros_map_stem} '
+            f'-pbstream_filename={pbstream_file} '
+            f'-resolution=0.05'
         ]
 
         # 変換プロセスの実行
