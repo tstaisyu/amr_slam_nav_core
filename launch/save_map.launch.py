@@ -101,19 +101,19 @@ def save_map(context, *args, **kwargs):
         print(f"An error occurred while saving the map: {e}")
         return [LogInfo(msg=f"An error occurred while saving the map: {e}")]
 
-    def generate_launch_description():
-        ld = LaunchDescription()
+def generate_launch_description():
+    ld = LaunchDescription()
 
-        # Launch引数の宣言
-        map_name_arg = DeclareLaunchArgument(
-            'map_name',
-            default_value='map',
-            description='Name of the map to save'
-        )
-        ld.add_action(map_name_arg)
+    # Launch引数の宣言
+    map_name_arg = DeclareLaunchArgument(
+        'map_name',
+        default_value='map',
+        description='Name of the map to save'
+    )
+    ld.add_action(map_name_arg)
 
-        # OpaqueFunctionを使用してマップ保存処理を実行
-        save_map_action = OpaqueFunction(function=save_map)
-        ld.add_action(save_map_action)
+    # OpaqueFunctionを使用してマップ保存処理を実行
+    save_map_action = OpaqueFunction(function=save_map)
+    ld.add_action(save_map_action)
 
-        return ld
+    return ld
