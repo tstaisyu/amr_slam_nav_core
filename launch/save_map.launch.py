@@ -27,45 +27,29 @@ def save_map(context, *args, **kwargs):
 
         # マップディレクトリの作成
         os.makedirs(map_dir, exist_ok=True)
-
-        # pbstreamファイルのパス
-        pbstream_file = os.path.join(map_dir, f'{map_name}.pbstream')
-
-        # ROSマップファイルのパス
-        ros_map_stem = os.path.join(map_dir, map_name)
-
-        # `/write_state` サービスの呼び出しコマンド
-        call_write_state_cmd = [
-            'ros2', 'service', 'call', '/write_state',
-            'cartographer_ros_msgs/srv/WriteState',
-            f'{{"filename": "{pbstream_file}", "include_unfinished_submaps": true}}'
-        ]
-
-        # pbstreamからROSマップへの変換コマンド
-        convert_pbstream_cmd = [
-            'ros2', 'run', 'cartographer_ros', 'cartographer_pbstream_to_ros_map',
-            f'-map_filestem={ros_map_stem}',
-            f'-pbstream_filename={pbstream_file}',
-            '-resolution=0.05'
-        ]
-
-        # アクションリストの作成
-        actions = [
-            LogInfo(msg=f"Calling service to save pbstream: {pbstream_file}"),
+        return [
+            LogInfo(msg=f"Calling service to save pbstream: {os.path.join(map_dir, map_name + '.pbstream')}"),
             ExecuteProcess(
-                cmd=call_write_state_cmd,
+                cmd=[
+                    'ros2', 'service', 'call', '/write_state',
+                    'cartographer_ros_msgs/srv/WriteState',
+                    f'{{"filename": "{os.path.join(map_dir, map_name + ".pbstream")}", "include_unfinished_submaps": true}}'
+                ],
                 output='screen',
                 shell=True  # シェル経由で実行
             ),
-            LogInfo(msg=f"Converting pbstream to ROS map: {ros_map_stem}.yaml and {ros_map_stem}.pgm"),
+            LogInfo(msg=f"Converting pbstream to ROS map: {map_dir}/{map_name}.yaml and {map_dir}/{map_name}.pgm"),
             ExecuteProcess(
-                cmd=convert_pbstream_cmd,
+                cmd=[
+                    'ros2', 'run', 'cartographer_ros', 'cartographer_pbstream_to_ros_map',
+                    f'-map_filestem={os.path.join(map_dir, map_name)}',
+                    f'-pbstream_filename={os.path.join(map_dir, map_name + ".pbstream")}',
+                    '-resolution=0.05'
+                ],
                 output='screen'
             ),
-            LogInfo(msg=f"Map saved as {ros_map_stem}.yaml and {ros_map_stem}.pgm in {map_dir}")
+            LogInfo(msg=f"Map saved as {map_dir}/{map_name}.yaml and {map_dir}/{map_name}.pgm in {map_dir}")
         ]
-
-        return actions
 
     except Exception as e:
         return [LogInfo(msg=f"An error occurred while saving the map: {e}")]
