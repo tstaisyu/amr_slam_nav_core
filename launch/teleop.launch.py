@@ -46,7 +46,8 @@ def generate_launch_description():
             ('cmd_vel', 'cmd_vel')  # Remap topics if necessary (currently redundant)
         ],
         output='screen',  # Output logs to the screen
-        arguments=['--ros-args', '--log-level', 'INFO']  # Set log level to INFO
+        arguments=['--ros-args', '--log-level', 'INFO'],  # Set log level to INFO
+        qos_profile=qos_profile_sensor_data
     )
 
     # Create and return the LaunchDescription with both nodes
