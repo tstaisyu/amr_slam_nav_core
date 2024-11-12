@@ -14,10 +14,26 @@
 
 import os
 import subprocess
+import time
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, LogInfo, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
+
+def is_service_available(service_name):
+    """
+    指定されたサービスが利用可能かどうかをチェックします。
+    """
+    try:
+        result = subprocess.run(['ros2', 'service', 'list'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"Failed to list services: {result.stderr}")
+            return False
+        services = result.stdout.splitlines()
+        return service_name in services
+    except Exception as e:
+        print(f"Exception while checking service availability: {e}")
+        return False
 
 def save_map(context, *args, **kwargs):
     try:
@@ -39,18 +55,24 @@ def save_map(context, *args, **kwargs):
         print(f"ROS map stem: {ros_map_stem}")
 
         # サービスの待機
-        print("Waiting for /write_state service to become available...")
-        wait_cmd = 'ros2 service wait /write_state --timeout 10'
-        wait_result = subprocess.run(wait_cmd, shell=True, capture_output=True, text=True)
-
-        if wait_result.returncode != 0:
-            print(f"Service /write_state not available: {wait_result.stderr}")
-            return [LogInfo(msg=f"Service /write_state not available: {wait_result.stderr}")]
+        service_name = '/write_state'
+        timeout = 10  # 最大待機時間（秒）
+        interval = 1  # チェック間隔（秒）
+        elapsed = 0
+        print(f"Waiting for {service_name} service to become available...")
+        while elapsed < timeout:
+            if is_service_available(service_name):
+                print(f"Service {service_name} is available.")
+                break
+            else:
+                print(f"Service {service_name} not available yet, waiting...")
+                time.sleep(interval)
+                elapsed += interval
         else:
-            print("Service /write_state is available.")
+            print(f"Service {service_name} not available after {timeout} seconds.")
+            return [LogInfo(msg=f"Service {service_name} not available after {timeout} seconds.")]
 
-        # `/write_state` サービスの呼び出しコマンド
-        # JSONを正しくエスケープ
+        # サービス呼び出しコマンドを文字列形式で定義
         call_write_state_cmd = (
             f'ros2 service call /write_state '
             f'cartographer_ros_msgs/srv/WriteState '
@@ -76,7 +98,7 @@ def save_map(context, *args, **kwargs):
             print(f"pbstream file is empty: {pbstream_file}")
             return [LogInfo(msg=f"pbstream file is empty: {pbstream_file}")]
 
-        # pbstreamからROSマップへの変換コマンド
+        # pbstreamからROSマップへの変換コマンドを文字列形式で定義
         convert_pbstream_cmd = (
             f'ros2 run cartographer_ros cartographer_pbstream_to_ros_map '
             f'-map_filestem={ros_map_stem} '
@@ -108,10 +130,6 @@ def save_map(context, *args, **kwargs):
         # マップ保存完了のログ
         print(f"Map saved as {yaml_file} and {pgm_file} in {map_dir}")
         return [LogInfo(msg=f"Map saved as {yaml_file} and {pgm_file} in {map_dir}")]
-
-    except Exception as e:
-        print(f"An error occurred while saving the map: {e}")
-        return [LogInfo(msg=f"An error occurred while saving the map: {e}")]
 
 def generate_launch_description():
     ld = LaunchDescription()
