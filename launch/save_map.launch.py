@@ -131,6 +131,10 @@ def save_map(context, *args, **kwargs):
         print(f"Map saved as {yaml_file} and {pgm_file} in {map_dir}")
         return [LogInfo(msg=f"Map saved as {yaml_file} and {pgm_file} in {map_dir}")]
 
+    except Exception as e:
+        print(f"An error occurred while saving the map: {e}")
+        return [LogInfo(msg=f"An error occurred while saving the map: {e}")]
+
 def generate_launch_description():
     ld = LaunchDescription()
 
