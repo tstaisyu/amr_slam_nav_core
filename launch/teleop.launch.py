@@ -43,7 +43,7 @@ def generate_launch_description():
         name='teleop_twist_joy',  # Node name
         parameters=[config_file],  # Path to the Teleop Twist Joy configuration file
         remappings=[
-            ('cmd_vel', 'cmd_vel')  # Remap topics if necessary (currently redundant)
+            ('cmd_vel', 'joy_cmd_vel')  # Remap topics if necessary (currently redundant)
         ],
         output='screen',  # Output logs to the screen
         arguments=['--ros-args', '--log-level', 'INFO']  # Set log level to INFO
