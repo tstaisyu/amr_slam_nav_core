@@ -16,7 +16,7 @@ import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import IncludeLaunchDescription, Node
+from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
@@ -25,15 +25,12 @@ def generate_launch_description():
     package_name = 'amr_slam_nav_core'
     package_dir = get_package_share_directory(package_name)
 
-    # Declare launch arguments
-    rviz_config_file = DeclareLaunchArgument(
-        'rviz_config_file',
-        default_value=os.path.joinPathJoinSubstitution([package_dir, 'rviz', 'mapping.rviz']),
-        description='Path to the RViz2 config file'
-    )
+    # Define the path to the RViz configuration file
+    rviz_dir = os.path.join(package_dir, 'rviz')
+    rviz_file = os.path.join(rviz_dir, 'mapping.rviz')
 
-    # Define the launch configuration for RViz
-    rviz_config = LaunchConfiguration('rviz_config_file')
+    # Declare launch arguments
+    rviz_config = LaunchConfiguration('rviz_config_file', default=rviz_file)
 
     # Define the RViz node with configuration
     rviz_node = Node(
@@ -44,8 +41,13 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Build and return the launch description
-    return LaunchDescription([
-        rviz_config_file,
-        rviz_node
-    ])
+    # ======== Building a launch description ========
+    ld = LaunchDescription()
+
+    # Add the actions to the launch description
+    ld.add_action(DeclareLaunchArgument('rviz_config', default_value=rviz_file, description='Full path to the RViz config file to use'))
+
+    # Declare launch arguments
+    ld.add_action(rviz_node)
+
+    return ld
