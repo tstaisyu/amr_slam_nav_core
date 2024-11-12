@@ -14,12 +14,21 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, Shutdown
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
+    # ======== Source the path and configuration file ========
+    package_name = 'amr_slam_nav_core'
+    package_dir = get_package_share_directory(package_name)
+
+    # Source the Nav2 package and configuration file
+    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+    nav2_params_dir = os.path.join(package_dir, 'config')
+
     # Launch引数の宣言
     use_sim_time = DeclareLaunchArgument(
         'use_sim_time',
@@ -55,9 +64,36 @@ def generate_launch_description():
             'yaml_filename': map_yaml
         }]
     )
-    
+
+    # Node to manage lifecycle transitions
+    lifecycle_manager_node = Node(
+        package='nav2_lifecycle_manager',
+        executable='lifecycle_manager',
+        name='lifecycle_manager',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'autostart': True,
+            'node_names': ['map_server', 'amcl', 'controller_server', 'planner_server', 'recoveries_server', 'bt_navigator']
+        }]
+    )
+
+    # Include the Nav2 bringup launch file for additional configurations
+    bringup_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
+        ),
+        launch_arguments={
+            'map': map_yaml,
+            'use_sim_time': use_sim_time,
+            'params_file': os.path.join(nav2_params_dir, 'nav2_params.yaml')
+        }.items()
+    )
+
     return LaunchDescription([
         use_sim_time,
         map_name_arg,
         map_server_node,
+        lifecycle_manager_node,
+        bringup_launch
     ])
