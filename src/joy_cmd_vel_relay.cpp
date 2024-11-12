@@ -25,13 +25,13 @@ public:
         // 購読するトピックのQoS設定
         auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
         subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
-            "joy_cmd_vel",
+            "input_cmd_vel",
             qos,
             std::bind(&CmdVelRelay::listener_callback, this, std::placeholders::_1));
 
         // 発行するトピックのQoS設定
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>(
-            "cmd_vel",
+            "output_cmd_vel",
             qos);
     }
 
