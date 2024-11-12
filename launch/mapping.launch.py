@@ -54,7 +54,7 @@ def generate_launch_description():
         description='Name of the map to save'
     )
     
-    # Launch引数の取得
+    # Arguments for Cartographer settings
     use_sim_time = LaunchConfiguration('use_sim_time')
     resolution = LaunchConfiguration('resolution')
     publish_period_sec = LaunchConfiguration('publish_period_sec')
