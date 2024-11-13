@@ -50,9 +50,9 @@ def generate_launch_description():
             os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
         ),
         launch_arguments={
-            'map': Command(['echo', map_yaml]),
-            'use_sim_time': Command(['echo', use_sim_time]),
-            'params_file': Command(['echo', os.path.join(nav2_params_dir, 'nav2_params.yaml')])
+            'map': map_yaml,
+            'use_sim_time': use_sim_time,
+            'params_file': os.path.join(nav2_params_dir, 'nav2_params.yaml')
         }.items()
     )
 
