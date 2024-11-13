@@ -11,5 +11,3 @@ delay=2
 
 # Start mapping
 ros2 launch amr_slam_nav_core navigation.launch.py
-
-ros2 launch nav2_bringup bringup_launch.py
