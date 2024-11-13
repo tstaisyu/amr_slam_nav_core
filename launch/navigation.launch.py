@@ -14,8 +14,8 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command, TextSubstitution
+from launch.actions import DeclareLaunchArgument, LogInfo
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -29,25 +29,19 @@ def generate_launch_description():
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     nav2_params_dir = os.path.join(package_dir, 'config')
 
-    # Launch引数の宣言
-    use_sim_time = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='false',
-        description='Use simulation (Gazebo) clock if true'
-    )
-    map_name_arg = DeclareLaunchArgument(
-        'map_name',
-        default_value='map',
-        description='Name of the map to load'
-    )
+    # Arguments for simulation time settings
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+
+    map_name_arg = LaunchConfiguration('map_name', default='map')
     
-    use_sim_time = LaunchConfiguration('use_sim_time')
-    map_name = LaunchConfiguration('map_name')
-    
+    # ======== Declaration of launch arguments ========   
     # マップ読み込みパスの定義
     home_dir = os.path.expanduser('~')
     map_dir = os.path.join(home_dir, 'maps')
-    map_yaml = os.path.join(map_dir, map_name, TextSubstitution(text='.yaml'))
+    map_yaml = PathJoinSubstitution([
+        map_dir,
+        PythonExpression(["'", LaunchConfiguration('map_name'), ".yaml'"])
+    ])
     
     # map_serverノードの定義
     map_server_node = Node(
@@ -90,8 +84,9 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     # Add the actions to the launch description
-    ld.add_action(use_sim_time)
-    ld.add_action(map_name_arg)
+    ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'))
+    ld.add_action(DeclareLaunchArgument('map_name', default_value='map', description='Name of the map to save'))
+
     ld.add_action(map_server_node)
     ld.add_action(lifecycle_manager_node)
     ld.add_action(bringup_launch)
