@@ -24,6 +24,8 @@ public:
     {
         // 購読するトピックのQoS設定
         auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+        qos.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
+        qos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
         subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
             "input_cmd_vel",
             qos,
