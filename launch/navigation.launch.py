@@ -36,7 +36,7 @@ def generate_launch_description():
     map_name_arg = LaunchConfiguration('map_name', default='map')
     
     # ======== Declaration of launch arguments ========   
-    # Definition of the map path
+    # Define the map file path
     home_dir = os.path.expanduser('~')
     map_dir = os.path.join(home_dir, 'maps')
     map_yaml = PathJoinSubstitution([
@@ -44,31 +44,6 @@ def generate_launch_description():
         PythonExpression(["'", LaunchConfiguration('map_name'), ".yaml'"])
     ])
     
-    # Node for map server
-    map_server_node = Node(
-        package='nav2_map_server',
-        executable='map_server',
-        name='map_server',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'yaml_filename': map_yaml
-        }]
-    )
-
-    # Node to manage lifecycle transitions
-    lifecycle_manager_node = Node(
-        package='nav2_lifecycle_manager',
-        executable='lifecycle_manager',
-        name='lifecycle_manager',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'autostart': True,
-            'node_names': ['map_server', 'amcl', 'controller_server', 'planner_server', 'recoveries_server', 'bt_navigator']
-        }]
-    )
-
     # Include the Nav2 bringup launch file for additional configurations
     bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -90,8 +65,6 @@ def generate_launch_description():
     ld.add_action(DeclareLaunchArgument('map_name', default_value='map', description='Name of the map to save'))
 
     # Add the nodes to the launch description
-    ld.add_action(map_server_node)
-    ld.add_action(lifecycle_manager_node)
     ld.add_action(bringup_launch)
 
     return ld
