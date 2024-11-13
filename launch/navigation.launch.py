@@ -32,10 +32,11 @@ def generate_launch_description():
     # Arguments for simulation time settings
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
+    # Arguments for map saving
     map_name_arg = LaunchConfiguration('map_name', default='map')
     
     # ======== Declaration of launch arguments ========   
-    # マップ読み込みパスの定義
+    # Definition of the map path
     home_dir = os.path.expanduser('~')
     map_dir = os.path.join(home_dir, 'maps')
     map_yaml = PathJoinSubstitution([
@@ -43,7 +44,7 @@ def generate_launch_description():
         PythonExpression(["'", LaunchConfiguration('map_name'), ".yaml'"])
     ])
     
-    # map_serverノードの定義
+    # Node for map server
     map_server_node = Node(
         package='nav2_map_server',
         executable='map_server',
@@ -81,12 +82,14 @@ def generate_launch_description():
     )
 
     # ======== Building a launch description ========
+    # Create the launch description
     ld = LaunchDescription()
 
     # Add the actions to the launch description
     ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'))
     ld.add_action(DeclareLaunchArgument('map_name', default_value='map', description='Name of the map to save'))
 
+    # Add the nodes to the launch description
     ld.add_action(map_server_node)
     ld.add_action(lifecycle_manager_node)
     ld.add_action(bringup_launch)
