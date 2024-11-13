@@ -118,42 +118,70 @@ sudo chmod +x ${this package}/scripts/laserscan_sample.sh
 ./scripts/laserscan_sample.sh
 ```
 
-## パッケージのビルド
-以下の手順に従って、amr_slam_nav_core パッケージをビルドします。
+## パッケージのセットアップガイド
 
-### 前提条件
-- ROS 2 がインストールされていること。
-- Git がインストールされていること。
-- 必要な依存パッケージがインストールされていること。
+以下の手順に従って、`amr_slam_nav_core` パッケージを新規のROS 2ワークスペースにクローンし、ビルドしてください。
 
-1. ROS 2ワークスペースの作成
+1. 事前準備
+
+#### 必要なツールのインストール
+
+ROS 2がインストールされていることを確認してください。また、以下のツールがインストールされていることを確認します。
+
+```bash
+sudo apt update
+sudo apt install -y python3-colcon-common-extensions python3-rosdep python3-vcstool git
+```
+#### rosdepの初期化
+初めてrosdepを使用する場合は、以下のコマンドを実行します。
+
+```bash
+sudo rosdep init
+rosdep update
+```
+
+2. ROS 2ワークスペースの作成
 もしまだROS 2ワークスペースを作成していない場合は、以下のコマンドで作成します。既にワークスペースが存在する場合は、このステップをスキップしてください。
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 ```
 
-2. パッケージのクローン
+3. パッケージのクローン
 amr_slam_nav_core パッケージをROS 2ワークスペースの src ディレクトリにクローンします。
+
 ```bash
 git clone https://github.com/tstaisyu/amr_slam_nav_core.git
 ```
 
-3. 依存関係の解決
+4. 依存関係の解決
 ワークスペースのルートディレクトリに戻り、rosdep を使用して依存関係をインストールします。
+
 ```bash
 cd ~/ros2_ws
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
+rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
 ```
 
-4. パッケージのビルド
+## パッケージのビルド
+以下の手順に従って、`amr_slam_nav_core` パッケージをビルドします。
+
+### 前提条件
+- ROS 2 がインストールされていること。
+- Git がインストールされていること。
+- 必要な依存パッケージがインストールされていること。
+
+1. パッケージのビルド
 colcon を使用してパッケージをビルドします。
 ```bash
 colcon build --packages-select amr_slam_nav_core
 ```
 
-5. ワークスペースのソース
+※ 依存関係がある場合は、全体をビルドすることをお勧めします。
+```bash
+colcon build
+```
+
+2. ワークスペースのソース
 ビルドが完了したら、ワークスペースをソースします。
 ```bash
 source install/setup.bash
