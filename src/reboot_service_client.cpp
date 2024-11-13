@@ -15,7 +15,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
-#include <signal.h>
 #include <memory>
 
 class RebootServiceClient : public rclcpp::Node
@@ -26,28 +25,23 @@ public:
   {
     left_client_ = this->create_client<std_srvs::srv::Trigger>("/left_wheel/reboot_service");
     right_client_ = this->create_client<std_srvs::srv::Trigger>("/right_wheel/reboot_service");
-
-    // Set custom signal handler
-    signal(SIGINT, handle_signal);
-    // Store the node handle globally to access in the signal handler
     global_node_handle = this->shared_from_this();
+    // デストラクタでリブート処理を行う
   }
+
+  ~RebootServiceClient()
+  {
+    if (rclcpp::ok()) {  // Ensure ROS 2 is still running
+      reboot_wheels();
+    }
+  }
+
+  // 共通のノードハンドルを登録
+  static inline rclcpp::Node::SharedPtr global_node_handle = nullptr;
 
 private:
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr left_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
-  static inline rclcpp::Node::SharedPtr global_node_handle = nullptr;
-
-  static void handle_signal(int /*signal*/)
-  {
-    if (global_node_handle) {
-      auto node = std::dynamic_pointer_cast<RebootServiceClient>(global_node_handle->shared_from_this());
-      if (node) {
-        node->reboot_wheels();
-      }
-      rclcpp::shutdown();
-    }
-  }
 
   void reboot_wheels()
   {
