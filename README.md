@@ -143,6 +143,7 @@ rosdep update
 2. ROS 2ワークスペースの作成
 もしまだROS 2ワークスペースを作成していない場合は、以下のコマンドで作成します。既にワークスペースが存在する場合は、このステップをスキップしてください。
 ```bash
+source ~/.bashrc
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 ```
