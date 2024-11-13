@@ -62,10 +62,19 @@ ament_target_dependencies(reboot_service_client rclcpp std_srvs tf2_geometry_msg
 ament_target_dependencies(joy_cmd_vel_relay rclcpp geometry_msgs)
 
 # Installation of targets and resources
-install(TARGETS raw_imu_subscriber odometry_publisher connection_checker reboot_service_client joy_cmd_vel_relay
+install(TARGETS
+  raw_imu_subscriber
+  odometry_publisher
+  connection_checker
+  reboot_service_client
+  joy_cmd_vel_relay
   DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY launch config urdf rviz
+install(DIRECTORY
+  launch
+  config
+  urdf
+  rviz
   DESTINATION share/${PROJECT_NAME})
 
 ament_export_dependencies(rosidl_default_runtime)
