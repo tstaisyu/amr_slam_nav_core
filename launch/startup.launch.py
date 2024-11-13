@@ -219,7 +219,10 @@ def generate_launch_description():
             package='amr_slam_nav_core',
             executable='reboot_service_client',
             name='reboot_service_client',
-            output='screen'
+            on_exit=[launch.actions.ExecuteProcess(
+                cmd=['echo', 'Reboot service is called'],
+                name='reboot_notifier'
+            )]
         ),
     ])
 
