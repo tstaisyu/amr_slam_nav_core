@@ -25,33 +25,32 @@ public:
   {
     left_client_ = this->create_client<std_srvs::srv::Trigger>("/left_wheel/reboot_service");
     right_client_ = this->create_client<std_srvs::srv::Trigger>("/right_wheel/reboot_service");
-    global_node_handle = this->shared_from_this();
-    // デストラクタでリブート処理を行う
+
+    RCLCPP_INFO(this->get_logger(), "RebootServiceClient initialized.");
   }
-
-  ~RebootServiceClient()
-  {
-    if (rclcpp::ok()) {  // Ensure ROS 2 is still running
-      reboot_wheels();
-    }
-  }
-
-  // 共通のノードハンドルを登録
-  static inline rclcpp::Node::SharedPtr global_node_handle = nullptr;
-
-private:
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr left_client_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
 
   void reboot_wheels()
   {
+    RCLCPP_INFO(this->get_logger(), "Rebooting wheels...");
+
+    // サービスが利用可能になるまで待機（最大5秒）
+    if (!left_client_->wait_for_service(std::chrono::seconds(5))) {
+      RCLCPP_ERROR(this->get_logger(), "Left wheel reboot service not available.");
+      return;
+    }
+
+    if (!right_client_->wait_for_service(std::chrono::seconds(5))) {
+      RCLCPP_ERROR(this->get_logger(), "Right wheel reboot service not available.");
+      return;
+    }
+
     auto left_request = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto right_request = std::make_shared<std_srvs::srv::Trigger::Request>();
 
     auto left_future = left_client_->async_send_request(left_request);
     auto right_future = right_client_->async_send_request(right_request);
 
-    // Wait for both services to complete
+    // サービスレスポンスの待機
     auto left_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), left_future);
     auto right_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), right_future);
 
@@ -63,16 +62,28 @@ private:
         RCLCPP_ERROR(this->get_logger(), "Failed to reboot wheels: Left: %s, Right: %s",
                      left_future.get()->message.c_str(), right_future.get()->message.c_str());
       }
-    } else {
+    }
+    else
+    {
       RCLCPP_ERROR(this->get_logger(), "Failed to call service on one or both wheels.");
     }
   }
+
+private:
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr left_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
+
+
 };
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<RebootServiceClient>();
+  // シャットダウン時に reboot_wheels を呼び出す
+  rclcpp::on_shutdown([node]() {
+    node->reboot_wheels();
+  });
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
