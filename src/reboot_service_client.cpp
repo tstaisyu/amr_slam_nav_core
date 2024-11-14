@@ -125,9 +125,6 @@ int main(int argc, char ** argv)
 
     rclcpp::spin_some(node->get_node_base_interface());
 
-    // Register a shutdown callback to reboot wheels when the node is shutting down
-    rclcpp::shutdown();
-
     // Shutdown ROS 2
     rclcpp::shutdown();
     return 0;
