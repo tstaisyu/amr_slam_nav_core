@@ -20,15 +20,16 @@ teleop_twist_joy:
     
     # Mapping for angular velocity control
     axis_angular.yaw: 3  # Horizontal axis of the right joystick (confirmed via jstest)
-    scale_angular.yaw: -0.1  # Scaling factor for angular velocity (negative to invert direction)
+    scale_angular.yaw: 0.1  # Scaling factor for angular velocity (negative to invert direction)
     
     # Button configuration
     enable_button: 4  # Left shoulder button to enable teleoperation
     enable_turbo_button: 5  # Right shoulder button to toggle turbo mode
-    
+
     # Turbo mode scaling factor
-    turbo_scale: 2.0  # Scaling factor multiplier when turbo mode is active
-    
+    scale_linear_turbo.x: 0.3  # Scaling factor multiplier when turbo mode is active
+    scale_angular_turbo.yaw: 0.3  # Scaling factor multiplier when turbo mode is active
+
     # Timeout for sending Twist messages (in seconds)
     twist_timeout: 0.5  # If no input is received within this duration, velocities reset to zero
     
