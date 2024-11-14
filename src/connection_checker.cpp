@@ -48,14 +48,17 @@ private:
   // Set up subscriptions to wheel connection response topics
   void init_subscriptions()
   {
+    auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+    qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
+
     left_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-      "/left_wheel/connection_response", 10, 
+      "/left_wheel/connection_response", qos, 
       [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
         this->check_connection(msg, "left_wheel");
       });
           
     right_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-      "/right_wheel/connection_response", 10,
+      "/right_wheel/connection_response", qos,
       [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
         this->check_connection(msg, "right_wheel");
       });
