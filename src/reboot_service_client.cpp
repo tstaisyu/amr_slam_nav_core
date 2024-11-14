@@ -33,8 +33,12 @@ public:
 
     LifecycleNodeInterface::CallbackReturn on_configure(const State &)
     {
-        left_client_ = this->create_client<std_srvs::srv::Trigger>("/left_wheel/reboot_service");
-        right_client_ = this->create_client<std_srvs::srv::Trigger>("/right_wheel/reboot_service");
+        this->declare_parameter<std::string>("left_wheel_service", "/left_wheel/reboot_service");
+        this->declare_parameter<std::string>("right_wheel_service", "/right_wheel/reboot_service");
+
+        left_client_ = this->create_client<std_srvs::srv::Trigger>(get_parameter("left_wheel_service").as_string());
+        right_client_ = this->create_client<std_srvs::srv::Trigger>(get_parameter("right_wheel_service").as_string());
+
         RCLCPP_INFO(this->get_logger(), "RebootServiceClient configured.");
         return LifecycleNodeInterface::CallbackReturn::SUCCESS;
     }
@@ -83,27 +87,37 @@ private:
             RCLCPP_ERROR(this->get_logger(), "Left wheel reboot service not available.");
             return;
         }
+        RCLCPP_INFO(this->get_logger(), "Left wheel reboot service is available.");
 
         // Wait for the right wheel reboot service to be available (maximum 5 seconds)
         if (!right_client_->wait_for_service(std::chrono::seconds(5))) {
             RCLCPP_ERROR(this->get_logger(), "Right wheel reboot service not available.");
             return;
         }
+        RCLCPP_INFO(this->get_logger(), "Right wheel reboot service is available.");
 
         // Create service requests for both wheels
         auto left_request = std::make_shared<std_srvs::srv::Trigger::Request>();
         auto right_request = std::make_shared<std_srvs::srv::Trigger::Request>();
 
         // Send asynchronous service requests
+        RCLCPP_INFO(this->get_logger(), "Sending reboot request to left wheel.");
         auto left_future = left_client_->async_send_request(left_request);
+
+        RCLCPP_INFO(this->get_logger(), "Sending reboot request to right wheel.");
         auto right_future = right_client_->async_send_request(right_request);
 
         // Wait for the service responses
-        auto left_result = rclcpp::spin_until_future_complete(get_node_base_interface(), left_future);
-        auto right_result = rclcpp::spin_until_future_complete(get_node_base_interface(), right_future);
+        RCLCPP_INFO(this->get_logger(), "Waiting for left wheel reboot response.");
+        auto left_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), left_future);
+        RCLCPP_INFO(this->get_logger(), "Waiting for right wheel reboot response.");
+        auto right_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), right_future);
 
         // Check the results of the service calls
         if (left_result == rclcpp::FutureReturnCode::SUCCESS && right_result == rclcpp::FutureReturnCode::SUCCESS) {
+            auto left_response = left_future.get();
+            auto right_response = right_future.get();
+
             if (left_future.get()->success && right_future.get()->success) {
                 RCLCPP_INFO(this->get_logger(), "Both wheels rebooted successfully: Left: %s, Right: %s",
                             left_future.get()->message.c_str(), right_future.get()->message.c_str());
