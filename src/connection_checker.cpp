@@ -20,70 +20,76 @@
 class ConnectionChecker : public rclcpp::Node
 {
 public:
-  ConnectionChecker()
-  : Node("connection_checker")
-  {
-    init_publisher(); // Initialize the publisher for connection checks
-    init_subscriptions(); // Setup subscriptions to check connections for each wheel
-    init_timer(); // Start a timer to periodically check connections
-  }
+    ConnectionChecker()
+    : Node("connection_checker"), left_connected_(false), right_connected_(false)
+    {
+        init_publisher(); // Initialize the publisher for connection checks
+        init_subscriptions(); // Setup subscriptions to check connections for each wheel
+        init_timer(); // Start a timer to periodically check connections
+    }
 
 private:
-  // Initialize the publisher with the appropriate topic and QoS settings
-  void init_publisher()
-  {
-    publisher_ = this->create_publisher<std_msgs::msg::Int32>("connection_check_request", 10);
-  }
-
-  // Helper function to log connection status based on received messages
-  void check_connection(const std::shared_ptr<const std_msgs::msg::Int32> msg, const std::string &wheel_name)
-  {
-    if (msg->data == 1) {
-      RCLCPP_INFO(this->get_logger(), "%s connected.", wheel_name.c_str());
-      if (timer_) {
-          timer_->cancel();  // Cancel the timer after a successful response
-          timer_.reset();  // Optionally reset the timer to release resources
-      }
-    } else {
-      RCLCPP_WARN(this->get_logger(), "%s not connected.", wheel_name.c_str());
+    // Initialize the publisher with the appropriate topic and QoS settings
+    void init_publisher()
+    {
+        publisher_ = this->create_publisher<std_msgs::msg::Int32>("connection_check_request", 10);
     }
-  }
 
-  // Set up subscriptions to wheel connection response topics
-  void init_subscriptions()
-  {
-    auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
-    qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
+    // Helper function to log connection status based on received messages
+    void check_connection(const std::shared_ptr<const std_msgs::msg::Int32> msg, const std::string &wheel_name)
+    {
+        if (msg->data == 1) {
+            RCLCPP_INFO(this->get_logger(), "%s connected.", wheel_name.c_str());
+            if (wheel_name == "left_wheel") {
+                left_connected_ = true;
+            } else if (wheel_name == "right_wheel") {
+                right_connected_ = true;
+            }
+            if (left_connected_ && right_connected_ && timer_) {
+                timer_->cancel();  // Cancel the timer after both wheels are confirmed connected
+                timer_.reset();  // Reset the timer to release resources
+            }
+        } else {
+            RCLCPP_WARN(this->get_logger(), "%s not connected.", wheel_name.c_str());
+        }
+    }
 
-    left_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-      "/left_wheel/connection_response", qos, 
-      [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
-        this->check_connection(msg, "left_wheel");
-      });
-          
-    right_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-      "/right_wheel/connection_response", qos,
-      [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
-        this->check_connection(msg, "right_wheel");
-      });
-  }
+    // Set up subscriptions to wheel connection response topics
+    void init_subscriptions()
+    {
+        auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+        qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 
-  // Initialize a timer to publish connection check requests
-  void init_timer()
-  {
-    timer_ = this->create_wall_timer(
-      std::chrono::seconds(1), [this]() {
-        std_msgs::msg::Int32 msg;
-        msg.data = 1;
-        publisher_->publish(msg);
-        RCLCPP_DEBUG(this->get_logger(), "Published connection check request.");
-      });
-  }
+        left_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
+            "/left_wheel/connection_response", qos, 
+            [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
+                this->check_connection(msg, "left_wheel");
+            });
+            
+        right_wheel_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
+            "/right_wheel/connection_response", qos,
+            [this](const std::shared_ptr<const std_msgs::msg::Int32> msg) {
+                this->check_connection(msg, "right_wheel");
+            });
+    }
 
-  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
-  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr left_wheel_subscription_;
-  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr right_wheel_subscription_;
-  rclcpp::TimerBase::SharedPtr timer_;
+    // Initialize a timer to publish connection check requests
+    void init_timer()
+    {
+        timer_ = this->create_wall_timer(
+            std::chrono::seconds(1), [this]() {
+                std_msgs::msg::Int32 msg;
+                msg.data = 1;
+                publisher_->publish(msg);
+                RCLCPP_DEBUG(this->get_logger(), "Published connection check request.");
+         });
+    }
+
+    rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr left_wheel_subscription_;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr right_wheel_subscription_;
+    rclcpp::TimerBase::SharedPtr timer_;
+    bool left_connected_, right_connected_;  
 };
 
 int main(int argc, char ** argv)
