@@ -55,9 +55,13 @@ private:
 
 int main(int argc, char ** argv)
 {
+    // Initialize ROS 2
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<CmdVelRelay>();
-    rclcpp::spin(node);
+
+    // Create and spin the PoseSaver node
+    rclcpp::spin(std::make_shared<PoseSaver>());
+
+    // Shutdown ROS 2
     rclcpp::shutdown();
     return 0;
 }
