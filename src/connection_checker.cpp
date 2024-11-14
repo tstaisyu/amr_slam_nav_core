@@ -40,6 +40,10 @@ private:
   {
     if (msg->data == 1) {
       RCLCPP_INFO(this->get_logger(), "%s connected.", wheel_name.c_str());
+      if (timer_) {
+          timer_->cancel();  // Cancel the timer after a successful response
+          timer_.reset();  // Optionally reset the timer to release resources
+      }
     } else {
       RCLCPP_WARN(this->get_logger(), "%s not connected.", wheel_name.c_str());
     }
