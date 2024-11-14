@@ -229,8 +229,8 @@ def generate_launch_description():
             goal_state='unconfigured',
             entities=[
                 ExecuteProcess(
-                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'configure']
-                    name='configure_reboot_service_client'
+                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'configure'],
+                    name='configure_reboot_service_client',
                 )
             ]
         )
@@ -242,8 +242,8 @@ def generate_launch_description():
             goal_state='inactive',
             entities=[
                 ExecuteProcess(
-                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'activate']
-                    name='activate_reboot_service_client'
+                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'activate'],
+                    name='activate_reboot_service_client',
                 )
             ]
         )
