@@ -215,61 +215,6 @@ def generate_launch_description():
         ),
     ])
 
-    reboot_service_client = LifecycleNode(
-            package='amr_slam_nav_core',
-            executable='reboot_service_client',
-            name='reboot_service_client',
-            namespace='',
-            output='screen',
-        )
-
-    configure_transition_handler = RegisterEventHandler(
-        OnStateTransition(
-            target_lifecycle_node=reboot_service_client,
-            goal_state='unconfigured',
-            entities=[
-                ExecuteProcess(
-                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'configure'],
-                    name='configure_reboot_service_client',
-                )
-            ]
-        )
-    )
-
-    activate_transition_handler = RegisterEventHandler(
-        OnStateTransition(
-            target_lifecycle_node=reboot_service_client,
-            goal_state='inactive',
-            entities=[
-                ExecuteProcess(
-                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'activate'],
-                    name='activate_reboot_service_client',
-                )
-            ]
-        )
-    )
-
-    # シャットダウン時のイベントハンドラ
-    shutdown_event_handler = RegisterEventHandler(
-        OnShutdown(
-            on_shutdown=[
-                TimerAction(
-                    period=2.0,  # 2秒後にサービス呼び出しを実行
-                    actions=[
-                        ExecuteProcess(
-                            cmd=['ros2', 'service', 'call', '/left_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
-                            name='call_left_reboot_service'
-                        ),
-                        ExecuteProcess(
-                            cmd=['ros2', 'service', 'call', '/right_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
-                            name='call_right_reboot_service'
-                        )
-                    ]
-                )
-            ]
-        )
-    )
-
     # ======== Building a launch description ========
     ld = LaunchDescription()
 
@@ -289,11 +234,5 @@ def generate_launch_description():
     ld.add_action(sensor_nodes)
     ld.add_action(navigation_nodes)
     ld.add_action(communication_nodes)
-    ld.add_action(reboot_service_client)
-
-    # Add event handlers
-    ld.add_action(configure_transition_handler)
-    ld.add_action(activate_transition_handler)
-    ld.add_action(shutdown_event_handler)
 
     return ld
