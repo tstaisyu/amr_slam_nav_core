@@ -229,7 +229,8 @@ def generate_launch_description():
             goal_state='unconfigured',
             entities=[
                 ExecuteProcess(
-                    cmd=['ros2', 'lifecycle', 'set', '/reboot_service_client', 'configure']
+                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'configure']
+                    name='configure_reboot_service_client'
                 )
             ]
         )
@@ -241,7 +242,8 @@ def generate_launch_description():
             goal_state='inactive',
             entities=[
                 ExecuteProcess(
-                    cmd=['ros2', 'lifecycle', 'set', '/reboot_service_client', 'activate']
+                    cmd=['ros2', 'lifecycle', 'set', 'reboot_service_client', 'activate']
+                    name='activate_reboot_service_client'
                 )
             ]
         )
@@ -251,15 +253,18 @@ def generate_launch_description():
     shutdown_event_handler = RegisterEventHandler(
         OnShutdown(
             on_shutdown=[
-                # 左車輪の再起動サービスを呼び出し
-                ExecuteProcess(
-                    cmd=['ros2', 'service', 'call', '/left_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
-                    name='call_left_reboot_service'
-                ),
-                # 右車輪の再起動サービスを呼び出し
-                ExecuteProcess(
-                    cmd=['ros2', 'service', 'call', '/right_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
-                    name='call_right_reboot_service'
+                TimerAction(
+                    period=2.0,  # 2秒後にサービス呼び出しを実行
+                    actions=[
+                        ExecuteProcess(
+                            cmd=['ros2', 'service', 'call', '/left_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
+                            name='call_left_reboot_service'
+                        ),
+                        ExecuteProcess(
+                            cmd=['ros2', 'service', 'call', '/right_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
+                            name='call_right_reboot_service'
+                        )
+                    ]
                 )
             ]
         )
