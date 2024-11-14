@@ -15,10 +15,13 @@
 import os
 import launch
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction
+from launch.actions import DeclareLaunchArgument, GroupAction, RegisterEventHandler, ExecuteProcess
+from launch.event_handlers import OnShutdown
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
+from launch_ros.actions import Node, LifecycleNode
+from launch_ros.event_handlers import OnStateTransition
+from launch_ros.lifecycle import NodeState
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
@@ -219,12 +222,30 @@ def generate_launch_description():
             package='amr_slam_nav_core',
             executable='reboot_service_client',
             name='reboot_service_client',
-            on_exit=[launch.actions.ExecuteProcess(
+            output='screen',
+            # Ensuring this node is started after micro-ros-agent nodes
+            on_exit=[ExecuteProcess(
                 cmd=['echo', 'Reboot service is called'],
                 name='reboot_notifier'
             )]
         ),
     ])
+
+    # OnShutdown event to call the reboot service
+    shutdown_event_handler = RegisterEventHandler(
+        OnShutdown(
+            on_shutdown=[
+                ExecuteProcess(
+                    cmd=['ros2', 'service', 'call', '/left_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
+                    name='call_left_reboot_service'
+                ),
+                ExecuteProcess(
+                    cmd=['ros2', 'service', 'call', '/right_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
+                    name='call_right_reboot_service'
+                )
+            ]
+        )
+    )
 
     # ======== Building a launch description ========
     ld = LaunchDescription()
@@ -246,5 +267,6 @@ def generate_launch_description():
     ld.add_action(navigation_nodes)
     ld.add_action(communication_nodes)
     ld.add_action(utility_nodes)
+    ld.add_action(shutdown_event_handler)
 
     return ld
