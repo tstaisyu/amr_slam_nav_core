@@ -60,7 +60,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Create and return the LaunchDescription with both nodes
+    # Create and return the LaunchDescription with nodes
     return LaunchDescription([
         joy_node,
         teleop_twist_joy_node,
