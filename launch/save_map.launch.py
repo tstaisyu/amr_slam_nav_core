@@ -31,11 +31,19 @@ def generate_launch_description():
     )
     map_name = LaunchConfiguration('map_name')
 
+    # Define the directory to save the map
+    map_directory = PathJoinSubstitution([os.path.expanduser('~'), 'robot_data', 'maps'])
+
+    # Ensure the directory exists
+    ensure_directory_exists = PythonExpression([
+        "import os; os.makedirs('", map_directory, "', exist_ok=True)"
+    ])
+
     # Define the command to save the map
     save_map_command = ExecuteProcess(
         cmd=[
             'ros2', 'run', 'nav2_map_server', 'map_saver_cli',
-            '-f', PathJoinSubstitution([os.path.expanduser('~'), 'maps', map_name])
+            '-f', PathJoinSubstitution([map_directory, map_name])
         ],
         name='save_map',
         output='screen'
@@ -44,6 +52,7 @@ def generate_launch_description():
     # Create and return the launch description
     ld = LaunchDescription([
         map_name_arg,
+        ensure_directory_exists,
         save_map_command
     ])
 

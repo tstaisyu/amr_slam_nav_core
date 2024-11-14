@@ -38,7 +38,7 @@ def generate_launch_description():
     # ======== Declaration of launch arguments ========   
     # Define the map file path
     home_dir = os.path.expanduser('~')
-    map_dir = os.path.join(home_dir, 'maps')
+    map_dir = os.path.join(home_dir, 'robot_data/maps')
     map_yaml = PathJoinSubstitution([
         map_dir,
         PythonExpression(["'", LaunchConfiguration('map_name'), ".yaml'"])
