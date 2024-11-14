@@ -217,7 +217,7 @@ def generate_launch_description():
     # Group of utility nodes
     utility_nodes = GroupAction([
         # Node for reboot service client
-        Node(
+        LifecycleNode(
             package='amr_slam_nav_core',
             executable='reboot_service_client',
             name='reboot_service_client',
