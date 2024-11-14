@@ -149,10 +149,11 @@ cd ~/ros2_ws/src
 ```
 
 3. パッケージのクローン
-amr_slam_nav_core パッケージをROS 2ワークスペースの src ディレクトリにクローンします。
+`amr_slam_nav_core`と`micro_ros_agent` パッケージをROS 2ワークスペースの src ディレクトリにクローンします。
 
 ```bash
 git clone https://github.com/tstaisyu/amr_slam_nav_core.git
+git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git
 ```
 
 4. 依存関係の解決
@@ -160,10 +161,18 @@ git clone https://github.com/tstaisyu/amr_slam_nav_core.git
 
 ```bash
 cd ~/ros2_ws
-rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
+rosdep update && rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
 ```
 
-## パッケージのビルド
+## micro_ros_agentのビルド
+`amr_slam_nav_core` パッケージをビルドする前に、`micro_ros_agent`をビルドします。
+```bash
+ros2 run micro_ros_setup create_agent_ws.sh
+ros2 run micro_ros_setup build_agent.sh
+source install/local_setup.sh
+```
+
+## amr_slam_nav_coreパッケージのビルド
 以下の手順に従って、`amr_slam_nav_core` パッケージをビルドします。
 
 ### 前提条件
