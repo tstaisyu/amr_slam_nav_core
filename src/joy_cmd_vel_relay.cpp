@@ -16,31 +16,37 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
+// Class for relaying Twist messages from one topic to another with QoS settings
 class CmdVelRelay : public rclcpp::Node
 {
 public:
     CmdVelRelay()
     : Node("joy_cmd_vel_relay")
     {
-        // 購読するトピックのQoS設定
+        // Setup Quality of Service (QoS) settings for subscription
         auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
         qos.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
         qos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
+
+        // Subscribe to input_cmd_vel with the specified QoS profile
         subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
             "input_cmd_vel",
             qos,
             std::bind(&CmdVelRelay::listener_callback, this, std::placeholders::_1));
 
-        // 発行するトピックのQoS設定
+        // Publish to output_cmd_vel with the same QoS profile
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>(
             "output_cmd_vel",
             qos);
     }
 
 private:
+    // Callback function to relay the received Twist message to another topic
     void listener_callback(const geometry_msgs::msg::Twist::SharedPtr msg)
     {
+        // Publish the received message to output_cmd_vel
         publisher_->publish(*msg);
+        RCLCPP_INFO(this->get_logger(), "Relayed cmd_vel message");
     }
 
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscriber_;
