@@ -59,7 +59,7 @@ int main(int argc, char ** argv)
     rclcpp::init(argc, argv);
 
     // Create and spin the PoseSaver node
-    rclcpp::spin(std::make_shared<PoseSaver>());
+    rclcpp::spin(std::make_shared<CmdVelRelay>());
 
     // Shutdown ROS 2
     rclcpp::shutdown();
