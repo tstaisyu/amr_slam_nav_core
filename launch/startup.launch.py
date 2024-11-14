@@ -221,9 +221,33 @@ def generate_launch_description():
             package='amr_slam_nav_core',
             executable='reboot_service_client',
             name='reboot_service_client',
+            namespace='',
             output='screen',
+            on_exit=[ExecuteProcess(
+                cmd=['echo', 'Reboot service is called'],
+                name='reboot_notifier'
+            )],
+            required=True
         ),
     ])
+
+    # シャットダウン時のイベントハンドラ
+    shutdown_event_handler = RegisterEventHandler(
+        OnShutdown(
+            on_shutdown=[
+                # 左車輪の再起動サービスを呼び出し
+                ExecuteProcess(
+                    cmd=['ros2', 'service', 'call', '/left_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
+                    name='call_left_reboot_service'
+                ),
+                # 右車輪の再起動サービスを呼び出し
+                ExecuteProcess(
+                    cmd=['ros2', 'service', 'call', '/right_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
+                    name='call_right_reboot_service'
+                )
+            ]
+        )
+    )
 
     # ======== Building a launch description ========
     ld = LaunchDescription()
@@ -245,5 +269,6 @@ def generate_launch_description():
     ld.add_action(navigation_nodes)
     ld.add_action(communication_nodes)
     ld.add_action(utility_nodes)
+    ld.add_action(shutdown_event_handler)
 
     return ld
