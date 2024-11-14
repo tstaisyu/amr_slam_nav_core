@@ -245,6 +245,5 @@ def generate_launch_description():
     ld.add_action(navigation_nodes)
     ld.add_action(communication_nodes)
     ld.add_action(utility_nodes)
-    ld.add_action(shutdown_event_handler)
 
     return ld
