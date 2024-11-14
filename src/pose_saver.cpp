@@ -12,3 +12,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include <fstream>
+#include <filesystem>
+#include <nlohmann/json.hpp>
+
+class PoseSaver : public rclcpp::Node
+{
+public:
+    PoseSaver() : Node("pose_saver"), save_path_(get_save_path())
+    {
+        subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+            "amcl_pose", 10, std::bind(&PoseSaver::pose_callback, this, std::placeholders::_1));
+    }
+
+private:
+    std::string get_save_path() {
+        auto home = std::getenv("HOME");
+        return std::string(home) + "/robot_data/pose/last_pose.json";
+    }
+
+    void pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
+    {
+        nlohmann::json pose_data = {
+            {"position", {
+                {"x", msg->pose.pose.position.x},
+                {"y", msg->pose.pose.position.y},
+                {"z", msg->pose.pose.position.z}
+            }},
+            {"orientation", {
+                {"x", msg->pose.pose.orientation.x},
+                {"y", msg->pose.pose.orientation.y},
+                {"z", msg->pose.pose.orientation.z},
+                {"w", msg->pose.pose.orientation.w}
+            }}
+        };
+
+        std::ofstream file(save_path_);
+        if (file.is_open()) {
+            file << pose_data.dump(4);
+            file.close();
+            RCLCPP_INFO(this->get_logger(), "Pose saved to %s", save_path_.c_str());
+        } else {
+            RCLCPP_ERROR(this->get_logger(), "Failed to open file at %s for saving pose.", save_path_.c_str());
+        }
+    }
+
+    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr subscription_;
+    std::string save_path_;
+};
+
+int main(int argc, char * argv[])
+{
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<PoseSaver>());
+    rclcpp::shutdown();
+    return 0;
+}
