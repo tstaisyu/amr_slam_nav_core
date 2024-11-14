@@ -25,8 +25,8 @@ public:
     {
         // Setup Quality of Service (QoS) settings for subscription
         auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
-        qos.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
-        qos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
+        qos.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
+        qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 
         // Subscribe to input_cmd_vel with the specified QoS profile
         subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
