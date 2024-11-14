@@ -21,6 +21,7 @@ from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
+from lifecycle_msgs.msg import Transition
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
@@ -223,13 +224,32 @@ def generate_launch_description():
             name='reboot_service_client',
             namespace='',
             output='screen',
-            on_exit=[ExecuteProcess(
-                cmd=['echo', 'Reboot service is called'],
-                name='reboot_notifier'
-            )],
-#            required=True
         ),
     ])
+
+    configure_transition_handler = RegisterEventHandler(
+        OnStateTransition(
+            target_lifecycle_node=reboot_service_client,
+            goal_state='unconfigured',
+            entities=[
+                ExecuteProcess(
+                    cmd=['ros2', 'lifecycle', 'set', '/reboot_service_client', 'configure']
+                )
+            ]
+        )
+    )
+
+    activate_transition_handler = RegisterEventHandler(
+        OnStateTransition(
+            target_lifecycle_node=reboot_service_client,
+            goal_state='inactive',
+            entities=[
+                ExecuteProcess(
+                    cmd=['ros2', 'lifecycle', 'set', '/reboot_service_client', 'activate']
+                )
+            ]
+        )
+    )
 
     # シャットダウン時のイベントハンドラ
     shutdown_event_handler = RegisterEventHandler(
@@ -269,6 +289,10 @@ def generate_launch_description():
     ld.add_action(navigation_nodes)
     ld.add_action(communication_nodes)
     ld.add_action(utility_nodes)
+
+    # Add event handlers
+    ld.add_action(configure_transition_handler)
+    ld.add_action(activate_transition_handler)
     ld.add_action(shutdown_event_handler)
 
     return ld
