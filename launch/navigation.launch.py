@@ -14,8 +14,8 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, LogInfo, IncludeLaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, Command
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction, LogInfo, IncludeLaunchDescription
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, Command, EnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -37,12 +37,17 @@ def generate_launch_description():
     
     # ======== Declaration of launch arguments ========   
     # Define the map file path
-    home_dir = os.path.expanduser('~')
-    map_dir = os.path.join(home_dir, 'robot_data/maps')
+    home_dir = os.path.expanduser('HOME')
+    robot_data_dir = os.path.join(home_dir, 'robot_data')
+    pose_dir = os.path.join(robot_data_dir, 'pose')
+    map_dir = os.path.join(robot_data_dir, 'maps')
     map_yaml = PathJoinSubstitution([
         map_dir,
         PythonExpression(["'", LaunchConfiguration('map_name'), ".yaml'"])
     ])
+
+    # Ensure directories exist
+    ensure_directories = OpaqueFunction(function=ensure_directories_func)
     
     # Include the Nav2 bringup launch file for additional configurations
     bringup_launch = IncludeLaunchDescription(
@@ -56,6 +61,21 @@ def generate_launch_description():
         }.items()
     )
 
+    # Pose management nodes
+    pose_saver_node = Node(
+        package='amr_slam_nav_core',
+        executable='pose_saver',
+        name='pose_saver',
+        output='screen'
+    )
+
+    initial_pose_publisher_node = Node(
+        package='amr_slam_nav_core',
+        executable='initial_pose_publisher',
+        name='initial_pose_publisher',
+        output='screen'
+    )
+
     # ======== Building a launch description ========
     # Create the launch description
     ld = LaunchDescription()
@@ -63,8 +83,22 @@ def generate_launch_description():
     # Add the actions to the launch description
     ld.add_action(DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'))
     ld.add_action(DeclareLaunchArgument('map_name', default_value='map', description='Name of the map to save'))
+    ld.add_action(ensure_directories)
 
     # Add the nodes to the launch description
     ld.add_action(bringup_launch)
+    ld.add_action(pose_saver_node)
+    ld.add_action(initial_pose_publisher_node)    
 
     return ld
+
+def ensure_directories_func(context):
+    home_dir = os.path.expanduser('~')
+    robot_data_dir = os.path.join(home_dir, 'robot_data')
+    pose_dir = os.path.join(robot_data_dir, 'pose')
+    maps_dir = os.path.join(robot_data_dir, 'maps')
+    
+    # Create directories if they don't exist
+    os.makedirs(pose_dir, exist_ok=True)
+    os.makedirs(maps_dir, exist_ok=True)
+    return [LogInfo(msg=f"Directories created: {pose_dir}, {maps_dir}")]
