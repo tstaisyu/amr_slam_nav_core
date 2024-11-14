@@ -15,6 +15,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include <memory>
 #include <string>
@@ -27,15 +28,13 @@ public:
     RebootServiceClient()
     : LifecycleNode("reboot_service_client")
     {
-        this->declare_parameter<std::string>("left_wheel_service", "/left_wheel/reboot_service");
-        this->declare_parameter<std::string>("right_wheel_service", "/right_wheel/reboot_service");
+        RCLCPP_INFO(this->get_logger(), "RebootServiceClient node constructed.");
     }
 
     LifecycleNodeInterface::CallbackReturn on_configure(const State &)
     {
         left_client_ = this->create_client<std_srvs::srv::Trigger>("/left_wheel/reboot_service");
         right_client_ = this->create_client<std_srvs::srv::Trigger>("/right_wheel/reboot_service");
-
         RCLCPP_INFO(this->get_logger(), "RebootServiceClient configured.");
         return LifecycleNodeInterface::CallbackReturn::SUCCESS;
     }
@@ -49,6 +48,14 @@ public:
     LifecycleNodeInterface::CallbackReturn on_deactivate(const State &)
     {
         RCLCPP_INFO(this->get_logger(), "RebootServiceClient deactivated.");
+        return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    }
+
+    LifecycleNodeInterface::CallbackReturn on_cleanup(const State &)
+    {
+        RCLCPP_INFO(this->get_logger(), "RebootServiceClient cleaned up.");
+        left_client_.reset();
+        right_client_.reset();
         return LifecycleNodeInterface::CallbackReturn::SUCCESS;
     }
 
@@ -120,7 +127,13 @@ int main(int argc, char ** argv)
     // Create the RebootServiceClient node
     auto node = std::make_shared<RebootServiceClient>();
 
-    rclcpp::spin_some(node->get_node_base_interface());
+    // ライフサイクルノードを configure 状態に遷移
+    node->configure();
+    // ライフサイクルノードを activate 状態に遷移
+    node->activate();
+
+    // ノードをスピンし、ライフサイクルイベントを処理
+    rclcpp::spin(node->get_node_base_interface());
 
     // Shutdown ROS 2
     rclcpp::shutdown();
