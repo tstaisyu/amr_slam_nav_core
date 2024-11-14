@@ -227,7 +227,7 @@ def generate_launch_description():
                 cmd=['echo', 'Reboot service is called'],
                 name='reboot_notifier'
             )],
-            required=True
+#            required=True
         ),
     ])
 
