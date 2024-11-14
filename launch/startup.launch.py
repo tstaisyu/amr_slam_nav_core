@@ -222,6 +222,7 @@ def generate_launch_description():
             executable='reboot_service_client',
             name='reboot_service_client',
             output='screen',
+            required=True,
             # Ensuring this node is started after micro-ros-agent nodes
             on_exit=[ExecuteProcess(
                 cmd=['echo', 'Reboot service is called'],
