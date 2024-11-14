@@ -27,11 +27,8 @@ public:
     RebootServiceClient()
     : LifecycleNode("reboot_service_client")
     {
-        // Create service clients for left and right wheel reboot services
-        left_client_ = this->create_client<std_srvs::srv::Trigger>("/left_wheel/reboot_service");
-        right_client_ = this->create_client<std_srvs::srv::Trigger>("/right_wheel/reboot_service");
-
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient initialized.");
+        this->declare_parameter<std::string>("left_wheel_service", "/left_wheel/reboot_service");
+        this->declare_parameter<std::string>("right_wheel_service", "/right_wheel/reboot_service");
     }
 
     LifecycleNodeInterface::CallbackReturn on_configure(const State &)
