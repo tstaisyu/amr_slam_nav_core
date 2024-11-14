@@ -222,30 +222,8 @@ def generate_launch_description():
             executable='reboot_service_client',
             name='reboot_service_client',
             output='screen',
-            required=True,
-            # Ensuring this node is started after micro-ros-agent nodes
-            on_exit=[ExecuteProcess(
-                cmd=['echo', 'Reboot service is called'],
-                name='reboot_notifier'
-            )]
         ),
     ])
-
-    # OnShutdown event to call the reboot service
-    shutdown_event_handler = RegisterEventHandler(
-        OnShutdown(
-            on_shutdown=[
-                ExecuteProcess(
-                    cmd=['ros2', 'service', 'call', '/left_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
-                    name='call_left_reboot_service'
-                ),
-                ExecuteProcess(
-                    cmd=['ros2', 'service', 'call', '/right_wheel/reboot_service', 'std_srvs/srv/Trigger', '{}'],
-                    name='call_right_reboot_service'
-                )
-            ]
-        )
-    )
 
     # ======== Building a launch description ========
     ld = LaunchDescription()
