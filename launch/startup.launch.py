@@ -215,17 +215,13 @@ def generate_launch_description():
         ),
     ])
 
-    # Group of utility nodes
-    utility_nodes = GroupAction([
-        # Node for reboot service client
-        LifecycleNode(
+    reboot_service_client = LifecycleNode(
             package='amr_slam_nav_core',
             executable='reboot_service_client',
             name='reboot_service_client',
             namespace='',
             output='screen',
-        ),
-    ])
+        )
 
     configure_transition_handler = RegisterEventHandler(
         OnStateTransition(
@@ -288,7 +284,7 @@ def generate_launch_description():
     ld.add_action(sensor_nodes)
     ld.add_action(navigation_nodes)
     ld.add_action(communication_nodes)
-    ld.add_action(utility_nodes)
+    ld.add_action(reboot_service_client)
 
     # Add event handlers
     ld.add_action(configure_transition_handler)
