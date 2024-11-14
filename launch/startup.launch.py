@@ -21,7 +21,6 @@ from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
-from launch_ros.lifecycle import NodeState
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
