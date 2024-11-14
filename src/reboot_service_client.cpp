@@ -14,60 +14,27 @@
  */
 
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include <memory>
 #include <string>
 
-using namespace rclcpp_lifecycle;
-
-class RebootServiceClient : public LifecycleNode
+class RebootServiceClient : public rclcpp::Node
 {
 public:
     RebootServiceClient()
-    : LifecycleNode("reboot_service_client")
+    : Node("reboot_service_client"), has_rebooted_(false)
     {
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient node constructed.");
-    }
+        // Create service clients for left and right wheel reboot services
+        left_client_ = this->create_client<std_srvs::srv::Trigger>("/left_wheel/reboot_service");
+        right_client_ = this->create_client<std_srvs::srv::Trigger>("/right_wheel/reboot_service");
 
-    LifecycleNodeInterface::CallbackReturn on_configure(const State &)
-    {
-        this->declare_parameter<std::string>("left_wheel_service", "/left_wheel/reboot_service");
-        this->declare_parameter<std::string>("right_wheel_service", "/right_wheel/reboot_service");
+        RCLCPP_INFO(this->get_logger(), "RebootServiceClient initialized.");
 
-        left_client_ = this->create_client<std_srvs::srv::Trigger>(get_parameter("left_wheel_service").as_string());
-        right_client_ = this->create_client<std_srvs::srv::Trigger>(get_parameter("right_wheel_service").as_string());
-
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient configured.");
-        return LifecycleNodeInterface::CallbackReturn::SUCCESS;
-    }
-
-    LifecycleNodeInterface::CallbackReturn on_activate(const State &)
-    {
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient activated.");
-        return LifecycleNodeInterface::CallbackReturn::SUCCESS;
-    }
-
-    LifecycleNodeInterface::CallbackReturn on_deactivate(const State &)
-    {
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient deactivated.");
-        return LifecycleNodeInterface::CallbackReturn::SUCCESS;
-    }
-
-    LifecycleNodeInterface::CallbackReturn on_cleanup(const State &)
-    {
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient cleaned up.");
-        left_client_.reset();
-        right_client_.reset();
-        return LifecycleNodeInterface::CallbackReturn::SUCCESS;
-    }
-
-    LifecycleNodeInterface::CallbackReturn on_shutdown(const State &)
-    {
-        reboot_wheels();
-        RCLCPP_INFO(this->get_logger(), "RebootServiceClient shut down.");
-        return LifecycleNodeInterface::CallbackReturn::SUCCESS;
+        // タイマーの作成（100ms後にreboot_wheelsを実行）
+        timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(100),
+            std::bind(&RebootServiceClient::reboot_wheels, this)
+        );
     }
 
 private:
@@ -75,12 +42,27 @@ private:
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr left_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
 
+    // タイマー
+    rclcpp::TimerBase::SharedPtr timer_;
+
+    // 再起動が既に実行されたかどうかのフラグ
+    bool has_rebooted_;
+
     /**
      * @brief Sends reboot requests to both left and right wheel services.
      */
     void reboot_wheels()
     {
+        if (has_rebooted_) {
+            return;
+        }
+
+        has_rebooted_ = true;
+
         RCLCPP_INFO(this->get_logger(), "Rebooting wheels...");
+
+        // タイマーをキャンセルして、再起動を一度だけ実行
+        timer_->cancel();
 
         // Wait for the left wheel reboot service to be available (maximum 5 seconds)
         if (!left_client_->wait_for_service(std::chrono::seconds(5))) {
@@ -107,29 +89,32 @@ private:
         RCLCPP_INFO(this->get_logger(), "Sending reboot request to right wheel.");
         auto right_future = right_client_->async_send_request(right_request);
 
-        // Wait for the service responses
+        // サービスレスポンスを待機
         RCLCPP_INFO(this->get_logger(), "Waiting for left wheel reboot response.");
         auto left_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), left_future);
         RCLCPP_INFO(this->get_logger(), "Waiting for right wheel reboot response.");
         auto right_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), right_future);
 
-        // Check the results of the service calls
+        // サービス呼び出し結果の確認
         if (left_result == rclcpp::FutureReturnCode::SUCCESS && right_result == rclcpp::FutureReturnCode::SUCCESS) {
             auto left_response = left_future.get();
             auto right_response = right_future.get();
 
-            if (left_future.get()->success && right_future.get()->success) {
+            if (left_response->success && right_response->success) {
                 RCLCPP_INFO(this->get_logger(), "Both wheels rebooted successfully: Left: %s, Right: %s",
-                            left_future.get()->message.c_str(), right_future.get()->message.c_str());
+                            left_response->message.c_str(), right_response->message.c_str());
             } else {
                 RCLCPP_ERROR(this->get_logger(), "Failed to reboot wheels: Left: %s, Right: %s",
-                             left_future.get()->message.c_str(), right_future.get()->message.c_str());
+                             left_response->message.c_str(), right_response->message.c_str());
             }
         }
         else
         {
             RCLCPP_ERROR(this->get_logger(), "Failed to call service on one or both wheels.");
         }
+
+        // ノードをシャットダウン
+        rclcpp::shutdown();
     }
 };
 
@@ -141,13 +126,8 @@ int main(int argc, char ** argv)
     // Create the RebootServiceClient node
     auto node = std::make_shared<RebootServiceClient>();
 
-    // ライフサイクルノードを configure 状態に遷移
-    node->configure();
-    // ライフサイクルノードを activate 状態に遷移
-    node->activate();
-
-    // ノードをスピンし、ライフサイクルイベントを処理
-    rclcpp::spin(node->get_node_base_interface());
+    // Spin the node to process callbacks
+    rclcpp::spin(node);
 
     // Shutdown ROS 2
     rclcpp::shutdown();
