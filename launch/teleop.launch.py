@@ -63,5 +63,6 @@ def generate_launch_description():
     # Create and return the LaunchDescription with both nodes
     return LaunchDescription([
         joy_node,
-        teleop_twist_joy_node
+        teleop_twist_joy_node,
+        joy_cmd_vel_relay
     ])
