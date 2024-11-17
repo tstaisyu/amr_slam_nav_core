@@ -167,6 +167,14 @@ def generate_launch_description():
                 ('/imu/data', '/imu/data_filtered')
             ]
         ),
+        # Node for Static TF publisher
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_transform_publisher',
+            output='screen',
+            arguments=['0', '0', '0', '0', '0', '0', '1', 'base_link', 'base_footprint']
+        ),
     ])
 
     # Group of communication related nodes
