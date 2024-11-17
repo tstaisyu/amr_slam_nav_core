@@ -127,6 +127,12 @@ private:
         }
     }
 
+    /**
+     * @brief Callback function for the stop_initial_pose_publisher service.
+     * 
+     * @param request The service request.
+     * @param response The service response.
+     */
     void stopCallback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                      std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
@@ -145,7 +151,7 @@ private:
 
     // Flag to stop publishing
     bool stop_publishing_;
-    
+
     // Path to the JSON file containing the last pose
     std::string save_path_;
 };
