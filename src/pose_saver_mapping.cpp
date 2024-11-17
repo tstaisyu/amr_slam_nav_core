@@ -73,7 +73,8 @@ private:
 int main(int argc, char * argv[])
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<PoseSaver>();
+    auto node_options = rclcpp::NodeOptions();
+    auto node = std::make_shared<PoseSaver>(node_options);
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;
