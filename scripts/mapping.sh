@@ -38,7 +38,7 @@ fi
 
 # ======== Execute Startup Launch File ========
 echo "Launching startup.launch.py..."
-ros2 launch amr_slam_nav_core startup.launch.py || error_exit "Failed to launch startup.launch.py"
+ros2 launch amr_slam_nav_core startup.launch.py & || error_exit "Failed to launch startup.launch.py"
 
 # ======== Delay ========
 echo "Waiting for 2 seconds..."
@@ -46,4 +46,4 @@ sleep 2
 
 # ======== Execute Mapping Launch File ========
 echo "Launching mapping.launch.py..."
-ros2 launch amr_slam_nav_core mapping.launch.py || error_exit "Failed to launch mapping.launch.py"
+ros2 launch amr_slam_nav_core mapping.launch.py & || error_exit "Failed to launch mapping.launch.py"
