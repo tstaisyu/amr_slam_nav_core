@@ -43,8 +43,9 @@ def generate_launch_description():
     map_dir = os.path.join(robot_data_dir, 'maps')
     map_yaml = PathJoinSubstitution([
         map_dir,
+        '/',
         LaunchConfiguration('map_name'),
-        TextSubstitution(text=".yaml")
+        '.yaml'
     ])
 
     # Ensure directories exist
