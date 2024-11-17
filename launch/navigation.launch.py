@@ -41,7 +41,7 @@ def generate_launch_description():
     robot_data_dir = os.path.join(home_dir, 'robot_data')
     pose_dir = os.path.join(robot_data_dir, 'pose')
     map_dir = os.path.join(robot_data_dir, 'maps')
-    map_yaml = PathJoinSubstitution([map_dir, map_name_arg, '.yaml'])
+    map_yaml = PathJoinSubstitution([map_dir, map_name_arg])
 
     # Ensure directories exist
     ensure_directories = OpaqueFunction(function=ensure_directories_func)
