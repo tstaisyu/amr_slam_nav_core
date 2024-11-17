@@ -26,21 +26,21 @@ namespace fs = std::filesystem;
 /**
  * @brief Node that subscribes to the "amcl_pose" topic and periodically saves the latest pose to a JSON file.
  */
-class PoseSaver : public rclcpp::Node
+class PoseSaverNav : public rclcpp::Node
 {
 public:
-    PoseSaver() : Node("pose_saver_nav"), save_path_(get_save_path())
+    PoseSaverNav() : Node("pose_saver_nav"), save_path_(get_save_path())
     {
         // Initialize subscription to "amcl_pose" topic with QoS depth 10
         subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
             "amcl_pose", 
             10, 
-            std::bind(&PoseSaver::pose_callback, this, std::placeholders::_1));
+            std::bind(&PoseSaverNav::pose_callback, this, std::placeholders::_1));
 
         // Initialize timer to trigger every 60 seconds to save pose
         timer_ = this->create_wall_timer(
             std::chrono::minutes(1),
-            std::bind(&PoseSaver::save_pose_to_file, this));
+            std::bind(&PoseSaverNav::save_pose_to_file, this));
 
         RCLCPP_INFO(this->get_logger(), "PoseSaver node initialized. Saving poses to %s every 60 seconds.", save_path_.c_str());
     }
@@ -144,7 +144,7 @@ int main(int argc, char * argv[])
     rclcpp::init(argc, argv);
 
     // Create and spin the PoseSaver node
-    rclcpp::spin(std::make_shared<PoseSaver>());
+    rclcpp::spin(std::make_shared<PoseSaverNav>());
 
     // Shutdown ROS 2
     rclcpp::shutdown();
