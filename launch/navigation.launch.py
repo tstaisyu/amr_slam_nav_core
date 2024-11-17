@@ -15,7 +15,7 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction, LogInfo, IncludeLaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, JoinSubstitution, PythonExpression, Command, EnvironmentVariable, TextSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, Command, EnvironmentVariable, TextSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -41,12 +41,7 @@ def generate_launch_description():
     robot_data_dir = os.path.join(home_dir, 'robot_data')
     pose_dir = os.path.join(robot_data_dir, 'pose')
     map_dir = os.path.join(robot_data_dir, 'maps')
-    map_yaml = JoinSubstitution([
-        map_dir,
-        '/',
-        LaunchConfiguration('map_name'),
-        '.yaml'
-    ])
+    map_yaml = PathJoinSubstitution([map_dir, map_name, '.yaml'])
 
     # Ensure directories exist
     ensure_directories = OpaqueFunction(function=ensure_directories_func)
