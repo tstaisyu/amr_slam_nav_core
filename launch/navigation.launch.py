@@ -64,8 +64,8 @@ def generate_launch_description():
     # Pose management nodes
     pose_saver_node = Node(
         package='amr_slam_nav_core',
-        executable='pose_saver',
-        name='pose_saver',
+        executable='pose_saver_nav',
+        name='pose_saver_nav',
         output='screen'
     )
 
