@@ -26,14 +26,14 @@
 
 namespace fs = std::filesystem;
 
-class PoseSaver : public rclcpp::Node
+class PoseSaverMapping : public rclcpp::Node
 {
 public:
     /**
      * @brief Constructor for the PoseSaver node.
      * Initializes the TF buffer and listener, determines the save path, and sets up a timer.
      */
-    PoseSaver() 
+    PoseSaverMapping() 
     : Node("pose_saver_mapping"), 
       tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)),
       tf_listener_(tf_buffer_)
@@ -66,7 +66,7 @@ private:
     {
         save_timer_ = this->create_wall_timer(
             std::chrono::seconds(10), // Check every 10 seconds for demonstration
-            std::bind(&PoseSaver::save_pose, this)
+            std::bind(&PoseSaverMapping::save_pose, this)
         );
         RCLCPP_INFO(this->get_logger(), "Save timer initialized to trigger every 10 seconds.");
     }
@@ -140,7 +140,7 @@ int main(int argc, char * argv[])
     rclcpp::init(argc, argv);
 
     // Create and spin the PoseSaver node
-    auto node = std::make_shared<PoseSaver>();
+    auto node = std::make_shared<PoseSaverMapping>();
     rclcpp::spin(node);
 
     // Shutdown ROS 2
