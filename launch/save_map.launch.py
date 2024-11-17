@@ -14,7 +14,7 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, PythonExpression
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from ament_index_python.packages import get_package_share_directory
 
@@ -35,9 +35,10 @@ def generate_launch_description():
     map_directory = PathJoinSubstitution([os.path.expanduser('~'), 'robot_data', 'maps'])
 
     # Ensure the directory exists
-    ensure_directory_exists = PythonExpression([
-        "import os; os.makedirs('", map_directory, "', exist_ok=True)"
-    ])
+    ensure_directory_exists = ExecuteProcess(
+        cmd=['mkdir', '-p', map_directory],
+        name='ensure_directory_exists'
+    )
 
     # Define the command to save the map
     save_map_command = ExecuteProcess(
