@@ -31,16 +31,7 @@ public:
     {
         // Create a publisher for PoseWithCovarianceStamped messages on the "initialpose" topic with a queue size of 10
         publisher_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", 10);
-
-        // Declare a parameter for the timer period with a default value of 5 seconds
-        this->declare_parameter<double>("timer_period", 5.0);
-        double timer_period = this->get_parameter("timer_period").as_double();
-
-        // Create a timer that triggers the load_and_publish_pose callback at the specified period
-        timer_ = this->create_wall_timer(
-            std::chrono::duration<double>(timer_period),
-            std::bind(&InitialPosePublisher::load_and_publish_pose, this)
-        );
+        publish_once();
 
         RCLCPP_INFO(this->get_logger(), "InitialPosePublisher node has been initialized.");
     }
@@ -63,7 +54,7 @@ private:
     /**
      * @brief Loads the pose from the JSON file and publishes it as a PoseWithCovarianceStamped message.
      */
-    void load_and_publish_pose()
+    void publish_once()
     {
         // Check if the pose file exists
         if (!fs::exists(save_path_)) {
@@ -95,7 +86,20 @@ private:
         auto message = geometry_msgs::msg::PoseWithCovarianceStamped();
         message.header.stamp = this->get_clock()->now();
         message.header.frame_id = "map";
+        fill_pose_data(message, pose_data);
 
+        publisher_->publish(message);
+        RCLCPP_INFO(this->get_logger(), "Initial pose published.");
+    } 
+
+    /**
+     * @brief Fills the PoseWithCovarianceStamped message with the data from the JSON object.
+     * 
+     * @param message The PoseWithCovarianceStamped message to fill.
+     * @param pose_data The JSON object containing the pose data.
+     */
+    void fill_pose_data(geometry_msgs::msg::PoseWithCovarianceStamped& message, const nlohmann::json& pose_data) const
+    {
         // Assign position values        
         message.pose.pose.position.x = pose_data["position"]["x"];
         message.pose.pose.position.y = pose_data["position"]["y"];
@@ -113,17 +117,10 @@ private:
                 message.pose.covariance[i] = pose_data["covariance"][i].get<double>();
             }
         }
-
-        publisher_->publish(message);
-        RCLCPP_INFO(this->get_logger(), "Initial pose published.");
-    } 
-
+    }
 
     // Publisher for PoseWithCovarianceStamped messages
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr publisher_;
-
-    // Timer to periodically publish the pose
-    rclcpp::TimerBase::SharedPtr timer_;
 
     // Path to the JSON file containing the last pose
     std::string save_path_;
