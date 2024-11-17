@@ -20,6 +20,7 @@
 #include <cstdlib> // For std::getenv
 #include <string>
 #include <filesystem> // For std::filesystem::exists
+#include "std_srvs/srv/trigger.hpp"
 
 namespace fs = std::filesystem;
 
@@ -31,6 +32,13 @@ public:
     {
         // Create a publisher for PoseWithCovarianceStamped messages on the "initialpose" topic with a queue size of 10
         publisher_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", 10);
+        // Create a service to stop publishing
+        stop_publishing_ = false;
+        stop_service_ = this->create_service<std_srvs::srv::Trigger>(
+            "stop_initial_pose_publisher",
+            std::bind(&InitialPosePublisher::stopCallback, this, std::placeholders::_1, std::placeholders::_2)
+        );
+
         publish_once();
 
         RCLCPP_INFO(this->get_logger(), "InitialPosePublisher node has been initialized.");
@@ -119,9 +127,25 @@ private:
         }
     }
 
+    void stopCallback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                     std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    {
+        (void)request;
+        RCLCPP_INFO(this->get_logger(), "Stopping InitialPosePublisher.");
+        stop_publishing_ = true;
+        response->success = true;
+        response->message = "InitialPosePublisher has been stopped.";
+    }
+
     // Publisher for PoseWithCovarianceStamped messages
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr publisher_;
 
+    // Service to stop publishing
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_service_;
+
+    // Flag to stop publishing
+    bool stop_publishing_;
+    
     // Path to the JSON file containing the last pose
     std::string save_path_;
 };
