@@ -29,6 +29,7 @@ class PoseSaver : public rclcpp::Node
 public:
     PoseSaver() : Node("pose_saver_mapping"), tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)), tf_listener_(tf_buffer_)
     {
+        save_path_ = get_save_path();
         save_timer_ = this->create_wall_timer(
             std::chrono::seconds(10), // デモ用に10秒ごとにチェック
             std::bind(&PoseSaver::save_pose, this));
@@ -61,9 +62,13 @@ private:
             };
 
             std::ofstream file(save_path_);
-            file << pose_data.dump(4);
-            file.close();
-            RCLCPP_INFO(this->get_logger(), "Pose saved successfully.");
+            if (file.is_open()) {
+                file << pose_data.dump(4);
+                file.close();
+                RCLCPP_INFO(this->get_logger(), "Pose saved successfully.");
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "Failed to open pose file: %s", save_path_.c_str());
+            }
         } catch (const tf2::TransformException &ex) {
             RCLCPP_ERROR(this->get_logger(), "Failed to get transform: %s", ex.what());
         }
