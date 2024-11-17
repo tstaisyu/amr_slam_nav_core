@@ -37,7 +37,7 @@ def generate_launch_description():
     
     # ======== Declaration of launch arguments ========   
     # Define the map file path
-    home_dir = EnvironmentVariable('HOME')
+    home_dir = os.path.expanduser('~')
     robot_data_dir = os.path.join(home_dir, 'robot_data')
     pose_dir = os.path.join(robot_data_dir, 'pose')
     map_dir = os.path.join(robot_data_dir, 'maps')
