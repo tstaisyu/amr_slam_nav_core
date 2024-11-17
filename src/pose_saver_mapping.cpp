@@ -58,6 +58,15 @@ private:
                     {"y", transform.transform.rotation.y},
                     {"z", transform.transform.rotation.z},
                     {"w", transform.transform.rotation.w}
+                }},
+                {"covariance", {
+                    // 36要素の共分散行列を適切に設定
+                    1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 1.0
                 }}
             };
 
