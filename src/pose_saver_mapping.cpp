@@ -27,7 +27,7 @@ namespace fs = std::filesystem;
 class PoseSaver : public rclcpp::Node
 {
 public:
-    PoseSaver(const rclcpp::NodeOptions& options) : Node("pose_saver_mapping"), tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)), tf_listener_(tf_buffer_)
+    PoseSaver(const rclcpp::NodeOptions& options) : Node("pose_saver_mapping", options), tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)), tf_listener_(tf_buffer_)
     {
         this->declare_parameter<std::string>("file_path", "/tmp/last_pose.json");  // デフォルトのファイルパス
         save_path_ = this->get_parameter("file_path").as_string();
