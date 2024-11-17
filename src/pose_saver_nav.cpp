@@ -29,7 +29,7 @@ namespace fs = std::filesystem;
 class PoseSaver : public rclcpp::Node
 {
 public:
-    PoseSaver() : Node("pose_saver"), save_path_(get_save_path())
+    PoseSaver() : Node("pose_saver_nav"), save_path_(get_save_path())
     {
         // Initialize subscription to "amcl_pose" topic with QoS depth 10
         subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
