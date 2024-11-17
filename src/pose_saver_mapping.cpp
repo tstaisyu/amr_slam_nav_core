@@ -15,7 +15,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/transform_listener.h"
-#include "geometry_msgs/msg/TransformStamped.hpp"
+#include "tf2_ros/buffer.h"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <cstdlib>
@@ -26,7 +27,7 @@ namespace fs = std::filesystem;
 class PoseSaver : public rclcpp::Node
 {
 public:
-    PoseSaver() : Node("pose_saver_mapping"), tf_buffer_(), tf_listener_(tf_buffer_)
+    PoseSaver() : Node("pose_saver_mapping"), tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)), tf_listener_(tf_buffer_)
     {
         save_timer_ = this->create_wall_timer(
             std::chrono::seconds(10), // デモ用に10秒ごとにチェック
