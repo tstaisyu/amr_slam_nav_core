@@ -60,6 +60,7 @@ add_executable(joy_cmd_vel_relay src/joy_cmd_vel_relay.cpp)
 add_executable(pose_saver_nav src/pose_saver_nav.cpp)
 add_executable(pose_saver_mapping src/pose_saver_mapping.cpp)
 add_executable(initial_pose_publisher src/initial_pose_publisher.cpp)
+add_executable(initial_pose_publisher_controller src/initial_pose_publisher_controller.cpp)
 add_executable(wifi_config_publisher src/wifi_config_publisher.cpp)
 
 # Specifying libraries for linking
@@ -71,6 +72,7 @@ ament_target_dependencies(joy_cmd_vel_relay rclcpp geometry_msgs)
 ament_target_dependencies(pose_saver_nav rclcpp geometry_msgs)
 ament_target_dependencies(pose_saver_mapping rclcpp geometry_msgs tf2_ros)
 ament_target_dependencies(initial_pose_publisher rclcpp geometry_msgs)
+ament_target_dependencies(initial_pose_publisher_controller rclcpp geometry_msgs)
 ament_target_dependencies(wifi_config_publisher rclcpp std_msgs)
 
 # Installation of targets and resources
@@ -83,6 +85,7 @@ install(TARGETS
   pose_saver_nav
   pose_saver_mapping
   initial_pose_publisher
+  initial_pose_publisher_controller
   wifi_config_publisher
   DESTINATION lib/${PROJECT_NAME})
 
