@@ -27,21 +27,16 @@ namespace fs = std::filesystem;
 class PoseSaver : public rclcpp::Node
 {
 public:
-    PoseSaver() : Node("pose_saver_mapping"), tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)), tf_listener_(tf_buffer_)
+    PoseSaver(const rclcpp::NodeOptions& options) : Node("pose_saver_mapping"), tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)), tf_listener_(tf_buffer_)
     {
+        this->declare_parameter<std::string>("file_path", "/tmp/last_pose.json");  // デフォルトのファイルパス
+        save_path_ = this->get_parameter("file_path").as_string();
         save_timer_ = this->create_wall_timer(
             std::chrono::seconds(10), // デモ用に10秒ごとにチェック
             std::bind(&PoseSaver::save_pose, this));
     }
 
 private:
-    std::string get_save_path() {
-        const char* home = std::getenv("HOME");
-        std::string path = std::string(home ? home : "/tmp") + "/robot_data/pose/last_pose.json";
-        fs::create_directories(fs::path(path).parent_path());
-        return path;
-    }
-
     void save_pose()
     {
         try {
