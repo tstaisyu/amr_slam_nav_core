@@ -9,12 +9,11 @@ error_exit() {
     exit 1
 }
 
-
 # Cleanup function to kill background processes
 cleanup() {
     echo "Cleaning up background processes..."
-    kill $startup_pid $mapping_pid 2>/dev/null
-    wait $startup_pid $mapping_pid 2>/dev/null
+    kill $startup_pid $mapping_pid $(pgrep -f rosbridge_websocket) 2>/dev/null
+    wait $startup_pid $mapping_pid $(pgrep -f rosbridge_websocket) 2>/dev/null
     echo "Background processes have been terminated."
 }
 
