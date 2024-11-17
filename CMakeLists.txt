@@ -71,7 +71,7 @@ ament_target_dependencies(reboot_service_client rclcpp rclcpp_lifecycle std_srvs
 ament_target_dependencies(joy_cmd_vel_relay rclcpp geometry_msgs)
 ament_target_dependencies(pose_saver_nav rclcpp geometry_msgs)
 ament_target_dependencies(pose_saver_mapping rclcpp geometry_msgs tf2_ros)
-ament_target_dependencies(initial_pose_publisher rclcpp geometry_msgs)
+ament_target_dependencies(initial_pose_publisher rclcpp geometry_msgs std_srvs)
 ament_target_dependencies(initial_pose_publisher_controller rclcpp geometry_msgs)
 ament_target_dependencies(wifi_config_publisher rclcpp std_msgs)
 
