@@ -15,7 +15,7 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction, LogInfo, IncludeLaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, Command, EnvironmentVariable
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, Command, EnvironmentVariable, TextSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -43,7 +43,8 @@ def generate_launch_description():
     map_dir = os.path.join(robot_data_dir, 'maps')
     map_yaml = PathJoinSubstitution([
         map_dir,
-        PythonExpression(["'", LaunchConfiguration('map_name'), ".yaml'"])
+        LaunchConfiguration('map_name'),
+        TextSubstitution(text=".yaml")
     ])
 
     # Ensure directories exist
