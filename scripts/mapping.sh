@@ -42,7 +42,7 @@ ros2 launch amr_slam_nav_core startup.launch.py & || error_exit "Failed to launc
 
 # ======== Delay ========
 echo "Waiting for 2 seconds..."
-sleep 2
+sleep 5
 
 # ======== Execute Mapping Launch File ========
 echo "Launching mapping.launch.py..."
