@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
-#include "rclcpp/rclcpp.hpp"
-#include "std_srvs/srv/trigger.hpp"
+#include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include "rclcpp/rclcpp.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 class RebootServiceClient : public rclcpp::Node
 {
 public:
+    /**
+     * @brief Constructor for the RebootServiceClient node.
+     * Initializes service clients and sets up a timer to trigger reboot.
+     */
     RebootServiceClient()
     : Node("reboot_service_client"), has_rebooted_(false)
     {
@@ -30,26 +36,17 @@ public:
 
         RCLCPP_INFO(this->get_logger(), "RebootServiceClient initialized.");
 
-        // タイマーの作成（100ms後にreboot_wheelsを実行）
-        timer_ = this->create_wall_timer(
+        // Create a timer to execute reboot_wheels after 100ms
+        reboot_timer_ = this->create_wall_timer(
             std::chrono::milliseconds(100),
             std::bind(&RebootServiceClient::reboot_wheels, this)
         );
     }
 
 private:
-    // Service clients for left and right wheel reboot services
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr left_client_;
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
-
-    // タイマー
-    rclcpp::TimerBase::SharedPtr timer_;
-
-    // 再起動が既に実行されたかどうかのフラグ
-    bool has_rebooted_;
-
     /**
-     * @brief Sends reboot requests to both left and right wheel services.
+     * @brief Initiates the reboot process for both left and right wheels.
+     * Sends asynchronous service requests and handles responses via callbacks.
      */
     void reboot_wheels()
     {
@@ -61,17 +58,16 @@ private:
 
         RCLCPP_INFO(this->get_logger(), "Rebooting wheels...");
 
-        // タイマーをキャンセルして、再起動を一度だけ実行
-        timer_->cancel();
+        // Cancel the timer to ensure this method is only called once
+        reboot_timer_->cancel();
 
-        // Wait for the left wheel reboot service to be available (maximum 5 seconds)
+        // Ensure the reboot services are available
         if (!left_client_->wait_for_service(std::chrono::seconds(5))) {
             RCLCPP_ERROR(this->get_logger(), "Left wheel reboot service not available.");
             return;
         }
         RCLCPP_INFO(this->get_logger(), "Left wheel reboot service is available.");
 
-        // Wait for the right wheel reboot service to be available (maximum 5 seconds)
         if (!right_client_->wait_for_service(std::chrono::seconds(5))) {
             RCLCPP_ERROR(this->get_logger(), "Right wheel reboot service not available.");
             return;
@@ -82,40 +78,72 @@ private:
         auto left_request = std::make_shared<std_srvs::srv::Trigger::Request>();
         auto right_request = std::make_shared<std_srvs::srv::Trigger::Request>();
 
-        // Send asynchronous service requests
+        // Send asynchronous service requests with response callbacks
         RCLCPP_INFO(this->get_logger(), "Sending reboot request to left wheel.");
-        auto left_future = left_client_->async_send_request(left_request);
+        left_client_->async_send_request(left_request,
+            [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future_response) {
+                handle_reboot_response(future_response, "Left");
+            });
 
         RCLCPP_INFO(this->get_logger(), "Sending reboot request to right wheel.");
-        auto right_future = right_client_->async_send_request(right_request);
-
-        // サービスレスポンスを待機
-        RCLCPP_INFO(this->get_logger(), "Waiting for left wheel reboot response.");
-        auto left_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), left_future);
-        RCLCPP_INFO(this->get_logger(), "Waiting for right wheel reboot response.");
-        auto right_result = rclcpp::spin_until_future_complete(this->get_node_base_interface(), right_future);
-
-        // サービス呼び出し結果の確認
-        if (left_result == rclcpp::FutureReturnCode::SUCCESS && right_result == rclcpp::FutureReturnCode::SUCCESS) {
-            auto left_response = left_future.get();
-            auto right_response = right_future.get();
-
-            if (left_response->success && right_response->success) {
-                RCLCPP_INFO(this->get_logger(), "Both wheels rebooted successfully: Left: %s, Right: %s",
-                            left_response->message.c_str(), right_response->message.c_str());
-            } else {
-                RCLCPP_ERROR(this->get_logger(), "Failed to reboot wheels: Left: %s, Right: %s",
-                             left_response->message.c_str(), right_response->message.c_str());
-            }
-        }
-        else
-        {
-            RCLCPP_ERROR(this->get_logger(), "Failed to call service on one or both wheels.");
-        }
-
-        // ノードをシャットダウン
-        rclcpp::shutdown();
+        right_client_->async_send_request(right_request,
+            [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future_response) {
+                handle_reboot_response(future_response, "Right");
+            });
     }
+
+
+    /**
+     * @brief Callback function to handle the response from reboot service requests.
+     * Logs the outcome and shuts down ROS if both reboots are successful.
+     *
+     * @param future_response The future response from the service call.
+     * @param wheel_side Identifier for the wheel ("Left" or "Right").
+     */
+    void handle_reboot_response(
+        rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future_response,
+        const std::string &wheel_side)
+    {
+        try {
+            auto response = future_response.get();
+            if (response->success) {
+                RCLCPP_INFO(this->get_logger(), "%s wheel rebooted successfully: %s", wheel_side.c_str(), response->message.c_str());
+                reboot_success_[wheel_side] = true;
+            }
+            else {
+                RCLCPP_ERROR(this->get_logger(), "Failed to reboot %s wheel: %s", wheel_side.c_str(), response->message.c_str());
+                reboot_success_[wheel_side] = false;
+            }
+        } catch (const std::exception &ex) {
+            RCLCPP_ERROR(this->get_logger(), "Exception while getting response for %s wheel reboot: %s", wheel_side.c_str(), ex.what());
+            reboot_success_[wheel_side] = false;
+        }
+
+        // Check if both reboots have been attempted
+        if (reboot_success_.size() == 2) {
+            if (reboot_success_["Left"] && reboot_success_["Right"]) {
+                RCLCPP_INFO(this->get_logger(), "Both wheels rebooted successfully. Shutting down.");
+            }
+            else {
+                RCLCPP_WARN(this->get_logger(), "One or both wheels failed to reboot.");
+            }
+            // Shutdown the node after handling the responses
+            rclcpp::shutdown();
+        }
+    }
+
+    // Service clients for left and right wheel reboot services
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr left_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr right_client_;
+
+    // Timer for initiating the reboot process
+    rclcpp::TimerBase::SharedPtr reboot_timer_;
+
+    // Flag to ensure reboot is only attempted once
+    bool has_rebooted_;
+
+    // Map to track reboot success for each wheel
+    std::unordered_map<std::string, bool> reboot_success_;
 };
 
 int main(int argc, char ** argv)
