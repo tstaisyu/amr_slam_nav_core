@@ -96,6 +96,17 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Pose management nodes
+    pose_saver_node = Node(
+        package='amr_slam_nav_core',
+        executable='pose_saver_mapping',
+        name='pose_saver_mapping',
+        parameters=[
+            {'save_interval_seconds': 1},
+        ],
+        output='screen'
+    )
+
     # ======== Building a launch description ========
     ld = LaunchDescription()
 
@@ -108,5 +119,6 @@ def generate_launch_description():
     # Add nodes to the launch description
     ld.add_action(cartographer_node)
     ld.add_action(occupancy_grid_node)
+    ld.add_action(pose_saver_node)
 
     return ld
