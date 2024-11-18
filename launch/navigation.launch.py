@@ -80,6 +80,13 @@ def generate_launch_description():
         output='screen'
     )
 
+    pose_publisher_node = Node(
+        package='amr_slam_nav_core',
+        executable='pose_publisher_node',
+        name='pose_publisher_node',
+        output='screen'
+    )
+
     # ======== Building a launch description ========
     # Create the launch description
     ld = LaunchDescription()
@@ -96,6 +103,7 @@ def generate_launch_description():
     ld.add_action(pose_saver_node)
     ld.add_action(initial_pose_publisher_node)
     ld.add_action(initial_pose_publisher_controller_node)
+    ld.add_action(pose_publisher_node)
 
     return ld
 
