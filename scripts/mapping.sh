@@ -9,6 +9,11 @@ error_exit() {
     exit 1
 }
 
+# ======== Check Environment Variables ========
+if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
+    error_exit "環境変数 YOUR_CUSTOM_ROS2_WS が設定されていません。カスタムROS2ワークスペースのパスを設定してください。"
+fi
+
 # Cleanup function to kill background processes
 cleanup() {
     echo "Cleaning up background processes..."
@@ -40,27 +45,12 @@ else
 fi
 
 # Source NeuraTruck workspace setup
-if [ -f ~/neuratruck_ws/install/setup.bash ]; then
+if [ -f "${YOUR_CUSTOM_ROS2_WS}"/install/setup.bash ]; then
     source ~/neuratruck_ws/install/setup.bash || error_exit "Failed to source neuratruck_ws setup.bash"
     echo "Sourced ~/neuratruck_ws/install/setup.bash"
 else
     error_exit "~/neuratruck_ws/install/setup.bash not found."
 fi
-
-# ======== Execute Startup Launch File ========
-echo "Launching startup.launch.py..."
-ros2 launch amr_slam_nav_core startup.launch.py &
-startup_pid=$!  # Save the PID of the startup launch
-
-# Wait for the background process to finish
-wait $startup_pid
-if [ $? -ne 0 ]; then
-    error_exit "Failed to launch startup.launch.py"
-fi
-
-# ======== Delay ========
-echo "Waiting for 2 seconds..."
-sleep 2
 
 # ======== Execute Mapping Launch File ========
 echo "Launching mapping.launch.py..."
