@@ -57,6 +57,7 @@ add_executable(odometry_publisher src/odometry_publisher.cpp)
 add_executable(connection_checker src/connection_checker.cpp)
 add_executable(reboot_service_client src/reboot_service_client.cpp)
 add_executable(joy_cmd_vel_relay src/joy_cmd_vel_relay.cpp)
+add_executable(pose_publisher_node src/pose_publisher_node.cpp)
 add_executable(pose_saver_nav src/pose_saver_nav.cpp)
 add_executable(pose_saver_mapping src/pose_saver_mapping.cpp)
 add_executable(initial_pose_publisher src/initial_pose_publisher.cpp)
@@ -69,6 +70,7 @@ ament_target_dependencies(odometry_publisher rclcpp geometry_msgs nav_msgs tf2_r
 ament_target_dependencies(connection_checker rclcpp std_msgs tf2_geometry_msgs)
 ament_target_dependencies(reboot_service_client rclcpp rclcpp_lifecycle std_srvs tf2_geometry_msgs)
 ament_target_dependencies(joy_cmd_vel_relay rclcpp geometry_msgs)
+ament_target_dependencies(pose_publisher_node rclcpp geometry_msgs tf2_ros tf2_geometry_msgs)
 ament_target_dependencies(pose_saver_nav rclcpp geometry_msgs)
 ament_target_dependencies(pose_saver_mapping rclcpp geometry_msgs tf2_ros)
 ament_target_dependencies(initial_pose_publisher rclcpp geometry_msgs std_srvs)
@@ -82,6 +84,7 @@ install(TARGETS
   connection_checker
   reboot_service_client
   joy_cmd_vel_relay
+  pose_publisher_node
   pose_saver_nav
   pose_saver_mapping
   initial_pose_publisher
