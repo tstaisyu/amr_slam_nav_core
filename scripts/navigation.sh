@@ -40,11 +40,7 @@ fi
 
 # Source ROS 2 workspace setup
 ros2_ws_dir="${HOME}/ros2_ws"
-if [ -d "${ros2_ws_dir}" ]; then
-    source_workspace "${ros2_ws_dir}"
-else
-    error_exit "~/ros2_ws/install/setup.bash not found."
-fi
+source_workspace "${ros2_ws_dir}"
 
 # Source NeuraTruck workspace setup
 source_workspace "${YOUR_CUSTOM_ROS2_WS}"
