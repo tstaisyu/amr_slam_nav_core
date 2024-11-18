@@ -27,19 +27,26 @@ namespace fs = std::filesystem;
 class InitialPosePublisher : public rclcpp::Node
 {
 public:
+    /**
+     * @brief Constructor for the InitialPosePublisher node.
+     * Initializes parameters, publisher, service, and sets up a timer for periodic publishing.
+     */
     InitialPosePublisher() 
-    : Node("initial_pose_publisher"), save_path_(get_save_path())
+    : Node("initial_pose_publisher"), stop_publishing_(false), save_path_(get_save_path())
     {
         // Create a publisher for PoseWithCovarianceStamped messages on the "initialpose" topic with a queue size of 10
         publisher_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", 10);
         // Create a service to stop publishing
-        stop_publishing_ = false;
         stop_service_ = this->create_service<std_srvs::srv::Trigger>(
             "stop_initial_pose_publisher",
             std::bind(&InitialPosePublisher::stopCallback, this, std::placeholders::_1, std::placeholders::_2)
         );
 
-        publish_once();
+        // Initialize a timer to publish pose every 1 second
+        publish_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(1000),
+            [this]() { this->publish_pose(); }
+        );
 
         RCLCPP_INFO(this->get_logger(), "InitialPosePublisher node has been initialized.");
     }
@@ -56,14 +63,23 @@ private:
             RCLCPP_ERROR(this->get_logger(), "HOME environment variable is not set.");
             return "/tmp/last_pose.json"; // Fallback path
         }
-        return std::string(home) + "/robot_data/pose/last_pose.json";
+        std::string path = std::string(home) + "/robot_data/pose/last_pose.json";
+        fs::create_directories(fs::path(path).parent_path());
+        return path;
     }
 
     /**
      * @brief Loads the pose from the JSON file and publishes it as a PoseWithCovarianceStamped message.
+     * Continues publishing until a stop signal is received via the service.
      */
-    void publish_once()
+    void publish_pose()
     {
+        if (stop_publishing_) {
+            RCLCPP_INFO(this->get_logger(), "Publishing has been stopped.");
+            publish_timer_->cancel();
+            return;
+        }
+
         // Check if the pose file exists
         if (!fs::exists(save_path_)) {
             RCLCPP_WARN(this->get_logger(), "Pose file does not exist: %s", save_path_.c_str());
@@ -91,11 +107,13 @@ private:
             return;
         }
 
+        // Create and fill the PoseWithCovarianceStamped message
         auto message = geometry_msgs::msg::PoseWithCovarianceStamped();
         message.header.stamp = this->get_clock()->now();
         message.header.frame_id = "map";
         fill_pose_data(message, pose_data);
 
+        // Publish the message
         publisher_->publish(message);
         RCLCPP_INFO(this->get_logger(), "Initial pose published.");
     } 
@@ -148,6 +166,9 @@ private:
 
     // Service to stop publishing
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_service_;
+
+    // Timer for periodic pose publishing
+    rclcpp::TimerBase::SharedPtr publish_timer_;
 
     // Flag to stop publishing
     bool stop_publishing_;
