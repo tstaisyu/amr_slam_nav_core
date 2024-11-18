@@ -38,18 +38,18 @@ ekf_localization_node:
     imu0_remove_gravitational_acceleration: true  # Remove gravitational acceleration from IMU data
     imu0_nodelay: false  # No delay in IMU data processing
 
-# Initial estimate covariance matrix
-#initial_estimate_covariance: [1e-1, 0, 0, 0, 0, 0,
-#                              0, 1e-1, 0, 0, 0, 0,
-#                              0, 0, 1e-1, 0, 0, 0,
-#                              0, 0, 0, 1e-1, 0, 0,
-#                              0, 0, 0, 0, 1e-1, 0,
-#                              0, 0, 0, 0, 0, 1e-1]
+    # Initial estimate covariance matrix
+    initial_estimate_covariance: [1e-1, 0, 0, 0, 0, 0,
+                                  0, 1e-1, 0, 0, 0, 0,
+                                  0, 0, 1e-1, 0, 0, 0,
+                                  0, 0, 0, 1e-1, 0, 0,
+                                  0, 0, 0, 0, 1e-1, 0,
+                                  0, 0, 0, 0, 0, 1e-1]
 
-# Process noise covariance matrix
-#process_noise_covariance: [ 1e-5, 0, 0, 0, 0, 0,
-#                            0, 1e-5, 0, 0, 0, 0,
-#                            0, 0, 1e-5, 0, 0, 0,
-#                            0, 0, 0, 1e-5, 0, 0,
-#                            0, 0, 0, 0, 1e-5, 0,
-#                            0, 0, 0, 0, 0, 1e-5]
+    # Process noise covariance matrix
+    process_noise_covariance: [ 1e-5, 0, 0, 0, 0, 0,
+                                0, 1e-5, 0, 0, 0, 0,
+                                0, 0, 1e-5, 0, 0, 0,
+                                0, 0, 0, 1e-5, 0, 0,
+                                0, 0, 0, 0, 1e-5, 0,
+                                0, 0, 0, 0, 0, 1e-5]
