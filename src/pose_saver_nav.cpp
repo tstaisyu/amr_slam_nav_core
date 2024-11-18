@@ -39,12 +39,20 @@ public:
 
         // Initialize timer to trigger every 60 seconds to save pose
         timer_ = this->create_wall_timer(
-            std::chrono::minutes(1),
+            std::chrono::seconds(1),
             std::bind(&PoseSaverNav::save_pose_to_file, this));
 
         RCLCPP_INFO(this->get_logger(), "PoseSaver node initialized. Saving poses to %s every 60 seconds.", save_path_.c_str());
     }
 
+    ~PoseSaverNav()
+    {
+        // Save the last pose upon destruction (node shutdown)
+        if (!last_pose_.empty()) {
+            save_pose_to_file();
+        }
+    }
+    
 private:
     /**
      * @brief Retrieves the path to save the last pose JSON file.
