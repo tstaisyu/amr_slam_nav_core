@@ -14,20 +14,6 @@ if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
     error_exit "The environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set it to the path of your custom ROS2 workspace."
 fi
 
-# Cleanup function to kill background processes
-cleanup() {
-    echo "Cleaning up background processes..."
-    if ps -p $mapping_pid > /dev/null 2>&1; then
-        kill $mapping_pid || true
-    fi
-    if pgrep -f rosbridge_websocket > /dev/null 2>&1; then
-        kill $(pgrep -f rosbridge_websocket) || true
-    fi
-    wait $mapping_pid 2>/dev/null || true
-    wait $(pgrep -f rosbridge_websocket) 2>/dev/null || true
-    echo "Background processes have been terminated."
-}
-
 # Trap SIGINT and execute cleanup
 trap cleanup INT
 
@@ -69,6 +55,3 @@ source_workspace "${YOUR_CUSTOM_ROS2_WS}"
 # ======== Execute Mapping Launch File ========
 echo "Launching mapping.launch.py..."
 ros2 launch amr_slam_nav_core mapping.launch.py
-
-# ======== Cleanup ========
-cleanup
