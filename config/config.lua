@@ -53,9 +53,9 @@ TRAJECTORY_BUILDER_2D = {
     },
   },
   motion_filter = {
-    max_time_seconds = 0.1,
-    max_distance_meters = 0.1,
-    max_angle_radians = math.rad(0.1),
+    max_time_seconds = 0.2,
+    max_distance_meters = 0.2,
+    max_angle_radians = math.rad(0.2),
   },
   submaps = {
     num_range_data = 90,  -- Number of scans to create a submap
