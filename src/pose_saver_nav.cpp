@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <string>
 #include <filesystem>
+#include <cmath>
 
 namespace fs = std::filesystem;
 
@@ -29,18 +30,23 @@ namespace fs = std::filesystem;
 class PoseSaverNav : public rclcpp::Node
 {
 public:
-    PoseSaverNav() : Node("pose_saver_nav"), save_path_(get_save_path())
+    PoseSaverNav() 
+    : Node("pose_saver_nav"), 
+      save_path_(determine_save_path()),
+      save_interval_seconds_(1)
     {
+        // Declare a parameter for the save interval in seconds
+        this->declare_parameter<int>("save_interval_seconds", 1);
+        this->get_parameter("save_interval_seconds", save_interval_seconds_);
+
         // Initialize subscription to "amcl_pose" topic with QoS depth 10
         subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
             "amcl_pose", 
             10, 
             std::bind(&PoseSaverNav::pose_callback, this, std::placeholders::_1));
 
-        // Initialize timer to trigger every 60 seconds to save pose
-        timer_ = this->create_wall_timer(
-            std::chrono::seconds(1),
-            std::bind(&PoseSaverNav::save_pose_to_file, this));
+        // Initialize timer
+        initialize_timer(save_interval_seconds_);
 
         RCLCPP_INFO(this->get_logger(), "PoseSaver node initialized. Saving poses to %s every 60 seconds.", save_path_.c_str());
     }
@@ -59,7 +65,7 @@ private:
      * 
      * @return std::string The full path to the last_pose.json file.
      */
-    std::string get_save_path() {
+    std::string determine_save_path() {
         const char* home = std::getenv("HOME");
         if (!home) {
             RCLCPP_ERROR(this->get_logger(), "HOME environment variable is not set. Using default save path /tmp/last_pose.json");
@@ -82,6 +88,21 @@ private:
         }
 
         return file_path;
+    }
+
+
+    /**
+     * @brief Initializes a timer that triggers the save_pose_to_file method at regular intervals.
+     *
+     * @param interval_seconds The interval in seconds to save the pose to file.
+     */
+    void initialize_timer(int interval_seconds)
+    {
+        save_timer_ = this->create_wall_timer(
+            std::chrono::seconds(interval_seconds),
+            std::bind(&PoseSaverNav::save_pose_to_file, this)
+        );
+        RCLCPP_INFO(this->get_logger(), "Save timer initialized to trigger every %d seconds.", interval_seconds);
     }
 
     /**
@@ -137,13 +158,16 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr subscription_;
 
     // Timer to periodically save the pose to file
-    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr save_timer_;
 
     // JSON object to store the last received pose
     nlohmann::json last_pose_;
 
     // Path to save the last pose JSON file
     std::string save_path_;
+
+    // Save interval in seconds
+    int save_interval_seconds_;
 };
 
 int main(int argc, char * argv[])
