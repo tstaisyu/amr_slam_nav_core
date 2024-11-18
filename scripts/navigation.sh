@@ -45,6 +45,13 @@ fi
 # Source NeuraTruck workspace setup
 source_workspace "${YOUR_CUSTOM_ROS2_WS}"
 
+# Check if map_name is provided as a script argument
+if [ $# -ge 1 ]; then
+    MAP_NAME="$1"
+else
+    error_exit "No map_name provided. Usage: ./mapping_remote.sh <map_name>"
+fi
+
 # ======== Execute Navigation Launch File ========
-echo "[INFO] Launching navigation.launch.py..."
-ros2 launch amr_slam_nav_core navigation.launch.py || error_exit "Failed to launch navigation.launch.py"
+echo "[INFO] Launching navigation.launch.py with map_name: ${MAP_NAME}..."
+ros2 launch amr_slam_nav_core navigation.launch.py map_name:="${MAP_NAME}" || error_exit "Failed to launch navigation.launch.py"
