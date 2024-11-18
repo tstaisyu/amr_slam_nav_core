@@ -9,6 +9,24 @@ error_exit() {
     exit 1
 }
 
+# ======== Check Environment Variables ========
+if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
+    error_exit "The environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set it to the path of your custom ROS2 workspace."
+fi
+
+# Function to source a workspace
+source_workspace() {
+    local workspace_dir=$1
+    local setup_file="${workspace_dir}/install/setup.bash"
+
+    if [ -f "${setup_file}" ]; then
+        source "${setup_file}" || error_exit "Failed to source ${setup_file}"
+        echo "Sourced ${setup_file}"
+    else
+        error_exit "${setup_file} not found."
+    fi
+}
+
 # ======== Load Environment ========
 echo "Loading environment variables..."
 
@@ -21,28 +39,15 @@ else
 fi
 
 # Source ROS 2 workspace setup
-if [ -f ~/ros2_ws/install/setup.bash ]; then
-    source ~/ros2_ws/install/setup.bash || error_exit "Failed to source ros2_ws setup.bash"
-    echo "Sourced ~/ros2_ws/install/setup.bash"
+ros2_ws_dir="${HOME}/ros2_ws"
+if [ -d "${ros2_ws_dir}" ]; then
+    source_workspace "${ros2_ws_dir}"
 else
     error_exit "~/ros2_ws/install/setup.bash not found."
 fi
 
 # Source NeuraTruck workspace setup
-if [ -f ~/neuratruck_ws/install/setup.bash ]; then
-    source ~/neuratruck_ws/install/setup.bash || error_exit "Failed to source neuratruck_ws setup.bash"
-    echo "Sourced ~/neuratruck_ws/install/setup.bash"
-else
-    error_exit "~/neuratruck_ws/install/setup.bash not found."
-fi
-
-# ======== Execute Startup Launch File ========
-echo "Launching startup.launch.py..."
-ros2 launch amr_slam_nav_core startup.launch.py || error_exit "Failed to launch startup.launch.py"
-
-# ======== Delay ========
-echo "Waiting for 2 seconds..."
-sleep 2
+source_workspace "${YOUR_CUSTOM_ROS2_WS}"
 
 # ======== Execute Navigation Launch File ========
 echo "Launching navigation.launch.py..."
