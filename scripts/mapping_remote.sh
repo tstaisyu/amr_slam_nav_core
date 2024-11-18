@@ -28,11 +28,6 @@ cleanup() {
 # Trap SIGINT (Ctrl-C) and execute cleanup
 trap cleanup INT
 
-# Check environment variables (add as needed)
-if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
-    error_exit "Environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set the path to your custom ROS2 workspace."
-fi
-
 # Function to source a workspace
 source_workspace() {
     local workspace_dir=$1
@@ -60,6 +55,11 @@ fi
 # Source ROS2 main workspace
 ros2_ws_dir="${HOME}/ros2_ws"
 source_workspace "${ros2_ws_dir}"
+
+# Check environment variables (add as needed)
+if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
+    error_exit "Environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set the path to your custom ROS2 workspace."
+fi
 
 # Source custom ROS2 workspace
 source_workspace "${YOUR_CUSTOM_ROS2_WS}"

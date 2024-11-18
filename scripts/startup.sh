@@ -9,11 +9,6 @@ error_exit() {
     exit 1
 }
 
-# ======== Check Environment Variables ========
-if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
-    error_exit "The environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set it to the path of your custom ROS2 workspace."
-fi
-
 # Cleanup function to kill background processes, particularly for rosbridge_websocket
 cleanup() {
     echo "[INFO] Cleaning up background processes..."
@@ -52,6 +47,11 @@ fi
 # Source ROS 2 workspace setup
 ros2_ws_dir="${HOME}/ros2_ws"
 source_workspace "${ros2_ws_dir}"
+
+# ======== Check Environment Variables ========
+if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
+    error_exit "The environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set it to the path of your custom ROS2 workspace."
+fi
 
 # Source NeuraTruck workspace setup
 source_workspace "${YOUR_CUSTOM_ROS2_WS}"
