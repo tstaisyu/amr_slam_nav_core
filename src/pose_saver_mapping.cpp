@@ -42,6 +42,9 @@ public:
         this->declare_parameter<int>("save_interval_seconds", 1);
         int save_interval = this->get_parameter("save_interval_seconds").as_int();
 
+        // Retrieve the save interval parameter
+        this->get_parameter("save_interval_seconds", save_interval_seconds_);
+
         save_path_ = determine_save_path();
         initialize_timer(save_interval);
 
@@ -136,6 +139,9 @@ private:
 
     // Path to save the pose JSON file
     std::string save_path_;
+
+    // Save interval in seconds
+    int save_interval_seconds_;
 };
 
 int main(int argc, char * argv[])
