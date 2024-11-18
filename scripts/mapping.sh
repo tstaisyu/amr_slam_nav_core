@@ -68,14 +68,7 @@ source_workspace "${YOUR_CUSTOM_ROS2_WS}"
 
 # ======== Execute Mapping Launch File ========
 echo "Launching mapping.launch.py..."
-ros2 launch amr_slam_nav_core mapping.launch.py &
-mapping_pid=$!  # Save the PID of the mapping launch
-
-# Wait for the background process to finish
-wait $mapping_pid
-if [ $? -ne 0 ]; then
-    error_exit "Failed to launch mapping.launch.py"
-fi
+ros2 launch amr_slam_nav_core mapping.launch.py
 
 # ======== Cleanup ========
 cleanup
