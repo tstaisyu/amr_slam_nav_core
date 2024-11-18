@@ -72,7 +72,11 @@ private:
         // For example, consider the first received amcl_pose as the initial pose.
         if (!initial_pose_set_)
         {
-            RCLCPP_INFO(this->get_logger(), "Initial pose has been set. Sending stop signal to InitialPosePublisher.");
+            RCLCPP_INFO(this->get_logger(), "Initial pose has been set. Position: x=%.2f, y=%.2f, z=%.2f",
+                        msg->pose.pose.position.x,
+                        msg->pose.pose.position.y,
+                        msg->pose.pose.position.z);
+            RCLCPP_INFO(this->get_logger(), "Sending stop signal to InitialPosePublisher.");
             initial_pose_set_ = true;
 
             // Create a Trigger service request to stop the InitialPosePublisher.
