@@ -56,7 +56,7 @@
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="0 0.15 0" rpy="0 0 0"/>
+    <origin xyz="0 0.15 0.055" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
@@ -83,7 +83,7 @@
   <joint name="base_to_imu" type="fixed">
     <parent link="base_link"/>
     <child link="imu_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="-0.045 0.105 0.10" rpy="0.0 0.0 1.57079"/>
   </joint>
 
   <!-- LiDAR link definition -->
