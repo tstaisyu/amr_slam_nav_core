@@ -39,17 +39,17 @@ TRAJECTORY_BUILDER_2D = {
   min_range = 0.1,
   max_range = 10.0,
   missing_data_ray_length = 1.0,
-  num_accumulated_range_data = 1,
+  num_accumulated_range_data = 2,
   voxel_filter_size = 0.025,  -- Voxel size for downsampling point clouds
-  use_online_correlative_scan_matcher = false,  -- Online scan matching
+  use_online_correlative_scan_matcher = true,  -- Online scan matching
   ceres_scan_matcher = {
     occupied_space_weight = 1,  -- Weight for occupied space in Ceres
     translation_weight = 10,  -- Weight for translation in Ceres optimization
-    rotation_weight = 40,  -- Weight for rotation in Ceres optimization
+    rotation_weight = 10,  -- Weight for rotation in Ceres optimization
     ceres_solver_options = {
       use_nonmonotonic_steps = false,
-      max_num_iterations = 20,
-      num_threads = 1,
+      max_num_iterations = 300,
+      num_threads = 2,
     },
   },
   motion_filter = {
@@ -71,6 +71,10 @@ TRAJECTORY_BUILDER_2D = {
   },
 
   POSE_GRAPH = {
+    publish_frame_projected_to_2d = true,  -- Force projection of 3D to 2D
+    publish_poses_hz = 5.0,  -- Publishing frequency for poses
+    publish_tracked_pose = true,  -- Publish tracked pose
+    global_sampling_ratio = 1.0,  -- Sampling ratio for global localization
     optimize_every_n_nodes = 90,  -- Optimization frequency for pose graph
     constraint_builder = {
       min_score = 0.65,  -- Minimum score for adding constraints
@@ -104,6 +108,11 @@ TRAJECTORY_BUILDER_2D = {
 -- Set odometry topic
 TRAJECTORY_BUILDER_2D.use_odometry = true
 TRAJECTORY_BUILDER_2D.odometry_topic = "/odometry/filtered"
+
+TRAJECTORY_BUILDER = {
+  publish_accumulated_scan_matching_translations = 0.05,
+  publish_accumulated_scan_matching_rotations = math.rad(2.0),
+}
 
 -- Return configuration options
 return options
