@@ -73,6 +73,13 @@ def generate_launch_description():
         output='screen'
     )
 
+    initial_pose_publisher_controller_node = Node(
+        package='amr_slam_nav_core',
+        executable='initial_pose_publisher_controller',
+        name='initial_pose_publisher_controller',
+        output='screen'
+    )
+
     # ======== Building a launch description ========
     # Create the launch description
     ld = LaunchDescription()
@@ -82,10 +89,13 @@ def generate_launch_description():
     ld.add_action(DeclareLaunchArgument('map_name', default_value='map', description='Name of the map to save'))
     ld.add_action(ensure_directories)
 
-    # Add the nodes to the launch description
+    # Add the Nav2 bringup launch
     ld.add_action(bringup_launch)
+
+    # Add the pose management nodes
     ld.add_action(pose_saver_node)
-    ld.add_action(initial_pose_publisher_node)    
+    ld.add_action(initial_pose_publisher_node)
+    ld.add_action(initial_pose_publisher_controller_node)
 
     return ld
 
