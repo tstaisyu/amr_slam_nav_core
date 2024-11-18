@@ -11,7 +11,7 @@ error_exit() {
 
 # ======== Check Environment Variables ========
 if [ -z "${YOUR_CUSTOM_ROS2_WS}" ]; then
-    error_exit "環境変数 YOUR_CUSTOM_ROS2_WS が設定されていません。カスタムROS2ワークスペースのパスを設定してください。"
+    error_exit "The environment variable YOUR_CUSTOM_ROS2_WS is not set. Please set it to the path of your custom ROS2 workspace."
 fi
 
 # Cleanup function to kill background processes
