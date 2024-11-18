@@ -38,8 +38,12 @@ public:
       tf_buffer_(std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME)),
       tf_listener_(tf_buffer_)
     {
+        // Declare a parameter for the save interval in seconds
+        this->declare_parameter<int>("save_interval_seconds", 1);
+        int save_interval = this->get_parameter("save_interval_seconds").as_int();
+
         save_path_ = determine_save_path();
-        initialize_timer();
+        initialize_timer(save_interval);
 
         RCLCPP_INFO(this->get_logger(), "PoseSaver node initialized.");
     }
@@ -62,10 +66,10 @@ private:
      * @brief Initializes a timer that triggers the save_pose method at regular intervals.
      * Currently set to trigger every 10 seconds for demonstration purposes.
      */
-    void initialize_timer()
+    void initialize_timer(int interval_seconds)
     {
         save_timer_ = this->create_wall_timer(
-            std::chrono::seconds(10), // Check every 10 seconds for demonstration
+            std::chrono::seconds(interval_seconds), // Check every 10 seconds for demonstration
             std::bind(&PoseSaverMapping::save_pose, this)
         );
         RCLCPP_INFO(this->get_logger(), "Save timer initialized to trigger every 10 seconds.");
