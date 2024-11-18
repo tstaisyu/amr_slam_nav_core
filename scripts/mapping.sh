@@ -17,13 +17,32 @@ fi
 # Cleanup function to kill background processes
 cleanup() {
     echo "Cleaning up background processes..."
-    kill $startup_pid $mapping_pid $(pgrep -f rosbridge_websocket) 2>/dev/null
-    wait $startup_pid $mapping_pid $(pgrep -f rosbridge_websocket) 2>/dev/null
+    if ps -p $mapping_pid > /dev/null 2>&1; then
+        kill $mapping_pid || true
+    fi
+    if pgrep -f rosbridge_websocket > /dev/null 2>&1; then
+        kill $(pgrep -f rosbridge_websocket) || true
+    fi
+    wait $mapping_pid 2>/dev/null || true
+    wait $(pgrep -f rosbridge_websocket) 2>/dev/null || true
     echo "Background processes have been terminated."
 }
 
 # Trap SIGINT and execute cleanup
 trap cleanup INT
+
+# Function to source a workspace
+source_workspace() {
+    local workspace_dir=$1
+    local setup_file="${workspace_dir}/install/setup.bash"
+
+    if [ -f "${setup_file}" ]; then
+        source "${setup_file}" || error_exit "Failed to source ${setup_file}"
+        echo "Sourced ${setup_file}"
+    else
+        error_exit "${setup_file} not found."
+    fi
+}
 
 # ======== Load Environment ========
 echo "Loading environment variables..."
@@ -37,20 +56,15 @@ else
 fi
 
 # Source ROS 2 workspace setup
-if [ -f ~/ros2_ws/install/setup.bash ]; then
-    source ~/ros2_ws/install/setup.bash || error_exit "Failed to source ros2_ws setup.bash"
-    echo "Sourced ~/ros2_ws/install/setup.bash"
+ros2_ws_dir="${HOME}/ros2_ws"
+if [ -d "${ros2_ws_dir}" ]; then
+    source_workspace "${ros2_ws_dir}"
 else
     error_exit "~/ros2_ws/install/setup.bash not found."
 fi
 
 # Source NeuraTruck workspace setup
-if [ -f "${YOUR_CUSTOM_ROS2_WS}"/install/setup.bash ]; then
-    source ~/neuratruck_ws/install/setup.bash || error_exit "Failed to source neuratruck_ws setup.bash"
-    echo "Sourced ~/neuratruck_ws/install/setup.bash"
-else
-    error_exit "~/neuratruck_ws/install/setup.bash not found."
-fi
+source_workspace "${YOUR_CUSTOM_ROS2_WS}"
 
 # ======== Execute Mapping Launch File ========
 echo "Launching mapping.launch.py..."
