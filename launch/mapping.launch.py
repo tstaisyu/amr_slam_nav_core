@@ -101,7 +101,7 @@ def generate_launch_description():
         package='amr_slam_nav_core',
         executable='pose_publisher_node',
         name='pose_publisher_node',
-        output='screen
+        output='screen'
     )
 
     pose_saver_node = Node(
