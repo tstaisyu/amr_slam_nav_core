@@ -48,6 +48,7 @@ def generate_launch_description():
     nav2_config = os.path.join(config_dir, 'nav2_params.yaml')
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
+    raw_imu_subscriber_config = os.path.join(config_dir, 'raw_imu_subscriber_config.yaml')
     urdf_file = os.path.join(urdf_dir, 'n_v1.urdf')
 
     # Load the robot's URDF file
@@ -89,6 +90,7 @@ def generate_launch_description():
             package='amr_slam_nav_core',
             executable='raw_imu_subscriber',
             name='raw_imu_subscriber',
+            parameters=[raw_imu_subscriber_config],
             output='screen',
             remappings=[
                 ('/imu/data_raw', '/imu/data_raw'),
