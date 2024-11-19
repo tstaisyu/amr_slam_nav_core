@@ -134,11 +134,11 @@ private:
         // Set covariance matrices, assuming some standard values
         std::fill(std::begin(odom_msg->pose.covariance), std::end(odom_msg->pose.covariance), 0.0);
         std::fill(std::begin(odom_msg->twist.covariance), std::end(odom_msg->twist.covariance), 0.0);
-        odom_msg->pose.covariance[0] = 0.001;  // Position x
-        odom_msg->pose.covariance[7] = 0.001;  // Position y
-        odom_msg->pose.covariance[35] = 0.01;  // Orientation yaw
-        odom_msg->twist.covariance[0] = 0.001; // Velocity x
-        odom_msg->twist.covariance[35] = 0.01; // Angular velocity z
+        odom_msg->pose.covariance[0] = 0.01;  // Position x
+        odom_msg->pose.covariance[7] = 0.01;  // Position y
+        odom_msg->pose.covariance[35] = 0.05;  // Orientation yaw
+        odom_msg->twist.covariance[0] = 0.01; // Velocity x
+        odom_msg->twist.covariance[35] = 0.05; // Angular velocity z
 
         odom_publisher_->publish(*odom_msg);
         RCLCPP_DEBUG(this->get_logger(), "Published odometry message.");
