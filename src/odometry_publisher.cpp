@@ -78,8 +78,6 @@ private:
         auto current_time = this->get_clock()->now();
         // Calculate the time elapsed since the last update
         double dt = (current_time - last_time_).seconds();
-        // Update the last_time_ to current time for the next cycle
-        last_time_ = current_time;
 
         RCLCPP_DEBUG(this->get_logger(), "Time delta: %f", dt);
 
@@ -88,6 +86,9 @@ private:
             RCLCPP_WARN(this->get_logger(), "Invalid time delta: %f", dt);
             return; // Skip this update if the time delta is invalid
         }
+
+        // Update the last_time_ to current time for the next cycle
+        last_time_ = current_time;
 
         // Compute linear and angular velocities from the wheel velocities
         double linear_velocity = (left_velocity_ + right_velocity_) / 2; // Average of both wheel velocities
