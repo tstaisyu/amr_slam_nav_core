@@ -65,7 +65,7 @@ add_executable(initial_pose_publisher_controller src/initial_pose_publisher_cont
 add_executable(wifi_config_publisher src/wifi_config_publisher.cpp)
 
 # Specifying libraries for linking
-ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs tf2_geometry_msgs)
+ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs tf2_geometry_msgs tf2)
 ament_target_dependencies(odometry_publisher rclcpp geometry_msgs nav_msgs tf2_ros tf2 tf2_geometry_msgs)
 ament_target_dependencies(connection_checker rclcpp std_msgs tf2_geometry_msgs)
 ament_target_dependencies(reboot_service_client rclcpp rclcpp_lifecycle std_srvs tf2_geometry_msgs)
