@@ -1,7 +1,7 @@
 ekf_localization_node:
   ros__parameters:
     use_sim_time: false  # Whether to use simulation time
-    frequency: 30.0  # Frequency at which to run the filter
+    frequency: 50.0  # Frequency at which to run the filter
     two_d_mode: true  # Limit EKF to 2D motion
     publish_tf: true  # Publish transformation frames
     map_frame: map  # Frame that represents the map
@@ -16,8 +16,8 @@ ekf_localization_node:
     # Odometry data configuration
     odom0: /odometry/odom_encoder  # Odometry topic
     odom0_config: [true, true, false,  # Configure XYZ position
-                   false, false, false,  # Configure XYZ velocity
-                   false, false, false,  # Configure XYZ acceleration
+                   false, false, true,  # Configure XYZ velocity
+                   true, false, false,  # Configure XYZ acceleration
                    false, false, true,  # Configure Yaw angle
                    false, false, false]  # Not used
     odom0_differential: false  # Use differential odometry
@@ -28,7 +28,7 @@ ekf_localization_node:
     # IMU data configuration
     imu0: /imu/data_filtered  # IMU topic
     imu0_config: [false, false, false,  # No position
-                   false, false, false,  # No velocity
+                   true, true, true,  # No velocity
                    false, false, false,  # No acceleration
                    true, true, true,  # Orientation (Roll, Pitch, Yaw)
                    true, true, true]  # Angular velocities (Roll, Pitch, Yaw)
