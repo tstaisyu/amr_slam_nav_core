@@ -16,10 +16,10 @@ ekf_localization_node:
     # Odometry data configuration
     odom0: /odometry/odom_encoder  # Odometry topic
     odom0_config: [true, true, false,  # Configure XYZ position
-                   false, false, true,  # Configure XYZ velocity
-                   true, false, false,  # Configure XYZ acceleration
-                   false, false, true,  # Configure Yaw angle
-                   false, false, false]  # Not used
+                   false, false, true,  # Configure RPY orientation
+                   true, false, false,  # Configure linear velocity
+                   false, false, true,  # Configure angular velocity
+                   false, false, false]  # Configure linear acceleration
     odom0_differential: false  # Use differential odometry
     odom0_relative: false  # Use relative odometry
     odom0_queue_size: 10  # Queue size for odometry messages
@@ -27,11 +27,11 @@ ekf_localization_node:
 
     # IMU data configuration
     imu0: /imu/data_filtered  # IMU topic
-    imu0_config: [false, false, false,  # No position
-                   true, true, true,  # No velocity
-                   false, false, false,  # No acceleration
-                   true, true, true,  # Orientation (Roll, Pitch, Yaw)
-                   true, true, true]  # Angular velocities (Roll, Pitch, Yaw)
+    imu0_config: [false, false, false,  # Configure XYZ position
+                   true, true, true,  # Configure RPY orientation
+                   false, false, false,  # Configure linear velocity
+                   true, true, true,  # Configure angular velocity
+                   true, true, true]  # Configure linear acceleration
     imu0_differential: false  # Use differential IMU data
     imu0_relative: false  # Use relative IMU data
     imu0_queue_size: 10  # Queue size for IMU messages
@@ -40,31 +40,32 @@ ekf_localization_node:
 
     # Cartographer's pose estimates
     pose0: /pose_estimate
-    pose0_config: [true, true, false,
-                   false, false, true,
-                   false, false, false,
-                   false, false, false]
+    pose0_config: [true, true, false,  # Configure XYZ position
+                   false, false, true,  # Configure RPY orientation
+                   false, false, false,  # Configure linear velocity
+                   false, false, false,  # Configure angular velocity
+                   false, false, false]  # Configure linear acceleration
     pose0_differential: false
     pose0_relative: false
     pose0_queue_size: 10
     pose0_nodelay: false
 
     # Initial estimate covariance matrix
-    initial_estimate_covariance: [1e-9, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	1e-9, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	1e-9, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	1e-9, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	1e-9, 0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	1e-9, 0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-9, 0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-9, 0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-9, 0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-9,  0.0, 	0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	1e-9,  0.0, 	0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	1e-9,  0.0,	0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	1e-9, 0.0,	0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	1e-9, 0.0,
-                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	1e-9]
+    initial_estimate_covariance: [1e-1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	1e-1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	1e-1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	1e-1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	1e-1, 0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	1e-1, 0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-1, 0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-1, 0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-1, 0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	1e-1,  0.0, 	0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	1e-1,  0.0, 	0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	1e-1,  0.0,	0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	1e-1, 0.0,	0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	1e-1, 0.0,
+                                  0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	1e-1]
 
     # Process noise covariance matrix
     process_noise_covariance: [0.05, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
@@ -72,13 +73,13 @@ ekf_localization_node:
                               0.0,	0.0,	0.06, 0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
                               0.0,	0.0,	0.0,	0.03, 0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
                               0.0,	0.0,	0.0,	0.0,	0.03, 0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
-                              0.0,	0.0,	0.0,	0.0,	0.0,	0.06, 0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
+                              0.0,	0.0,	0.0,	0.0,	0.0,	0.1, 0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
                               0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.025, 0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
                               0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.025, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
                               0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.04, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,
-                              0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.01, 0.0,	0.0,	0.0,	0.0,	0.0,
-                              0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.01, 0.0,	0.0,	0.0,	0.0,
-                              0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.02, 0.0,	0.0,	0.0,
+                              0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.1, 0.0,	0.0,	0.0,	0.0,	0.0,
+                              0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.1, 0.0,	0.0,	0.0,	0.0,
+                              0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.1, 0.0,	0.0,	0.0,
                               0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.01, 0.0,	0.0,
                               0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.01, 0.0,
                               0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.015]
