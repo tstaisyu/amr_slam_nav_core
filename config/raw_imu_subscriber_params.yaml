@@ -1,0 +1,12 @@
+raw_imu_subscriber:
+  ros__parameters:
+    raw_imu_topic: "imu/data_raw"
+    filtered_imu_topic: "imu/data_qos"
+    source_frame: "map"
+    target_frame: "imu_link"
+    subscriber_queue_size: 10
+    publisher_queue_size: 10
+    offset_x: -0.045
+    offset_y: 0.105
+    offset_z: 0.10
+    yaw_offset: 0.0
