@@ -28,7 +28,7 @@ teleop_twist_joy:
 
     # Turbo mode scaling factor
     scale_linear_turbo.x: 0.3  # Scaling factor multiplier when turbo mode is active
-    scale_angular_turbo.yaw: 0.3  # Scaling factor multiplier when turbo mode is active
+    scale_angular_turbo.yaw: 0.6  # Scaling factor multiplier when turbo mode is active
 
     # Timeout for sending Twist messages (in seconds)
     twist_timeout: 0.5  # If no input is received within this duration, velocities reset to zero
