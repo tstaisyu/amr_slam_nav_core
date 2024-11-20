@@ -54,4 +54,4 @@ fi
 
 # ======== Execute Navigation Launch File ========
 echo "[INFO] Launching navigation.launch.py with map_name: ${MAP_NAME}..."
-ros2 launch amr_slam_nav_core navigation.launch.py map_name:="${MAP_NAME}" || error_exit "Failed to launch navigation.launch.py"
+ros2 launch amr_slam_nav_core navigation.launch.py map_name:=${MAP_NAME} || error_exit "Failed to launch navigation.launch.py"
