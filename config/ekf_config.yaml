@@ -1,7 +1,7 @@
 ekf_localization_node:
   ros__parameters:
     use_sim_time: false  # Whether to use simulation time
-    frequency: 50.0  # Frequency at which to run the filter
+    frequency: 30.0  # Frequency at which to run the filter
     two_d_mode: true  # Limit EKF to 2D motion
     publish_tf: true  # Publish transformation frames
     map_frame: map  # Frame that represents the map
