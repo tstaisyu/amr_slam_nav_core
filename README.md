@@ -16,16 +16,16 @@
 # amr_slam_nav_core
 
 ## パッケージの説明
-`amr_slam_nav_core` は、自律移動ロボット（AMR）のナビゲーションとSLAM（Simultaneous Localization and Mapping）機能のコアコンポーネントを提供するROS 2パッケージです。このパッケージは、ロボットのセンサーからのデータを統合し、環境のマッピングとロボットの自己位置推定を行います。
+`amr_slam_nav_core` は、自律移動ロボット（AMR）のナビゲーションとSLAM（Simultaneous Localization and Mapping）機能のコアコンポーネントを提供するROS 2パッケージです。このパッケージは、ロボットのセンサーからのデータを統合し、環境のマッピングとロボットの自己位置推定、およびロボットの制御を行います。
 
 ## 主な機能
-* IMUデータの購読とフィルタリング
-* オドメトリデータの計算と公開
-* ホイールの接続状態の監視
-* SLAM機能の実装（Cartographer）
-* 通信インターフェースの提供（rosbridge_websocket）
-* LiDARデータの処理とフィルタリング
-* ホイールモータのリブートサービス
+* IMUデータの購読とフィルタリング：IMUセンサーからの生データをフィルタリングし、ノイズを低減したデータを提供します。
+* オドメトリデータの計算とパブリッシュ：左右のホイールエンコーダーからのデータを使用して、ロボットの位置と姿勢を推定します。
+* ホイールモータの接続状態の監視：ホイールモータとの通信状態を定期的にチェックし、接続が失われた場合にアラートを出します。
+* SLAM機能の実装（Cartographer）：LiDARデータを使用してリアルタイムで環境の地図を作成します。
+* 通信インターフェースの提供（rosbridge_websocket）：リモートデバイスとの通信を可能にし、遠隔操作やモニタリングをサポートします。
+* LiDARデータの処理とフィルタリング：LiDARセンサーからのデータをフィルタリングし、不要なデータを除去します。
+* ホイールモータのリブートサービス：モータのリブートをリモートから行うためのサービスを提供します。
 
 ## startup.launch.pyについて
 このlaunchファイルは、自律移動ロボットに必要なノードの起動を行います。以下のノードが含まれています：
@@ -200,6 +200,77 @@ source install/setup.bash
 
 ## 使用方法
 
+### 起動スクリプトの実行権限を付与
+スクリプトに実行権限を付与します。
+
+```bash
+chmod +x ~/ros2_ws/src/amr_slam_nav_core/scripts/*.sh
+```
+### ノードの起動
+1. ロボットの起動（startup.launch.py）
+ロボットの基本的なノードを起動します。
+```bash
+ros2 launch amr_slam_nav_core startup.launch.py
+```
+2. マッピングの開始（mapping.launch.py）
+SLAMを実行し、環境のマッピングを開始します。
+```bash
+ros2 launch amr_slam_nav_core mapping.launch.py
+```
+3. ナビゲーションの開始（navigation.launch.py）
+既存の地図を使用して、ロボットのナビゲーションを開始します。
+```bash
+ros2 launch amr_slam_nav_core navigation.launch.py map_name:=your_map_name
+```
+※ your_map_name は使用する地図の名前に置き換えてください。
+
+### リモートマッピングスクリプトの実行
+`mapping_remote.sh`
+リモートPC上でマッピングとテレオペレーションを同時に開始するスクリプトです。環境変数 YOUR_CUSTOM_ROS2_WS を設定し、以下のコマンドで実行します。
+```bash
+export YOUR_CUSTOM_ROS2_WS=~/your_custom_ws
+~/ros2_ws/src/amr_slam_nav_core/scripts/mapping_remote.sh
+```
+このスクリプトは以下の2つのLaunchファイルを同時に起動します。
+* mapping_rviz2.launch.py
+* teleop.launch.py
+
+## マッピングとナビゲーションの手順
+### マッピング
+1. ロボットの基本ノードを起動します。
+```bash
+ros2 launch amr_slam_nav_core startup.launch.py
+```
+2. マッピングを開始します。
+```bash
+ros2 launch amr_slam_nav_core mapping.launch.py
+```
+3. リモートPC上でRVizを使用して地図を確認します。
+```bash
+ros2 launch amr_slam_nav_core mapping_rviz2.launch.py
+```
+4. マッピングが完了したら、地図を保存します。
+```bash
+ros2 launch amr_slam_nav_core save_map.launch.py map_name:=your_map_name
+```
+
+### ナビゲーション
+ロボットの基本ノードを起動します。
+1. 
+```bash
+ros2 launch amr_slam_nav_core startup.launch.py
+```
+
+2. ナビゲーションを開始します。
+```bash
+ros2 launch amr_slam_nav_core navigation.launch.py map_name:=your_map_name
+```
+
+3. リモートPC上でRVizを使用してロボットを制御します。
+```bash
+ros2 launch amr_slam_nav_core navigation_rviz2.launch.py
+```
+
 ### ノードの説明
 `amr_slam_nav_core` パッケージには、以下の主要なノードが含まれています。それぞれのノードの役割と動作について詳しく説明します。
 
@@ -209,6 +280,11 @@ source install/setup.bash
   - `/imu/data_raw` トピックからIMUデータを受信。
   - 受信データに移動平均フィルタを適用してノイズを低減。
   - フィルタリング後のデータを `/imu/data_qos` トピックにパブリッシュ。
+* **パラメータ**:
+  - raw_imu_topic: 購読するIMUデータのトピック名（デフォルト: "imu/data_raw"）
+  - filtered_imu_topic: パブリッシュするフィルタリング済みIMUデータのトピック名（デフォルト: "imu/data_qos"）
+  - offset_x, offset_y, offset_z: IMUの位置オフセット（メートル）
+  - yaw_offset: IMUの回転オフセット（ラジアン）
 
 #### 2. `odometry_publisher`
 * **役割**: 左右のホイールの速度データを基にオドメトリデータを計算し、`/odometry/odom_encoder`にパブリッシュします。
@@ -231,6 +307,14 @@ source install/setup.bash
   - サービスのレスポンスを受け取り、リブートの成功・失敗をログに記録。
   - 両サービスの呼び出しが完了した後、ROS 2 を安全にシャットダウンします。
 
+#### 5. `pose_publisher_node`
+* **役割**: ロボットの現在位置を取得し、geometry_msgs::msg::PoseWithCovarianceStampedとしてパブリッシュします。
+* **パラメータ**:
+  - source_frame: トランスフォームのソースフレーム（デフォルト: "map"）
+  - target_frame: トランスフォームのターゲットフレーム（デフォルト: "base_link"）
+  - pose_topic: パブリッシュするトピック名（デフォルト: "pose_estimate"）
+  - publish_rate_hz: パブリッシュレート（Hz）
+
 ### サービスの利用
 
 リブートサービスを手動で呼び出す場合は、以下のコマンドを使用します：
@@ -250,22 +334,43 @@ ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 ├── config
 │   ├── config.lua
 │   ├── ekf_config.yaml
+│   ├── joy_teleop_config.yaml
 │   ├── laser_filter_config.yaml
-│   └── nav2_params.yaml
+│   ├── nav2_params.yaml
+│   └── raw_imu_subscriber_params.yaml
 ├── include
 │   └── amr_slam_nav_core
 ├── launch
-│   └── startup_cartographer.launch.py
+│   ├── mapping.launch.py
+│   ├── mapping_rviz2.launch.py
+│   ├── navigation.launch.py
+│   ├── save_map.launch.py
+│   ├── startup.launch.py
+│   └── teleop.launch.py
 ├── package.xml
+├── rviz
+│   └── mapping.rviz
 ├── scripts
 │   ├── laserscan_sample.sh
-│   ├── startup.py
-│   └── startup.sh
+│   ├── mapping.sh
+│   ├── mapping_remote.sh
+│   ├── navigation.sh
+│   ├── navigation_rviz2.sh
+│   ├── save_map.sh
+│   ├── startup.sh
+│   └── wheel_reboot.sh
 ├── src
 │   ├── connection_checker.cpp
+│   ├── initial_pose_publisher.cpp
+│   ├── initial_pose_publisher_controller.cpp
+│   ├── joy_cmd_vel_relay.cpp
 │   ├── odometry_publisher.cpp
+│   ├── pose_publisher_node.cpp
+│   ├── pose_saver_mapping.cpp
+│   ├── pose_saver_nav.cpp
 │   ├── raw_imu_subscriber.cpp
-│   └── reboot_service_client.cpp
+│   ├── reboot_service_client.cpp
+│   └── wifi_config_publisher.cpp
 └── urdf
     └── n_v1.urdf
 ```
@@ -281,8 +386,10 @@ ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 * nav_msgs
 * tf2_ros
 * rosbridge_server
-* rplidar_node
+* rplidar_ros
 * cartographer_ros
+* nav2_bringup
+* micro_ros_agent
 
 ### コントリビューション
 バグ報告や機能追加の提案は、GitHubリポジトリのIssuesセクションで受け付けています。プルリクエストも歓迎します。
@@ -307,3 +414,6 @@ ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 ### その他:
 * ログメッセージを確認し、エラーや警告を基に問題を特定してください。
 * 必要に応じて、各ノードのデバッグモードを有効にして詳細なログを取得してください。
+
+## お問い合わせ
+質問やサポートが必要な場合は、リポジトリのIssuesセクションまたはプルリクエストを通じてご連絡ください。
