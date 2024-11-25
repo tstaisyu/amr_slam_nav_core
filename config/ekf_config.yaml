@@ -24,6 +24,9 @@ ekf_localization_node:
     odom0_relative: false  # Use relative odometry
     odom0_queue_size: 10  # Queue size for odometry messages
     odom0_nodelay: false  # No delay in odometry processing
+    odom0_pose_rejection_threshold: 2.0  # Pose rejection threshold
+    odom0_twist_rejection_threshold: 2.0  # Twist rejection threshold
+    odom0_remove_repeating: false
     odom0_covariance: [0.5, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
                       0.0,	0.5, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
                       0.0,	0.0,	0.5, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
@@ -52,6 +55,9 @@ ekf_localization_node:
     imu0_queue_size: 10  # Queue size for IMU messages
     imu0_remove_gravitational_acceleration: true  # Remove gravitational acceleration from IMU data
     imu0_nodelay: false  # No delay in IMU data processing
+    imu0_pose_rejection_threshold: 0.8  # Pose rejection threshold
+    imu0_twist_rejection_threshold: 0.8  # Twist rejection threshold
+    imu0_remove_repeating: false
     imu0_covariance: [0.1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
                       0.0,	0.1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
                       0.0,	0.0,	0.1, 0.0,	0.0,	0.0,	0.0,	0.0,	0.0,	0.0, 	0.0, 	0.0, 	0.0,	0.0,	0.0,
