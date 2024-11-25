@@ -95,11 +95,15 @@ private:
             odom_msg->pose.covariance[0] = 1.0;  // Position x
             odom_msg->pose.covariance[7] = 1.0;  // Position y
             odom_msg->pose.covariance[35] = 1.0; // Orientation yaw
+            odom_msg->twist.covariance[0] = 1.0; // Velocity x
+            odom_msg->twist.covariance[35] = 1.0; // Angular velocity z
         } else {
             // 通常時の共分散に戻す
             odom_msg->pose.covariance[0] = 0.01;  // Position x
             odom_msg->pose.covariance[7] = 0.01;  // Position y
             odom_msg->pose.covariance[35] = 0.05; // Orientation yaw
+            odom_msg->twist.covariance[0] = 0.01; // Velocity x
+            odom_msg->twist.covariance[35] = 0.05; // Angular velocity z
         }
     }
 
