@@ -88,9 +88,9 @@ private:
         }
     }
 
-    // オドメトリの共分散を調整するメソッド
+    // Adjust odometry covariance based on slip detection
     void adjust_odometry_covariance(bool is_slipping, nav_msgs::msg::Odometry::SharedPtr odom_msg) {
-        // スリップ時は共分散を大きく設定（信頼性を低減）
+        //  Set high covariance values to indicate uncertainty
         if (is_slipping) {
             odom_msg->pose.covariance[0] = 1.0;  // Position x
             odom_msg->pose.covariance[7] = 1.0;  // Position y
@@ -98,7 +98,7 @@ private:
             odom_msg->twist.covariance[0] = 1.0; // Velocity x
             odom_msg->twist.covariance[35] = 1.0; // Angular velocity z
         } else {
-            // 通常時の共分散に戻す
+            // Reset covariance values to standard values
             odom_msg->pose.covariance[0] = 0.01;  // Position x
             odom_msg->pose.covariance[7] = 0.01;  // Position y
             odom_msg->pose.covariance[35] = 0.05; // Orientation yaw
