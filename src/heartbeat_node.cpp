@@ -131,22 +131,30 @@ private:
 
         // Check left wheel heartbeat response
         auto elapsed_time_left = (current_time - last_response_time_left_).seconds();
-        if (has_received_response_left_ && elapsed_time_left > heartbeat_timeout_) {
-            RCLCPP_WARN(this->get_logger(), "No heartbeat response received from LEFT wheel for %.2f seconds.", elapsed_time_left);
-            // Recovery or alert mechanisms can be added here
-            has_received_response_left_ = false;  // Reset flag after timeout
+        if (has_received_response_left_) {
+            if (elapsed_time_left > heartbeat_timeout_) {
+                RCLCPP_WARN(this->get_logger(), "No heartbeat response received from LEFT wheel for %.2f seconds.", elapsed_time_left);
+                // Recovery or alert mechanisms can be added here
+                has_received_response_left_ = false;  // Reset flag after timeout
+            } else {
+                RCLCPP_INFO(this->get_logger(), "LEFT wheel heartbeat is healthy. Last response %.2f seconds ago.", elapsed_time_left);
+            }
         } else {
-            RCLCPP_INFO(this->get_logger(), "LEFT wheel heartbeat is healthy. Last response %.2f seconds ago.", elapsed_time_left);
+            RCLCPP_WARN(this->get_logger(), "No heartbeat response received from LEFT wheel yet.");
         }
 
         // Check right wheel heartbeat response
         auto elapsed_time_right = (current_time - last_response_time_right_).seconds();
-        if (has_received_response_right_ && elapsed_time_right > heartbeat_timeout_) {
-            RCLCPP_WARN(this->get_logger(), "No heartbeat response received from RIGHT wheel for %.2f seconds.", elapsed_time_right);
-            // Recovery or alert mechanisms can be added here
-            has_received_response_right_ = false;  // Reset flag after timeout
+        if (has_received_response_right_) {
+            if (elapsed_time_right > heartbeat_timeout_) {
+                RCLCPP_WARN(this->get_logger(), "No heartbeat response received from RIGHT wheel for %.2f seconds.", elapsed_time_right);
+                // Recovery or alert mechanisms can be added here
+                has_received_response_right_ = false;  // Reset flag after timeout
+            } else {
+                RCLCPP_INFO(this->get_logger(), "RIGHT wheel heartbeat is healthy. Last response %.2f seconds ago.", elapsed_time_right);
+            }
         } else {
-            RCLCPP_INFO(this->get_logger(), "RIGHT wheel heartbeat is healthy. Last response %.2f seconds ago.", elapsed_time_right);
+            RCLCPP_WARN(this->get_logger(), "No heartbeat response received from RIGHT wheel yet.");
         }
     }
 
