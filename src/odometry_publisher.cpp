@@ -25,8 +25,8 @@
 class OdometryPublisher : public rclcpp::Node {
 public:
     OdometryPublisher() 
-    : Node("odometry_publisher"), update_rate_(50.0), wheel_base_(0.202),
-      alpha_(0.2), left_filtered_velocity_(0.0), right_filtered_velocity_(0.0) {
+    : Node("odometry_publisher"),alpha_(0.2), left_filtered_velocity_(0.0), right_filtered_velocity_(0.0), 
+      update_rate_(50.0), wheel_base_(0.202) {
 
         // QoS settings
         rclcpp::QoS custom_qos_profile(10);
