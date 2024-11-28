@@ -49,6 +49,7 @@ def generate_launch_description():
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
     raw_imu_subscriber_config = os.path.join(config_dir, 'raw_imu_subscriber_config.yaml')
+    heartbeat_config = os.path.join(config_dir, 'heartbeat_params.yaml')
     urdf_file = os.path.join(urdf_dir, 'n_v1.urdf')
 
     # Load the robot's URDF file
@@ -83,6 +84,14 @@ def generate_launch_description():
             package='amr_slam_nav_core',
             executable='connection_checker',
             name='connection_checker',
+            output='screen'
+        ),
+        # Node for heartbeat node
+        Node(
+            package='amr_slam_nav_core',
+            executable='heartbeat_node',
+            name='heartbeat_node',
+            parameters=[heartbeat_config],
             output='screen'
         ),
         # Node for subscription of raw imu data
