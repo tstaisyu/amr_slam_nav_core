@@ -26,7 +26,8 @@ public:
       last_response_time_left_(this->now()),
       last_response_time_right_(this->now()),
       has_received_response_left_(false),
-      has_received_response_right_(false)
+      has_received_response_right_(false),
+      check_counter_(0)  // Initialize counter for checking heartbeat responses      
     {
         // Declare and get parameters
         this->declare_parameter<std::string>("heartbeat_topic", "/heartbeat");
@@ -132,6 +133,10 @@ private:
     void check_heartbeat_response()
     {
         auto current_time = this->now();
+        check_counter_++;   // Increment counter for checking heartbeat responses
+
+        // Interval for checking heartbeat responses
+        const int log_interval = 5;
 
         // Check left wheel heartbeat response
         auto elapsed_time_left = (current_time - last_response_time_left_).seconds();
@@ -140,11 +145,13 @@ private:
                 RCLCPP_WARN(this->get_logger(), "No heartbeat response received from LEFT wheel for %.2f seconds.", elapsed_time_left);
                 // Recovery or alert mechanisms can be added here
                 has_received_response_left_ = false;  // Reset flag after timeout
-            } else {
+            } else if (check_counter_ >= log_interval) {
                 RCLCPP_INFO(this->get_logger(), "LEFT wheel heartbeat is healthy. Last response %.2f seconds ago.", elapsed_time_left);
             }
         } else {
-            RCLCPP_WARN(this->get_logger(), "No heartbeat response received from LEFT wheel yet.");
+            if (check_counter_ >= log_interval) {
+                RCLCPP_WARN(this->get_logger(), "No heartbeat response received from LEFT wheel yet.");
+            }
         }
 
         // Check right wheel heartbeat response
@@ -154,11 +161,18 @@ private:
                 RCLCPP_WARN(this->get_logger(), "No heartbeat response received from RIGHT wheel for %.2f seconds.", elapsed_time_right);
                 // Recovery or alert mechanisms can be added here
                 has_received_response_right_ = false;  // Reset flag after timeout
-            } else {
+            } else if (check_counter_ >= log_interval) {
                 RCLCPP_INFO(this->get_logger(), "RIGHT wheel heartbeat is healthy. Last response %.2f seconds ago.", elapsed_time_right);
             }
         } else {
-            RCLCPP_WARN(this->get_logger(), "No heartbeat response received from RIGHT wheel yet.");
+            if (check_counter_ >= log_interval) {
+                RCLCPP_WARN(this->get_logger(), "No heartbeat response received from RIGHT wheel yet.");
+            }
+        }
+
+        // Reset counter after logging
+        if (check_counter_ >= log_interval) {
+            check_counter_ = 0;
         }
     }
 
@@ -187,6 +201,9 @@ private:
     int heartbeat_response_value_;
     double heartbeat_interval_;
     double heartbeat_timeout_;
+
+    // Counter for checking heartbeat responses
+    int check_counter_;
 };
 
 int main(int argc, char ** argv)
