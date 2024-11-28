@@ -28,36 +28,22 @@ class WiFiConfigPublisher : public rclcpp::Node
 public:
     /**
      * @brief Constructor for the WiFiConfigPublisher node.
-     * Initializes parameters, publisher, and sets up a timer to publish the WiFi configuration.
+     * Initializes the publisher and sets up a timer to publish the WiFi configuration.
+     * @param ssid The SSID of the WiFi network.
+     * @param password The password of the WiFi network.
      */
-    WiFiConfigPublisher()
-    : Node("wifi_config_publisher")
+    WiFiConfigPublisher(const std::string& ssid, const std::string& password)
+    : Node("wifi_config_publisher"),
+      ssid_(ssid),
+      password_(password)
     {
-        initialize_parameters();
+        RCLCPP_INFO(this->get_logger(), "WiFiConfigPublisher node initialized with SSID='%s' and PASSWORD='%s'.", ssid_.c_str(), password_.c_str());
+
         initialize_publisher();
         initialize_timer();
-
-        RCLCPP_INFO(this->get_logger(), "WiFiConfigPublisher node initialized.");
     }
 
 private:
-    /**
-     * @brief Initializes the ROS 2 parameters with default values.
-     * Declares 'ssid' and 'password' parameters and retrieves their values.
-     */
-    void initialize_parameters()
-    {
-        // Declare parameters with default values
-        this->declare_parameter<std::string>("ssid", "default_ssid");
-        this->declare_parameter<std::string>("password", "default_password");
-
-        // Retrieve parameter values
-        this->get_parameter("ssid", ssid_);
-        this->get_parameter("password", password_);
-
-        RCLCPP_INFO(this->get_logger(), "Parameters initialized: SSID='%s', PASSWORD='%s'", ssid_.c_str(), password_.c_str());
-    }
-
     /**
      * @brief Initializes the publisher for sending WiFi configuration messages.
      * Sets up the publisher with a specified QoS profile.
@@ -126,11 +112,33 @@ private:
 
 int main(int argc, char * argv[])
 {
+    // Variables to hold SSID and password
+    std::string ssid = "default_ssid";
+    std::string password = "default_password";
+
+    // Simple command line argument parsing
+    for (int i = 1; i < argc; ++i)
+    {
+        std::string arg = argv[i];
+        if (arg == "--ssid" && i + 1 < argc)
+        {
+            ssid = argv[++i];
+        }
+        else if (arg == "--password" && i + 1 < argc)
+        {
+            password = argv[++i];
+        }
+        else
+        {
+            RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Unknown argument: %s", arg.c_str());
+        }
+    }
+
     // Initialize ROS 2
     rclcpp::init(argc, argv);
 
     // Create and spin the WiFiConfigPublisher node
-    auto node = std::make_shared<WiFiConfigPublisher>();
+    auto node = std::make_shared<WiFiConfigPublisher>(ssid, password);
     rclcpp::spin(node);
 
     // Shutdown ROS 2
