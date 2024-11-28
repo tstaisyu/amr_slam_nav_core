@@ -60,21 +60,25 @@ public:
         RCLCPP_INFO(this->get_logger(), "Heartbeat Interval: %.2f seconds", heartbeat_interval_);
         RCLCPP_INFO(this->get_logger(), "Heartbeat Timeout: %.2f seconds", heartbeat_timeout_);
 
+        // Define QoS profile with Best Effort reliability
+        auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(heartbeat_queue_size_));
+        qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
+
         // Create publisher for heartbeat
         heartbeat_publisher_ = this->create_publisher<std_msgs::msg::Int32>(
-            heartbeat_topic_, heartbeat_queue_size_);
+            heartbeat_topic_, qos_profile);
 
         // Create subscription for left wheel heartbeat responses
         heartbeat_subscriber_left_ = this->create_subscription<std_msgs::msg::Int32>(
             heartbeat_response_topic_left_,
-            response_queue_size_,
+            qos_profile,
             std::bind(&HeartbeatNode::heartbeat_response_callback_left, this, std::placeholders::_1)
         );
 
         // Create subscription for right wheel heartbeat responses
         heartbeat_subscriber_right_ = this->create_subscription<std_msgs::msg::Int32>(
             heartbeat_response_topic_right_,
-            response_queue_size_,
+            qos_profile,
             std::bind(&HeartbeatNode::heartbeat_response_callback_right, this, std::placeholders::_1)
         );
 
