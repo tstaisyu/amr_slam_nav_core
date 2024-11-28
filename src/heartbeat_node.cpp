@@ -104,12 +104,12 @@ private:
         message.data = heartbeat_value_;    // Heartbeat signal
 
         heartbeat_publisher_->publish(message);
-        RCLCPP_INFO(this->get_logger(), "Published heartbeat signal: %d", message.data);
+        // RCLCPP_INFO(this->get_logger(), "Published heartbeat signal: %d", message.data);
     }
 
     void heartbeat_response_callback_left(const std_msgs::msg::Int32::SharedPtr msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received valid heartbeat response from LEFT wheel: %d", msg->data);
+        // RCLCPP_INFO(this->get_logger(), "Received valid heartbeat response from LEFT wheel: %d", msg->data);
         last_response_time_left_ = this->now();
 
         if (!left_wheel_healthy_) {
@@ -120,7 +120,7 @@ private:
 
     void heartbeat_response_callback_right(const std_msgs::msg::Int32::SharedPtr msg)
     {
-        RCLCPP_INFO(this->get_logger(), "Received valid heartbeat response from RIGHT wheel: %d", msg->data);
+        // RCLCPP_INFO(this->get_logger(), "Received valid heartbeat response from RIGHT wheel: %d", msg->data);
         last_response_time_right_ = this->now();
 
         if (!right_wheel_healthy_) {
