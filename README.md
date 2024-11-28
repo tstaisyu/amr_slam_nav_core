@@ -38,6 +38,7 @@
 * **connection_checker**: ホイールモータの接続状態を定期的にチェックするノード
 * **raw_imu_subscriber**: IMUの生データを購読し、フィルタリングしてpublishするノード
 * **reboot_service_client**: システムシグナル（例: Ctrl+C）を受け取った際に、左右のホイールモータをリブートするサービスを呼び出すノード
+- **ハートビート通信**：JetsonとM5間でのハートビート信号の送受信を行い、通信状態を監視します。
 
 ## セットアップ方法
 
@@ -315,6 +316,18 @@ ros2 launch amr_slam_nav_core navigation_rviz2.launch.py
   - pose_topic: パブリッシュするトピック名（デフォルト: "pose_estimate"）
   - publish_rate_hz: パブリッシュレート（Hz）
 
+#### 6. `heartbeat_node`
+* **役割**: Jetsonデバイスとホイール制御を担当するM5Stackとの間でハートビートメッセージを交換し、通信状態をモニタリングします。このノードはシステムの健全性を確認し、M5Stackが適切に応答しているかを定期的にチェックすることで、ロボットの稼働状況を保証します。
+* **パラメータ**:
+  - heartbeat_publish_topic: ハートビートメッセージをパブリッシュするトピック名（デフォルト: "/heartbeat"）。
+  - heartbeat_subscribe_topic: M5Stackからのハートビート応答を購読するトピック名（デフォルト: "/heartbeat_response"）。
+  - heartbeat_publish_rate: ハートビートメッセージのパブリッシュ頻度（デフォルト: 1.0 秒ごと）。
+  - heartbeat_timeout: 応答がない場合のタイムアウト期間（デフォルト: 5.0 秒）。この期間内に応答がない場合、接続が失われたと判断され、アラートが発生します。
+* **動作**:
+  - ハートビートのパブリッシュ: JetsonからM5Stackへ定期的にハートビート信号（通常は整数の 1）をパブリッシュします。
+  - 応答の監視: M5Stackからの応答を購読し、設定されたタイムアウト期間内に応答があるか監視します。応答がタイムアウト期間内に受信できた場合は通信が正常であると判断し、そうでない場合は接続エラーがあると警告します。
+  - エラーハンドリング: 応答がタイムアウトした場合、リカバリ処理をトリガーするか、運用者に警告を送信します。
+
 ### サービスの利用
 
 リブートサービスを手動で呼び出す場合は、以下のコマンドを使用します：
@@ -371,6 +384,7 @@ ros2 service call /right_wheel/reboot_service std_srvs/srv/Trigger
 │   ├── raw_imu_subscriber.cpp
 │   ├── reboot_service_client.cpp
 │   └── wifi_config_publisher.cpp
+│   └── heartbeat_node.cpp
 └── urdf
     └── n_v1.urdf
 ```
