@@ -1,0 +1,10 @@
+heartbeat_node:
+  ros__parameters:
+    heartbeat_topic: "/heartbeat"
+    heartbeat_response_topic: "/heartbeat_response"
+    heartbeat_queue_size: 10
+    response_queue_size: 10
+    heartbeat_value: 1
+    heartbeat_response_value: 1
+    heartbeat_interval_seconds: 1.0
+    heartbeat_timeout_seconds: 5.0
