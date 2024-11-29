@@ -33,7 +33,7 @@ def generate_launch_description():
     # Paths of configuration files
     laser_filters_config_path = os.path.join(config_dir, 'laser_filter_config.yaml')
     ekf_config = os.path.join(config_dir, 'ekf_config.yaml')
-    raw_imu_subscriber_config = os.path.join(config_dir, 'raw_imu_subscriber_config.yaml')
+    raw_imu_subscriber_config = os.path.join(config_dir, 'raw_imu_subscriber_params.yaml')
     urdf_file = os.path.join(urdf_dir, 'n_v1.urdf')
 
     # Load the robot's URDF file
