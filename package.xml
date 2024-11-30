@@ -24,6 +24,7 @@
   <depend>rosbridge_server</depend>
   <depend>rplidar_node</depend>
   <depend>cartographer_ros</depend>
+  <depend>message_filters</depend>
 
   <!-- Test dependencies -->
   <test_depend>ament_cmake_pytest</test_depend>
