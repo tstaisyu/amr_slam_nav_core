@@ -36,6 +36,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(message_filters)
 
 # Optional dependency section
 # find_package(<dependency> REQUIRED)
@@ -64,6 +65,7 @@ add_executable(initial_pose_publisher src/initial_pose_publisher.cpp)
 add_executable(initial_pose_publisher_controller src/initial_pose_publisher_controller.cpp)
 add_executable(wifi_config_publisher src/wifi_config_publisher.cpp)
 add_executable(heartbeat_node src/heartbeat_node.cpp)
+add_executable(sensor_sync_node src/sensor_sync_node.cpp)
 
 # Specifying libraries for linking
 ament_target_dependencies(raw_imu_subscriber rclcpp sensor_msgs tf2_geometry_msgs tf2)
@@ -78,6 +80,7 @@ ament_target_dependencies(initial_pose_publisher rclcpp geometry_msgs std_srvs)
 ament_target_dependencies(initial_pose_publisher_controller rclcpp geometry_msgs std_srvs)
 ament_target_dependencies(wifi_config_publisher rclcpp std_msgs)
 ament_target_dependencies(heartbeat_node rclcpp std_msgs)
+ament_target_dependencies(sensor_sync_node rclcpp sensor_msgs nav_msgs message_filters)
 
 # Installation of targets and resources
 install(TARGETS
@@ -93,6 +96,7 @@ install(TARGETS
   initial_pose_publisher_controller
   wifi_config_publisher
   heartbeat_node
+  sensor_sync_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
