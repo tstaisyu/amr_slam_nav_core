@@ -110,7 +110,8 @@ TRAJECTORY_BUILDER_2D.use_odometry = true
 TRAJECTORY_BUILDER_2D.odometry_topic = "/odometry/filtered"
 
 TRAJECTORY_BUILDER = {
-  publish_accumulated_scan_matching_translations = 0.05,
+  expected_sensor_frequency = 10.0,
+  publish_accumulated_scan_matching_translations = true,
   publish_accumulated_scan_matching_rotations = math.rad(2.0),
 }
 
