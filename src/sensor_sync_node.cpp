@@ -32,10 +32,10 @@ public:
     SensorSyncNode()
     : Node("sensor_sync_node")
     {
-        // QoS設定（必要に応じて調整）
+        // QoS settings for the subscriptions
         rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10)).best_effort();
 
-        // message_filtersのサブスクライバーを初期化
+        // Initialize the subscribers
         imu_sub_.subscribe(this, "/imu/data", qos);
         odom_sub_.subscribe(this, "/odom", qos);
         scan_sub_.subscribe(this, "/scan", qos);
@@ -44,7 +44,7 @@ public:
         sync_.reset(new Sync(MySyncPolicy(10), imu_sub_, odom_sub_, scan_sub_));
         sync_->registerCallback(std::bind(&SensorSyncNode::sync_callback, this, _1, _2, _3));
 
-        // 同期されたデータをCartographerに渡すためのパブリッシャーを設定
+        // Set up the publishers for Cartographer
         carto_imu_pub_ = this->create_publisher<sensor_msgs::msg::Imu>("/synchronized_imu", qos);
         carto_odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/synchronized_odom", qos);
         carto_scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("/synchronized_scan", qos);
@@ -55,7 +55,7 @@ private:
                       const nav_msgs::msg::Odometry::ConstSharedPtr odom_msg,
                       const sensor_msgs::msg::LaserScan::ConstSharedPtr scan_msg)
     {
-        // 同期されたデータをパブリッシュ
+        // Publish the synchronized data to Cartographer
         carto_imu_pub_->publish(*imu_msg);
         carto_odom_pub_->publish(*odom_msg);
         carto_scan_pub_->publish(*scan_msg);
@@ -63,21 +63,21 @@ private:
         RCLCPP_INFO(this->get_logger(), "Synchronized IMU, Odometry, and LaserScan data received");
     }
 
-    // サブスクライバーの宣言
+    // Subscribers for IMU, Odometry, and LaserScan data
     message_filters::Subscriber<sensor_msgs::msg::Imu> imu_sub_;
     message_filters::Subscriber<nav_msgs::msg::Odometry> odom_sub_;
     message_filters::Subscriber<sensor_msgs::msg::LaserScan> scan_sub_;
 
-    // 同期ポリシーの定義
+    // Policy for ApproximateTimeSynchronizer
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Imu,
                                                             nav_msgs::msg::Odometry,
                                                             sensor_msgs::msg::LaserScan> MySyncPolicy;
 
-    // Synchronizerの宣言
+    // ApproximateTimeSynchronizer for IMU, Odometry, and LaserScan data
     typedef message_filters::Synchronizer<MySyncPolicy> Sync;
     std::shared_ptr<Sync> sync_;
 
-    // Cartographerにデータをパブリッシュするパブリッシャー
+    // Publishers for synchronized data
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr carto_imu_pub_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr carto_odom_pub_;
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr carto_scan_pub_;
