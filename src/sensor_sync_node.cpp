@@ -36,7 +36,7 @@ public:
         rclcpp::QoS qos = rclcpp::QoS(rclcpp::KeepLast(10)).best_effort();
 
         // Initialize the subscribers
-        imu_sub_.subscribe(this, "/imu/data", qos);
+        imu_sub_.subscribe(this, "/imu/data_raw", qos);
         odom_sub_.subscribe(this, "/odom", qos);
         scan_sub_.subscribe(this, "/scan", qos);
 
