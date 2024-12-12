@@ -79,10 +79,10 @@ private:
     nav_msgs::msg::Odometry calculate_odometry(const geometry_msgs::msg::TwistStamped::ConstSharedPtr left_wheel_msg,
                                               const geometry_msgs::msg::TwistStamped::ConstSharedPtr right_wheel_msg)
     {
-        // Odometry 計算のロジックをここに実装
+        // Implement odometry calculation based on wheel velocities
         // 例: 差動駆動の基本的な Odometry 計算
 
-        // 左右輪の速度から線形速度と角速度を計算
+        // Calculate linear and angular velocities from left and right wheel velocities
         double left_velocity = left_wheel_msg->twist.linear.x;
         double right_velocity = right_wheel_msg->twist.linear.x;
 
