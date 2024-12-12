@@ -46,7 +46,7 @@ public:
         left_wheel_sub_.subscribe(this, "/left_wheel/velocity", qos);
         right_wheel_sub_.subscribe(this, "/right_wheel/velocity", qos);
 
-        // ApproximateTimeSynchronizerの設定
+        // Set up ApproximateTimeSynchronizer
         sync_.reset(new Sync(MySyncPolicy(10), imu_sub_, odom_sub_, scan_sub_));
         sync_->registerCallback(std::bind(&SensorSyncNode::sync_callback, this, _1, _2, _3));
 
