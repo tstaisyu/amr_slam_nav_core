@@ -80,7 +80,7 @@ private:
                                               const geometry_msgs::msg::TwistStamped::ConstSharedPtr right_wheel_msg)
     {
         // Implement odometry calculation based on wheel velocities
-        // 例: 差動駆動の基本的な Odometry 計算
+        // Example code for calculating odometry from wheel velocities
 
         // Calculate linear and angular velocities from left and right wheel velocities
         double left_velocity = left_wheel_msg->twist.linear.x;
@@ -89,17 +89,17 @@ private:
         double linear_velocity = (left_velocity + right_velocity) / 2.0;
         double angular_velocity = (right_velocity - left_velocity) / wheel_base_;
 
-        // 時間差を計算（簡易的な例）
+        // Calculate the current time and time difference
         rclcpp::Time current_time = this->now();
         double dt = (current_time - last_time_).seconds();
         last_time_ = current_time;
 
-        // 前回の状態を保持（簡易的な例）
+        // Update the pose based on the velocities
         x_ += linear_velocity * cos(theta_) * dt;
         y_ += linear_velocity * sin(theta_) * dt;
         theta_ += angular_velocity * dt;
 
-        // Odometry メッセージを作成
+        // Create and return the Odometry message
         nav_msgs::msg::Odometry odom;
         odom.header.stamp = current_time;
         odom.header.frame_id = "odom";
